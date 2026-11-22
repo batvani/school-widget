@@ -6,7 +6,7 @@ Notes for continuing this project in Claude Code. Read this first, then `README.
 
 ## What it is
 
-- **`school-widget.js`:** the whole product, one Scriptable script ("School Widget"; its menu and widget text are Bulgarian by default, English is a setting). Version on line 4 and in `VERSION`; line 5 is the id line (`// id: uchilishte-widget; schema: N`), which the self-update checks.
+- **`school-widget.js`:** the whole product, one Scriptable script ("School Widget"; its menu and widget text are Bulgarian by default, English is a setting). Version on line 4 and in `const VERSION` (~line 209; there is no VERSION file); line 5 is the id line (`// id: uchilishte-widget; schema: N`, must match `const SCHEMA`), which the self-update checks.
 - **Timetable:** kept in Scriptable's documents folder (`uchilishte/data.json`, `state.json`, `history/`), never in the code. The built-in `DATA` is a made-up demo (class 10а, `meta.demo`), never adopted. **Code reads `TT`** (groups resolved, `lastDay` filled in), `TT_FULL` is the saved form; `DATA` only for adoption and the `holidayIcons` fallback.
 - **Getting a timetable in:** photo → an AI app with `ai/START.md`'s prompt (it reads `ai/INSTRUCTIONS.md`) → a link to the install page (`install/`, on GitHub Pages) → the Shortcut "School Widget Installer" (`shortcut/STEPS.md`; ends with Scriptable's Run Script, no URL actions) or the menu's **Внеси програма**. The editor (Програма → Промени програмата) fixes it on the phone.
 - **Important classes (red) are personal** (the person's own reminder): the AI asks about them only for the person's own timetable, and sharing strips every `important` and the group picks.
@@ -16,8 +16,8 @@ Notes for continuing this project in Claude Code. Read this first, then `README.
 
 ## Releases
 
-1. Bump line 4 and `VERSION`; add `## X.Y.Z — <date>` to `CHANGELOG.md` with a `Накратко:` line and an `In short:` line (they become the release notes and the update card's text; `tools/release.js` refuses without them).
-2. `npm test` and the regression check (below).
+1. Bump line 4 and `const VERSION` (and line 5 + `const SCHEMA` if the timetable format changed); add `## X.Y.Z — <date>` to `CHANGELOG.md` with a `Накратко:` line and an `In short:` line (they become the release notes and the update card's text; `tools/release.js` refuses without them).
+2. `npm test`, the regression check (below), and `node tools/release.js` (builds `out/release/` and shows the notes; it refuses on any mismatch).
 3. The user pushes `main`, then `git tag vX.Y.Z && git push origin vX.Y.Z`: `release.yml` runs the tests and makes a **pre-release** (= beta) with `school-widget.js` and `version.json`. Making it stable = unticking "pre-release" on GitHub (that also redeploys Pages).
 
 **The builder gets no GitHub access; the user pushes and tags.** Never force-push, never rewrite published history. Commits have no model-name trailer.
