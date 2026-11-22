@@ -114,7 +114,8 @@ async function test(name, fn) {
   await test("the expected timetables import in School Widget: no errors, and each one is drawn", async () => {
     for (const t of TESTS) {
       assert.deepStrictEqual(A.validateData(A.migrate(expected(t))).errors, [], t.n);
-      assert(fs.existsSync(P("ai/tests/pictures", t.n + (t.style === "photo" ? ".jpg" : ".png"))), "run node ai/tests/make.js");
+      // the pictures aren't in the repo (make.js draws them); when they are drawn, every one must be there
+      if (fs.existsSync(P("ai/tests/pictures"))) assert(fs.existsSync(P("ai/tests/pictures", t.n + (t.style === "photo" ? ".jpg" : ".png"))), "run node ai/tests/make.js");
       assert.deepStrictEqual(JSON.parse(fs.readFileSync(P("ai/tests/expected", t.n + ".json"), "utf8")), JSON.parse(JSON.stringify(expected(t))), "expected/ is out of date: run make.js");
     }
   });
