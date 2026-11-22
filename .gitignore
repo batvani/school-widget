@@ -1,0 +1,6 @@
+tools/preview/out/
+node_modules
+.DS_Store
+__pycache__/
+/out/
+ai/tests/pictures/

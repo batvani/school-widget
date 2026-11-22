@@ -1,0 +1,28 @@
+# Every push and pull request: all the tests (npm test), the privacy test included.
+# The privacy test's word list is the repository secret PRIVATE_WORDS (one word per line); pull
+# requests from forks don't get secrets, so there it is skipped.
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+    secrets:
+      PRIVATE_WORDS:
+        required: true
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+        env:
+          PRIVATE_WORDS: ${{ secrets.PRIVATE_WORDS }}
+          REQUIRE_PRIVATE_WORDS: ${{ github.event_name != 'pull_request' && '1' || '' }}

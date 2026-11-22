@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>School Widget · инсталиране</title>
+<style>
+:root{--bg:#000;--card:#1c1c1e;--line:#38383a;--fg:#fff;--dim:rgba(255,255,255,.65);--acc:#30d158;--accfg:#000;--red:#ff453a;color-scheme:dark light}
+@media (prefers-color-scheme:light){:root{--bg:#f2f2f7;--card:#fff;--line:#d1d1d6;--fg:#000;--dim:rgba(0,0,0,.6);--acc:#248a3d;--accfg:#fff;--red:#d70015}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.4 -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:480px;margin:0 auto}h1{font-size:28px;margin:8px 0 4px}h2{font-size:15px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.03em;margin:24px 0 8px}
+p{margin:0 0 12px}.lead{color:var(--dim)}.card{background:var(--card);border-radius:14px;padding:14px 16px;margin:0 0 12px}
+.pv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px}.pv b{font-size:28px;font-weight:600;line-height:1.1}.pv span{color:var(--dim);align-self:end;padding-bottom:3px}
+ol{margin:0;padding-left:22px}li{margin:0 0 8px}li:last-child{margin:0}q{quotes:"„" "“";font-weight:600}:lang(en) q{quotes:"“" "”"}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;font:inherit;font-weight:600;line-height:1.2;padding:14px 16px;margin:0 0 10px;text-align:center;text-decoration:none;cursor:pointer}
+.main{background:var(--acc);color:var(--accfg)}.sec{background:var(--card);color:var(--acc)}.err{border:2px solid var(--red)}.err b{color:var(--red)}
+small{display:block;color:var(--dim);font-size:13px;margin-top:20px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  "use strict";
+  var SHORTCUT = "School Widget Installer", SCRIPT = "School Widget";
+  var SHORTCUT_LINK = "https://www.icloud.com/shortcuts/0f50dd606f144e13b67e221e6b6ac6fb"; // the Shortcut's iCloud link (shortcut/STEPS.md, "Споделяне"); tools/instructions.js reads it from here
+  var README = "https://github.com/batvani/school-widget#readme";
+  var en = /[?&]lang=en\b/.test(location.search);
+  if (en) document.documentElement.lang = "en";
+  var L = en ? {
+    title: "Your timetable", lead: "From your AI chat. It is only inside this link: this page sends nothing anywhere.",
+    days: "school days", classes: "classes a week", groups: "Split into groups: you pick yours in School Widget.",
+    next: "What happens next", s1: "iOS asks <q>Open in Shortcuts?</q>: tap <b>Open</b>.",
+    s2: "The first time it asks to use Scriptable's folder and to connect to github.com: tap <b>Allow</b>. That saves your timetable and downloads School Widget.",
+    s3: "Scriptable opens by itself and runs School Widget.", s4: "Check the table, pick your group and tap <b>Запази</b> (Save).",
+    install: "Install", have: "I already have School Widget",
+    first: "First time? Add the Shortcut", firstNo: "First time? Install Scriptable from the App Store, open it once, then ask the AI for the install script.",
+    help: "If nothing happens", helpLead: "Copies the timetable, then runs the Shortcut, which takes it from the clipboard.", copy: "Copy, then run the Shortcut", copied: "Copied. Opening Shortcuts…",
+    noData: "No timetable in this link", noDataLead: "If you copied the timetable from the AI, run the Shortcut: it takes it from the clipboard.", fromClip: "Install from what I copied",
+    bad: "This link is broken", badLead: "The chat app probably cut it. Copy the AI's whole message, then in School Widget: Внеси програма → Постави от AI. Or ask the AI for the install script.",
+    newer: "This timetable needs a newer School Widget", newerLead: "It installs anyway: School Widget then offers to update first.",
+    more: "Step-by-step instructions", privacy: "Nothing is sent from this page: no analytics, no requests."
+  } : {
+    title: "Твоята програма", lead: "От чата с AI. Тя е само в този линк: страницата не изпраща нищо никъде.",
+    days: "учебни дни", classes: "часа седмично", groups: "Класът се дели на групи: избираш своята в School Widget.",
+    next: "Какво следва", s1: "iOS ще пита <q>Open in Shortcuts?</q> (Отвори в Команди?): натисни <b>Open</b>.",
+    s2: "Първия път ще поиска достъп до папката на Scriptable и до github.com: натисни <b>Allow</b>. Така запазва програмата ти и изтегля School Widget.",
+    s3: "Scriptable се отваря сам и пуска School Widget.", s4: "Провери таблицата, избери групата си и натисни <b>Запази</b>.",
+    install: "Инсталирай", have: "Вече имам School Widget",
+    first: "Първи път? Добави прекия път", firstNo: "Първи път? Инсталирай Scriptable от App Store, отвори го веднъж и поискай от AI-а скрипта за инсталиране.",
+    help: "Ако нищо не стане", helpLead: "Копира програмата и пуска прекия път, който я взима от копираното.", copy: "Копирай и пусни прекия път", copied: "Копирано. Отварям Команди…",
+    noData: "В този линк няма програма", noDataLead: "Ако си копирал програмата от AI-а, пусни прекия път: той я взима от копираното.", fromClip: "Инсталирай от копираното",
+    bad: "Линкът е повреден", badLead: "Вероятно чатът го е отрязал. Копирай цялото съобщение на AI-а и в School Widget: Внеси програма → Постави от AI. Или поискай от AI-а скрипта за инсталиране.",
+    newer: "Тази програма иска по-нов School Widget", newerLead: "Инсталира се все пак: School Widget първо ще предложи обновяване.",
+    more: "Инструкции стъпка по стъпка", privacy: "Страницата не изпраща нищо: без статистики, без заявки."
+  };
+  var app = document.getElementById("app");
+  var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); };
+  var m = location.hash.match(/[#&]([zd])=([A-Za-z0-9_\-]+)/);
+  var payload = m ? "uchilishte:" + m[1] + ":" + m[2] : "";
+  var shortcutURL = function (text) {
+    return "shortcuts://run-shortcut?name=" + encodeURIComponent(SHORTCUT) + (text ? "&input=text&text=" + encodeURIComponent(text) : "");
+  };
+  var scriptURL = "https://open.scriptable.app/run/" + encodeURIComponent(SCRIPT) + "?data=" + encodeURIComponent(payload);
+  var go = window.__go || function (u) { location.href = u; }; // __go: the tests watch where it goes
+
+  function bytes(b64) {
+    var s = atob(b64.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((b64.length + 3) % 4)), out = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+    return out;
+  }
+  // the same reading as School Widget's parseImport, enough for a preview
+  function decode() {
+    var b = bytes(m[2]);
+    if (m[1] === "d") return Promise.resolve(JSON.parse(new TextDecoder().decode(b)));
+    if (typeof DecompressionStream !== "function") return Promise.resolve(null); // no preview, the install still works
+    var s = new Blob([b]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Response(s).text().then(JSON.parse);
+  }
+  function help(broken) {
+    return (broken ? '' : '<h2>' + L.help + '</h2><p class="lead">' + L.helpLead + '</p><button class="btn sec" id="cp">' + L.copy + '</button>') +
+      (SHORTCUT_LINK ? '<a class="btn sec" href="' + esc(SHORTCUT_LINK) + '">' + L.first + '</a>' : '<p class="lead">' + L.firstNo + '</p>') +
+      '<a class="btn sec" href="' + README + '">' + L.more + '</a><small>' + L.privacy + '</small>';
+  }
+  function steps() {
+    return '<h2>' + L.next + '</h2><div class="card"><ol><li>' + L.s1 + '</li><li>' + L.s2 + '</li><li>' + L.s3 + '</li><li>' + L.s4 + '</li></ol></div>';
+  }
+  function bind() {
+    var cp = document.getElementById("cp");
+    if (cp) cp.onclick = function () {
+      var run = function () { cp.textContent = L.copied; setTimeout(function () { go(shortcutURL("")); }, 600); };
+      if (payload && navigator.clipboard) navigator.clipboard.writeText(payload).then(run, run); else run();
+    };
+  }
+  function show(d) {
+    var week = d && d.week || {}, days = Object.keys(week).filter(function (k) { return (week[k] || []).some(function (c) { return c && c.name; }); });
+    var n = 0, split = false;
+    Object.keys(week).forEach(function (k) { (week[k] || []).forEach(function (c) { if (c && c.name) n++; if (c && c.groups) split = true; }); });
+    var newer = d && d.meta && d.meta.schema > 1;
+    app.innerHTML = '<h1>' + (d && d.meta && d.meta.class ? esc(d.meta.class) + ' · ' : '') + L.title + '</h1><p class="lead">' + L.lead + '</p>' +
+      (d ? '<div class="card pv"><b>' + days.length + '</b><span>' + L.days + '</span><b>' + n + '</b><span>' + L.classes + '</span></div>' : '') +
+      (split ? '<p class="lead">' + L.groups + '</p>' : '') +
+      (newer ? '<div class="card err"><b>' + L.newer + '</b><p class="lead">' + L.newerLead + '</p></div>' : '') +
+      '<button class="btn main" id="in">' + L.install + '</button>' +
+      '<a class="btn sec" href="' + esc(scriptURL) + '">' + L.have + '</a>' + steps() + help();
+    bind();
+    document.getElementById("in").onclick = function () { go(shortcutURL(payload)); };
+  }
+  if (!m) {
+    app.innerHTML = '<h1>School Widget</h1><div class="card"><b>' + L.noData + '</b><p class="lead">' + L.noDataLead + '</p></div>' +
+      '<button class="btn main" id="clip">' + L.fromClip + '</button>' + steps() + help();
+    bind();
+    document.getElementById("clip").onclick = function () { go(shortcutURL("")); };
+  } else decode().then(show, function () {
+    app.innerHTML = '<h1>School Widget</h1><div class="card err"><b>' + L.bad + '</b><p class="lead">' + L.badLead + '</p></div>' + help(true);
+    bind();
+  });
+})();
+</script>
+</body>
+</html>

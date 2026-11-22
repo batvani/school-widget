@@ -1,0 +1,17 @@
+{
+  "name": "school-widget-dev",
+  "private": true,
+  "description": "Tools and tests for School Widget (the Scriptable script is school-widget.js; it needs none of this)",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tools/test/all.js",
+    "preview": "node tools/preview/final.js bg && node tools/preview/check.js bg",
+    "shots": "node tools/preview/shots.js",
+    "tree": "node tools/preview/tree.js",
+    "serve": "sh tools/serve.sh",
+    "instructions": "node tools/instructions.js"
+  },
+  "devDependencies": {
+    "playwright": "1.65.1"
+  }
+}

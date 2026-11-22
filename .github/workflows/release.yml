@@ -1,0 +1,33 @@
+# A tag vX.Y.Z makes a release: the tests, then tools/release.js (the tag must be the script's
+# VERSION, and CHANGELOG.md must have the version's "Накратко:" / "In short:" lines), then a GitHub
+# PRE-RELEASE with school-widget.js and version.json attached. Phones on beta get it at their next
+# daily check. To make it stable: on GitHub, edit the release, untick "Set as a pre-release", tick
+# "Set as the latest release" → Update release (phones on stable get it, and the Pages workflow
+# puts it on batvani.github.io).
+#   git tag v1.8.0 && git push origin v1.8.0
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets:
+      PRIVATE_WORDS: ${{ secrets.PRIVATE_WORDS }}
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm install --no-audit --no-fund
+      - run: node tools/release.js "$GITHUB_REF_NAME"
+      - run: |
+          gh release create "$GITHUB_REF_NAME" out/release/school-widget.js out/release/version.json \
+            --prerelease --verify-tag --title "School Widget ${GITHUB_REF_NAME#v}" --notes-file out/release/notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}

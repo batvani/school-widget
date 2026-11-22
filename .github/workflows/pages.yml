@@ -1,0 +1,41 @@
+# GitHub Pages (batvani.github.io/school-widget/): the install page, ai/ (the AI's instructions) and
+# the latest STABLE release's school-widget.js, so the Shortcut, the install script and Safari have
+# one plain address for the script. Runs when install/ or ai/ change on main, and when a release
+# becomes stable (published as one, or "pre-release" unticked). Repo Settings → Pages → Source: GitHub Actions.
+name: pages
+on:
+  push:
+    branches: [main]
+    paths: ["install/**", "ai/**", ".github/workflows/pages.yml"]
+  release:
+    types: [released]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir _site
+          cp -r install _site/install
+          cp -r ai _site/ai
+          rm -rf _site/ai/tests
+          gh release download --pattern school-widget.js --dir _site || echo "no stable release yet"
+          touch _site/.nojekyll
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
