@@ -22,7 +22,7 @@
 3. **Само първия път: добави прекия път** „School Widget Installer“ от линка в последното съобщение на AI-а (или на страницата за инсталиране) → **Add Shortcut**. *Защо:* iOS показва стъпките му, преди да го добави: той само записва файлове в папката на Scriptable и изтегля School Widget от github.com.
 4. **Натисни линка на AI-а.** Отваря се страница с кратък преглед (клас, дни, брой часове) → **Инсталирай**. *Програмата е вътре в линка; страницата не изпраща нищо.* Ако линкът не се натиска в чата: копирай го и го постави в Safari.
 5. **„Open in Shortcuts?“** → **Open**. *Защо пита:* уеб страница иска да пусне пряк път.
-6. **Само първия път:** прекият път иска достъп до папката на Scriptable и до `batvani.github.io` → **Allow** (или **Always Allow**). *Защо:* за да запази програмата ти и да изтегли School Widget (около 220 kB).
+6. **Само първия път:** прекият път иска достъп до папката на Scriptable и до `batvani.github.io` → **Allow** (или **Always Allow**). *Защо:* за да запази програмата ти и да изтегли School Widget (около 250 kB).
 7. **Scriptable се отваря сам** и пуска School Widget.
 8. Ако пита за **Calendars**: позволи само ако ще ползваш календар за неучебни дни или контролни (виж „Настройки“); иначе **Don't Allow**. Официалните ваканции са вградени.
 9. **Провери таблицата, избери групата си** („Коя група си?“) и натисни **Запази**. *Какво става:* програмата се записва във файл до скрипта; обновяванията никога не я пипат.
@@ -66,7 +66,7 @@
 
 - **Прекият път казва, че няма папка Scriptable:** отвори Scriptable веднъж и опитай пак. Ако пак не стане: Settings → [името ти] → iCloud → включи **Scriptable** (iCloud Drive).
 - **Линкът е повреден** (чатът го е отрязал): копирай цялото съобщение на AI-а → School Widget → **Внеси програма** → **Постави от AI**, или ползвай скрипта за инсталиране.
-- **Странни знаци вместо кирилица:** кодът е копиран с грешно кодиране. Копирай го пак от адреса в стъпка 2, в Safari.
+- **Странни знаци вместо кирилица:** кодът е копиран с грешно кодиране. Копирай го пак в Safari от адреса в „Без AI“.
 - **Уиджетът не се променя:** iOS обновява уиджетите, когато реши. Задръж пръст → **Edit Widget** → избери скрипта пак, или махни уиджета и го добави наново.
 - **„Няма връзка с GitHub“:** няма интернет или GitHub не отговаря. Уиджетът работи и без интернет; ще провери за нова версия по-късно.
 - **Грешка в програмата:** School Widget казва кое не е наред (ден и час). Ако файлът с програмата се повреди, предлага **Възстанови** последната запазена.
@@ -95,7 +95,7 @@ About 10 minutes. You photograph the timetable, an AI reads it, one tap installs
 3. **First time only: add the Shortcut** "School Widget Installer" from the link in the AI's last message (or on the install page) → **Add Shortcut**. *Why:* iOS shows its steps before adding it: it only saves files into Scriptable's folder and downloads School Widget from github.com.
 4. **Tap the AI's link.** A page opens with a short preview (class, days, number of classes) → **Install**. *Your timetable is inside the link; the page sends nothing.* If the link isn't tappable in the chat: copy it into Safari.
 5. **"Open in Shortcuts?"** → **Open**. *Why it asks:* a web page wants to start a Shortcut.
-6. **First time only:** the Shortcut asks to use Scriptable's folder and to connect to `batvani.github.io` → **Allow** (or **Always Allow**). *Why:* to save your timetable and download School Widget (about 220 kB).
+6. **First time only:** the Shortcut asks to use Scriptable's folder and to connect to `batvani.github.io` → **Allow** (or **Always Allow**). *Why:* to save your timetable and download School Widget (about 250 kB).
 7. **Scriptable opens by itself** and runs School Widget.
 8. If it asks for **Calendars**: allow only if you'll use a calendar for days off or tests (see Settings); otherwise **Don't Allow**. The official holidays are built in.
 9. **Check the table, pick your group** ("Коя група си?") and tap **Запази** (Save). *What's happening:* your timetable is saved in a file next to the script; updates never touch it.
@@ -135,7 +135,7 @@ From 1 September, **Програма** has a **Нова учебна годин�
 
 - **The Shortcut says there's no Scriptable folder:** open Scriptable once and try again. If it still fails: Settings → [your name] → iCloud → turn on **Scriptable** (iCloud Drive).
 - **The link is broken** (the chat cut it): copy the AI's whole message → School Widget → **Внеси програма** → **Постави от AI**, or use the install script.
-- **Odd characters instead of Cyrillic:** the code was copied with the wrong encoding. Copy it again from the address in step 2, in Safari.
+- **Odd characters instead of Cyrillic:** the code was copied with the wrong encoding. Copy it again in Safari from the address in "Without an AI".
 - **The widget doesn't change:** iOS refreshes widgets on its own schedule. Touch and hold → **Edit Widget** → pick the script again, or remove the widget and add it back.
 - **"Can't reach GitHub":** no internet, or GitHub isn't answering. The widget works offline and checks again later.
 - **A mistake in the timetable:** School Widget says what's wrong (day and period). If the timetable file gets damaged, it offers to **restore** the last saved one.
@@ -205,7 +205,7 @@ npm run serve                    # the script over Wi-Fi, to paste into Scriptab
 
 **Privacy test:** `tools/test/privacy.test.js` searches every file for the words in `~/.config/school-widget/private-words.txt` (one per line; on GitHub the secret `PRIVATE_WORDS`). Without the list it is skipped locally.
 
-**Releases:** bump line 4 and `VERSION`, add the version to `CHANGELOG.md` with a `Накратко:` and an `In short:` line, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The release workflow runs the tests and makes a **pre-release** (beta). To make it stable: edit the release on GitHub → untick **Set as a pre-release** → **Update release**.
+**Releases:** bump line 4 and `const VERSION` in `school-widget.js`, add the version to `CHANGELOG.md` with a `Накратко:` and an `In short:` line, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The release workflow runs the tests and makes a **pre-release** (beta). To make it stable: edit the release on GitHub → untick **Set as a pre-release** → **Update release**.
 
 Problems or ideas: [Issues](https://github.com/batvani/school-widget/issues).
 

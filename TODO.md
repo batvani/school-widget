@@ -56,4 +56,7 @@ When МОН publishes the next school year's order, update `HOLIDAYS` (steps in 
 
 ## Not built (as planned)
 
-Odd/even weeks, different bell times per day, Shortcuts AI actions, a native app.
+Odd/even weeks, different bell times per day, Shortcuts AI actions.
+
+- **Icons tab:** a menu tab showing the real SF Symbols on the phone, to pick subject icons.
+- **Native app:** SwiftUI + WidgetKit + ActivityKit (live countdown on the Lock Screen and Dynamic Island) + App Intents (real widget settings). Free signing works on your own phone but apps expire after 7 days and there's no iCloud; the paid Apple Developer Program ($99/yr) adds iCloud class sharing, TestFlight, the App Store.
