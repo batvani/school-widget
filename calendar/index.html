@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:">
+<title>School Widget · ваканциите в календара</title>
+<style>
+:root{--bg:#000;--card:#1c1c1e;--line:#38383a;--fg:#fff;--dim:rgba(255,255,255,.65);--acc:#30d158;--accfg:#000;--red:#ff453a;color-scheme:dark light}
+@media (prefers-color-scheme:light){:root{--bg:#f2f2f7;--card:#fff;--line:#d1d1d6;--fg:#000;--dim:rgba(0,0,0,.6);--acc:#248a3d;--accfg:#fff;--red:#d70015}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.4 -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:480px;margin:0 auto}h1{font-size:28px;margin:8px 0 4px}h2{font-size:15px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.03em;margin:24px 0 8px}
+p{margin:0 0 12px}.lead{color:var(--dim)}.card{background:var(--card);border-radius:14px;padding:4px 16px;margin:0 0 12px}
+label.row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:52px;border-bottom:1px solid var(--line)}label.row:last-child{border:0}
+select{font:inherit;color:var(--acc);background:transparent;border:0;text-align:right;max-width:60%}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;font:inherit;font-weight:600;line-height:1.2;padding:14px 16px;margin:0 0 10px;text-align:center;text-decoration:none;cursor:pointer}
+.main{background:var(--acc);color:var(--accfg)}.sec{background:var(--card);color:var(--acc)}
+code{display:block;font-size:13px;word-break:break-all;color:var(--dim);background:var(--card);border-radius:10px;padding:10px 12px;margin:0 0 10px}
+small{display:block;color:var(--dim);font-size:13px;margin-top:20px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  "use strict";
+  var en = /[?&]lang=en\b/.test(location.search);
+  if (en) document.documentElement.lang = "en";
+  var L = en ? {
+    title: "School holidays in your calendar", lead: "The official days off, vacations and the last day of school for your grade, in the calendar app you already use. When they change, your calendar updates by itself.",
+    grade: "Grade (now)", city: "City", noCity: "Not set", cityHint: "Only for days off a city declares for itself (e.g. a flu break).",
+    apple: "Add to Apple Calendar", google: "Add to Google Calendar", other: "Another calendar: copy the link", copied: "Copied",
+    otherLead: "In Outlook and others: add a calendar “from the internet” / “by URL” and paste this link.",
+    follows: "It follows your class: next September it shows next grade's days by itself. Nothing to change.",
+    note: "It's a subscription, not a copy: Apple Calendar refreshes it within hours, Google Calendar within about a day.",
+    err: "Couldn't load the list of calendars. Check the internet and reload the page.", privacy: "Nothing is sent from this page."
+  } : {
+    title: "Ваканциите в календара ти", lead: "Официалните почивни дни, ваканциите и последният учебен ден за твоя клас, в календара, който вече ползваш. Когато се променят, календарът ти се обновява сам.",
+    grade: "Клас (сега)", city: "Град", noCity: "Не е избран", cityHint: "Само за почивни дни, които град обявява за себе си (например грипна ваканция).",
+    apple: "Добави в Apple Calendar", google: "Добави в Google Calendar", other: "Друг календар: копирай линка", copied: "Копирано",
+    otherLead: "В Outlook и другите: добави календар „от интернет“ / „по URL“ и постави този линк.",
+    follows: "Следва класа ти: от септември показва дните за следващия клас сам. Нищо не се сменя.",
+    note: "Това е абонамент, не копие: Apple Calendar го обновява до няколко часа, Google Calendar до около ден.",
+    err: "Списъкът с календари не се зареди. Провери интернета и презареди страницата.", privacy: "Страницата не изпраща нищо."
+  };
+  var app = document.getElementById("app");
+  var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); };
+  var q = function (k) { var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : ""; };
+  var base = location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, ""); // …/calendar/
+  // the school year now (from 1 September) → the class finishing school in the summer of Y
+  var now = new Date(), sy = now.getFullYear() - (now.getMonth() < 8 ? 1 : 0);
+  var cohort = function (g) { return sy + 1 + 12 - g; };
+
+  fetch(base + "feeds.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (F) {
+    var g0 = parseInt(q("grade"), 10); g0 = g0 >= 1 && g0 <= 12 ? g0 : "";
+    var c0 = F.cities[q("city")] ? q("city") : "";
+    var opt = function (v, t, sel) { return '<option value="' + esc(v) + '"' + (sel ? " selected" : "") + ">" + esc(t) + "</option>"; };
+    var grades = opt("", "—", !g0);
+    for (var g = 1; g <= 12; g++) grades += opt(g, g, g === g0);
+    var cities = opt("", L.noCity, !c0) + Object.keys(F.cities).sort(function (a, b) { return a.localeCompare(b, "bg"); }).map(function (c) { return opt(c, c, c === c0); }).join("");
+    app.innerHTML = '<h1>' + L.title + '</h1><p class="lead">' + L.lead + '</p>' +
+      '<div class="card"><label class="row"><span>' + L.grade + '</span><select id="g">' + grades + '</select></label>' +
+      '<label class="row"><span>' + L.city + '</span><select id="c">' + cities + '</select></label></div>' +
+      '<p class="lead">' + L.cityHint + '</p><div id="go"></div><small>' + L.note + ' ' + L.privacy + '</small>';
+    var G = document.getElementById("g"), C = document.getElementById("c"), go = document.getElementById("go");
+    function draw() {
+      if (!G.value) { go.innerHTML = ""; return; }
+      var y = cohort(+G.value), file = y + (C.value ? "-" + F.cities[C.value] : "") + ".ics";
+      if (F.cohorts.indexOf(y) < 0) { go.innerHTML = '<p class="lead">' + L.err + '</p>'; return; }
+      var https = base + "feeds/" + file, webcal = https.replace(/^https?:/, "webcal:");
+      go.innerHTML = '<a class="btn main" id="apple" href="' + esc(webcal) + '">' + L.apple + '</a>' +
+        '<a class="btn sec" id="google" href="' + esc("https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcal)) + '">' + L.google + '</a>' +
+        '<button class="btn sec" id="copy">' + L.other + '</button><code id="url">' + esc(https) + '</code><p class="lead">' + L.otherLead + '</p>' +
+        '<p class="lead">' + L.follows + '</p>';
+      document.getElementById("copy").onclick = function () {
+        var b = this, done = function () { b.textContent = L.copied; setTimeout(function () { b.textContent = L.other; }, 1500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(https).then(done, done); else done();
+      };
+    }
+    G.onchange = C.onchange = draw;
+    draw();
+  }).catch(function () { app.innerHTML = '<h1>' + L.title + '</h1><p class="lead">' + L.err + '</p>'; });
+})();
+</script>
+</body>
+</html>

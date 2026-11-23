@@ -1,12 +1,14 @@
-# GitHub Pages (batvani.github.io/school-widget/): the install page, ai/ (the AI's instructions) and
-# the latest STABLE release's school-widget.js, so the Shortcut, the install script and Safari have
-# one plain address for the script. Runs when install/ or ai/ change on main, and when a release
-# becomes stable (published as one, or "pre-release" unticked). Repo Settings → Pages → Source: GitHub Actions.
+# GitHub Pages (batvani.github.io/school-widget/): the install page, ai/ (the AI's instructions),
+# the official days off (holidays.json, which School Widget downloads, and the calendar feeds, both
+# built from holidays/list.json by tools/holidays.js) and the latest STABLE release's school-widget.js,
+# so the Shortcut, the install script and Safari have one plain address for the script. Runs when
+# those change on main, and when a release becomes stable (published as one, or "pre-release"
+# unticked). Repo Settings → Pages → Source: GitHub Actions.
 name: pages
 on:
   push:
     branches: [main]
-    paths: ["install/**", "ai/**", ".github/workflows/pages.yml"]
+    paths: ["install/**", "ai/**", "calendar/**", "holidays/**", "tools/holidays.js", ".github/workflows/pages.yml"]
   release:
     types: [released]
   workflow_dispatch:
@@ -25,8 +27,13 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
       - run: |
           mkdir _site
+          node tools/holidays.js _site
+          cp calendar/index.html _site/calendar/index.html
           cp -r install _site/install
           cp -r ai _site/ai
           rm -rf _site/ai/tests
