@@ -1,32 +1,26 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: graduation-cap;
-// Version 1.8.0 — 22 Nov 2026. See CHANGELOG.md.
+// Version 1.8.5 — 24 Nov 2026. See CHANGELOG.md.
 // id: uchilishte-widget; schema: 1
 
 // ════════════════════════ TIMETABLE ════════════════════════
-// Since 1.5.0 your timetable is kept in a data file (uchilishte/data.json in Scriptable's
-// documents folder), so updates never touch it. The timetable below is used only when there
-// is no data file yet: the first time, it is moved into the data file by itself. If you edit
-// it here later, the script asks (when run in Scriptable) whether to use it.
+// Your timetable is kept in a data file (school-widget/data.json in Scriptable's documents folder),
+// so updates never touch it. The timetable below is a made-up demo: the widget shows it only until
+// a timetable is set up, and it is never saved. Its bells start a timetable typed in by hand.
 //
 // week:    "1" = Monday … "5" = Friday, classes in period order.
 //          "important": true marks a class as important (red ring, red name).
 //          A free period: { "name": "" }.
 // short:   optional short names, used where space is tight (the big class name,
 //          the medium widget's list, the Lock Screen).
-// icons:   optional icon for each subject: an Apple SF Symbol name (browse them
-//          in Apple's free "SF Symbols" app), or "text:XX" for a short text
-//          badge like "text:ES". Not shown on the widgets since 1.1 (kept for a
-//          future icons tab in the menu).
-// daysOff: extra days off of this school (the official ones are in HOLIDAYS below).
+// daysOff: extra days off of this school (the official ones are downloaded: HOLIDAYS below).
 //          Each entry is a date "YYYY-MM-DD", a range ["start", "end"], or either one
 //          with a name at the end: ["start", "end", "Name"] / ["date", "Name"].
 // notOff:  official days off that are school days at this school: ["YYYY-MM-DD", …].
 // holidayIcons: icon for a day off whose name contains the given text, e.g.
 //          "Коледн" → gift.fill matches "Коледна ваканция". Others get a calendar.
-// lastDay: last day of school. After it the widget shows "Vacation". Without it, the
-//          grade (meta.grade) picks the official one from HOLIDAYS.lastDay.
+// The last day of school isn't set here: the grade (meta.grade) picks the official one from HOLIDAYS.lastDay.
 // meta:    schema (the format's version), grade, class, noRoom (subjects with no room,
 //          e.g. ["ФВС"]), groups (your group in a split class), demo.
 const DATA = {
@@ -103,30 +97,12 @@ const DATA = {
   "tiny": {
     "Математика": "Мат."
   },
-  "icons": {
-    "БЕЛ": "book.fill",
-    "Математика": "function",
-    "Английски език": "text:EN",
-    "Немски език": "text:DE",
-    "История и цивилизации": "building.columns.fill",
-    "Биология и здравно образование": "leaf.fill",
-    "Физика и астрономия": "atom",
-    "География и икономика": "globe.europe.africa.fill",
-    "Химия и опазване на околната среда": "flask.fill",
-    "Информационни технологии": "laptopcomputer",
-    "Философия": "brain.head.profile",
-    "Изобразително изкуство": "paintpalette.fill",
-    "Музика": "music.note",
-    "ФВС": "figure.run",
-    "Час на класа": "graduationcap.fill"
-  },
   "holidayIcons": {
     "Коледн": "gift.fill",
     "Есенн": "leaf.fill",
     "Пролетн": "camera.macro",
     "Междусрочн": "snowflake",
     "Великд": "hare.fill",
-    "Великден": "hare.fill",
     "Лятн": "sun.max.fill",
     "Summer": "sun.max.fill",
     "независимост": "flag.fill",
@@ -137,43 +113,13 @@ const DATA = {
   "daysOff": []
 };
 
-// ════════════════════════ HOLIDAYS (built in, one school year) ════════════════════════
-// The official days off and the last day of school per grade. They come with the code, so a
-// new school year's holidays arrive as a normal update. Schools that differ keep their own
-// changes in the timetable (daysOff: extra days off; notOff: official days off they don't have).
-// How to update them each school year (when МОН publishes the next year's order, about August):
-//   1. edit HOLIDAYS: schoolYear, source, lastDay per grade, daysOff (or ask Claude to do it)
-//   2. bump VERSION and line 4, and add the version to CHANGELOG.md with "Накратко:" / "In short:"
-//   3. push a tag vX.Y.Z (a GitHub pre-release = beta), check on the phone, then untick "pre-release" (stable)
-//   schoolYear: "2026-27" · lastDay: { "<grade or range, e.g. 1-4>": "YYYY-MM-DD" }
-//   daysOff: entries in the same forms as the timetable's daysOff
-const HOLIDAYS = {
-  schoolYear: "2026-27",
-  source: "МОН, заповед № РД09-3345 от 31.08.2026 (график на учебното време 2026/2027), as reported by dbr.bg and svetlinki.com; checked 18 Nov 2026",
-  // last day of school per grade ("1-3" = grades 1 to 3)
-  lastDay: { "1-3": "2027-06-02", "4-6": "2027-06-16", "7-11": "2027-07-02", "12": "2027-05-13" },
-  // As in a timetable's daysOff; { grades: "1-11" } at the end = only for those grades (meta.grade;
-  // without a grade it counts). Where two overlap, the first name wins.
-  daysOff: [
-      ["2026-09-22", "Ден на независимостта"],
-      ["2026-10-31", "2026-11-02", "Есенна ваканция"],
-      ["2026-12-24", "2027-01-03", "Коледна ваканция"],
-      ["2027-01-30", "2027-02-02", "Междусрочна ваканция"],
-      ["2027-03-03", "Трети март"],
-      ["2027-04-03", "2027-04-07", "Пролетна ваканция", { grades: "1-11" }],
-      ["2027-04-08", "2027-04-11", "Пролетна ваканция"],
-      ["2027-04-30", "2027-05-09", "Великденска ваканция", { grades: "1-11" }],
-      ["2027-04-30", "Велики петък"],
-      ["2027-05-03", "2027-05-04", "Великден"],
-      ["2027-05-06", "Гергьовден"],
-      ["2027-05-19", "Матура по БЕЛ"],
-      ["2027-05-21", "Втора матура"],
-      ["2027-05-24", "24 май"],
-      ["2027-05-25", "След 24 май"],
-      ["2027-06-18", "НВО по БЕЛ"],
-      ["2027-06-21", "НВО по математика"]
-  ]
-};
+// ════════════════════════ HOLIDAYS (downloaded, since 1.8.5) ════════════════════════
+// The official days off and the last day of school per grade are not in the code: they come from
+// holidays.json on the website (made from holidays/list.json in the repo), downloaded once a day and
+// kept in school-widget/holidays.json, so a change reaches every phone without an update. Schools that
+// differ keep their own changes in the timetable (daysOff: extra days off; notOff: official days off
+// they don't have). HOLIDAYS is this school year's entry (see loadHolidays).
+let HOLIDAYS = null;
 
 // ════════════════════════ DEFAULT SETTINGS ════════════════════════
 // Easiest to change in the Settings tab: tap the widget, or run the script
@@ -189,8 +135,11 @@ const HOLIDAYS = {
 const DEFAULTS = {
   language: "bg",              // "bg" = Bulgarian, "en" = English (text on the widget)
   theme: "auto",               // "auto" = follow Light/Dark Mode, or "dark" / "light"
-  offCalendar: "Off-School",   // calendar whose events mark days off
-  testsCalendar: "Контролни",  // calendar with tests ("" = off)
+  offCalendar: "",             // your own calendar whose events mark days off ("" = none; picked in Settings)
+  offCalendarId: "",           //   …its identifier (the name is only the fallback, e.g. from a Parameter)
+  testsCalendar: "",           // calendar with tests ("" = off)
+  testsCalendarId: "",
+  city: "",                    // for the days off a city declares itself (holidays.json); "" = none
   showReason: true,            // show why it's a day off, e.g. "Day off · Коледна ваканция"
   countdown: true,             // "Коледна ваканция in 12 school days" (large widget)
   tapView: true,               // tapping the widget opens Today / Week / Days off / Settings
@@ -206,14 +155,13 @@ const DEFAULTS = {
 const TEST_NOW = null;
 
 // ════════════════════════ CODE (no need to edit below) ════════════════════════
-const VERSION = "1.8.0";
+const VERSION = "1.8.5";
 const SCHEMA = 1; // the timetable format this version reads (meta.schema)
 const NOW = TEST_NOW ? new Date(TEST_NOW) : new Date();
 
-// Colours. "auto" follows the phone's Light/Dark Mode, "dark"/"light" force one.
-// Text, icons and the background switch instantly (Color.dynamic). The rings are
-// pictures and can't switch by themselves, so in "auto" they use greys that read
-// well on both white and black.
+// Colours. "auto" follows the phone's Light/Dark Mode, "dark"/"light" force one. Text, icons and the
+// background switch instantly (Color.dynamic); the rings are pictures and can't, so in "auto" they
+// use greys that read well on both white and black.
 function makeColors(theme) {
   const light = theme === "light", dark = theme === "dark";
   const pick = (l, d) => light ? l : dark ? d : Color.dynamic(l, d);
@@ -354,7 +302,10 @@ const STRINGS = {
       themeHint: "„Автоматично“ следва светлия/тъмния режим на телефона.", langNote: "Затвори и отвори отново, за да видиш новия език.",
       daysOff: "Почивни дни", calendar: "Календар", reason: "Причина за почивката", reasonHint: "„Почивен ден · Коледна ваканция“",
       countdown: "Обратно броене до ваканция", countdownHint: "В големия уиджет и в „Почивни“",
-      tests: "Контролни", testsHint: "Събитие като „Контролно по химия“ в този календар оцветява часа в червено. Празно = изключено.",
+      tests: "Контролни", testsHint: "Събитие като „Контролно по химия“ в този календар оцветява часа в червено.",
+      city: "Град", noCity: "Не е избран", cityHint: "По желание: за почивните дни, които градът ти обявява сам (например грипна ваканция).",
+      ownOff: "Твой календар", ownOffHint: "По желание: календар с почивните дни на училището ти (например патронен празник). Официалните идват сами.",
+      calNone: "Няма", calOther: "Избери друг календар", calOff: "Без календар",
       off: "Изкл.", remind: "Напомняне преди час", remindHint: "При първото включване iOS ще поиска разрешение за известия – позволи го.",
       widget: "Уиджет", tap: "Докосване отваря това меню", tapHint: "Ако го изключиш, менюто остава достъпно в Scriptable.",
       links: "Свързани часове", linkColors: "Цветни връзки",
@@ -395,8 +346,7 @@ const STRINGS = {
     menuTitle: "Училище", menuTimetable: "Разписание", menuSettings: "Настройки",
     menuMedium: "Среден уиджет", menuSmall: "Малък уиджет", menuLarge: "Голям уиджет",
     menuRect: "Заключен екран – правоъгълник", menuCirc: "Заключен екран – кръг", menuInline: "Заключен екран – ред", close: "Затвори", menuUpdates: "Обновяване",
-    codeChangedTitle: "Програмата в кода е променена", codeChangedMsg: "Програмата в кода на скрипта е различна от запазената. Да я използвам ли? (Запазената остава в историята.)",
-    useIt: "Да, използвай я", keepMine: "Не, остави запазената", ok: "Добре", restore: "Възстанови",
+    ok: "Добре", restore: "Възстанови",
     brokenTitle: "Запазената програма е повредена", brokenMsg: "Сега се показва програмата от кода. Да възстановя последната запазена програма?",
     brokenMsgNoHistory: "Сега се показва програмата от кода. Няма по-стара запазена програма за възстановяване.",
     menuImport: "Внеси програма",
@@ -411,20 +361,27 @@ const STRINGS = {
       subjects: "Предмети", name: "Име", shortName: "Кратко име", tinyName: "Много кратко", noRoom: "без стая", shortIs: "кратко: %",
       groups: "Групи", whichGroup: "Коя група си?", groupLead: "Класът се дели на групи — избери своята. Уиджетът показва само твоя час и стая. Можеш да смениш по-късно: Програма → Промени програмата.",
       bells: "Звънци", addBell: "+ Добави час",
-      off: "Почивни дни", official: "Официалните почивни дни. Включи ден, ако в твоето училище се учи тогава.", addOff: "+ Добави почивен ден на училището", addOffTitle: "Почивен ден на училището", from: "От", to: "До (по желание)",
-      last: "Последен учебен ден", lastShort: "Последен ден", grade: "Клас (1–12)", lastHint: "За %. клас по подразбиране: %.", gradeHint: "Напиши класа (1–12): от него идват последният учебен ден и почивните дни само за някои класове.",
-      undo: "Върни предишна", undoLead: "Програмите отпреди всяко запазване. Сегашната също отива в историята, така че и това може да се върне.",
+      off: "Почивни дни", official: "Официалните почивни дни идват сами. Тук са само дните, в които твоето училище почива отделно.", addOff: "+ Добави почивен ден на училището", addOffTitle: "Почивен ден на училището", from: "От", to: "До (по желание)",
+      grade: "Клас (1–12)", lastHint: "Последен учебен ден за %. клас: %. Идва с официалните почивни дни.", gradeHint: "Напиши класа (1–12): от него идват последният учебен ден и почивните дни само за някои класове.",
+      hist: "Предишни програми", histLead: "Програмите отпреди последните запазвания (до 5). Избери една, за да я върнеш или изтриеш.", histNone: "Още няма предишни програми: появяват се, когато запазиш промяна.", histAll: "Изтрий всички", histAllQ: "Всички предишни програми се изтриват. Сегашната остава.", restoreThis: "Върни тази", del: "Изтрий", deleted: "Изтрито.",
+      undoLead: "Програмите отпреди всяко запазване. Сегашната също отива в историята, така че и това може да се върне.",
       saved: "Програмата е запазена ✓", restored: "Върната е предишната програма ✓", badHist: "Тази програма от историята е повредена.",
       fixFirst: "Първо поправи грешките (в червено).",
-      welcome: "Това е примерна програма", welcomeLead: "Сложи своята: снимай програмата, дай я на AI (ChatGPT, Gemini, Claude…) с промпта и внеси отговора.",
-      copyPrompt: "Копирай промпта за AI", importBtn: "Внеси програма", paste: "Постави от AI", file: "От файл",
-      welcomeHint: "„Постави от AI“ чете копирания отговор на AI-а (целия текст или линка). Програмата остава на телефона.",
+      
+      setupTitle: "Внеси програмата си", setupLead: "Копирай я (отговора на AI-а или програма от съученик) и натисни „Постави“, или снимай QR кода ѝ.",
+      pasteTT: "Постави", scan: "Сканирай QR код", scanMsg: "1. Отвори приложението Камера.\n2. Насочи го към QR кода.\n3. Натисни жълтия линк → „Отвори в School Widget“.\n\nQR кодът е снимка? Отвори я в Снимки и задръж пръст върху кода.", ok: "Добре",
+      noTT: "Още нямаш програма?", makeAI: "Направи я с AI", byHand: "Въведи я на ръка",
+      aboutYou: "За теб", ttHead: "Програмата", details: "Подробности: предмети, звънец, почивни дни", calSw: "Ваканциите в календара ти", calSwHint: "След „Запази“ се отваря страница за Apple, Google и други календари. Обновяват се сами.",
+      nameWarn: "Скриптът се казва „%“. Преименувай го на „School Widget“ (в Scriptable задръж върху него → Rename), иначе линковете с програми няма да го намират.",
+      clipTitle: "Програма в клипборда", clipLead: "Копирана е програма (%). Да я внеса ли?", clipYes: "Внеси я", no: "Не",
+      addCal: "Добави ваканциите в календара си", importBtn: "Внеси програма", paste: "Постави", file: "От файл",
+      welcomeHint: "„Постави“ чете копираното: целия отговор на AI-а, линк или програма от съученик. Програмата остава на телефона.",
       copied: "Промптът е копиран ✓ Постави го в AI-а заедно със снимката на програмата.", emptyClip: "Клипбордът е празен. Копирай целия отговор на AI-а и опитай пак.",
-      newer: "Тази програма е от по-нова версия на School Widget. Първо обнови School Widget.", fileBad: "Файлът за внасяне (uchilishte-import.txt) не стана. Да го изтрия ли?", fileGone: "Изтрий файла",
+      newer: "Тази програма е от по-нова версия на School Widget. Първо обнови School Widget.", fileBad: "Файлът за внасяне (school-widget-import.txt) не стана. Да го изтрия ли?", fileGone: "Изтрий файла",
       doneTitle: "Програмата е запазена", doneLead: "Сега добави уиджета. Тези стъпки са и в Настройки → Как да добавя уиджет.", toMenu: "Към менюто",
       share: "Сподели програмата", shareLead: "За съучениците: една снимка и един AI чат стигат за целия клас.", shareWhat: "Какво се споделя",
       shareYes: ["Часовете, стаите, звънците, имената", "И двете групи (всеки избира своята)"], shareNo: "Твоите важни (червени) часове и твоята група",
-      sendLink: "Изпрати линк", showQR: "Покажи QR код", saveFile: "Запази като файл", close: "Затвори", fileName: "програма",
+      sendLink: "Изпрати линк", showQR: "Покажи QR код", saveFile: "Запази като файл", close: "Затвори", fileName: "timetable",
       shareHint: "„Изпрати линк“ отваря менюто за споделяне на iPhone: Messages, WhatsApp, AirDrop… Линкът отваря страницата за инсталиране с програмата.",
       qrTitle: "QR код", qrLead: "Съученикът го снима с камерата на iPhone → страницата за инсталиране.", qrBig: "Програмата е твърде голяма за QR код: използвай линка.",
       sharedNote: "Споделена програма. Провери си групите. Важните часове не идват с нея: отбележи своите (докосни клетка → Важен).",
@@ -433,7 +390,7 @@ const STRINGS = {
       changed: "Какво се промени", was: "беше %", more: "и още %",
       gone: "„%“ го няма в новата програма (беше %). Къде е сега?", pick: "Избери клетки", drop: "Не е нужно", pickLead: "Докосни клетките, които са „%“.",
       gradeQ: "В кой клас си сега?", gradeLead: "Нова учебна година. От класа зависят последният учебен ден и някои почивни дни.",
-      oldHol: "Почивните дни в School Widget са за %. Новите идват с обновяване (обикновено през септември). Дотогава провери почивните дни в Програма → Промени програмата.",
+      oldHol: "Официалните почивни дни за % още ги няма. School Widget ще ги изтегли сам, щом излязат (обикновено през септември).",
       names: "Моите имена от досегашната програма (използвай ги пак, ако предметите са същите):", namesShort: "кратко „%“", namesTiny: "много кратко „%“", namesNoRoom: "без стая", namesGroup: "Моята група: % (от „%“)",
       prompt: url => `Здравей! Искам да настроя уиджета „School Widget“ с моята програма (снимката е приложена).\nОтвори и следвай стъпките от:\n${url}\nПърво ми напиши реда с версията от файла. Ако не можеш да отваряш линкове, кажи ми и ще ти поставя файла.`
     }
@@ -462,7 +419,10 @@ const STRINGS = {
       themeHint: "“Automatic” follows the phone's Light/Dark Mode.", langNote: "Close and reopen to see the new language.",
       daysOff: "Days off", calendar: "Calendar", reason: "Show why it's a day off", reasonHint: "“Day off · Коледна ваканция”",
       countdown: "Countdown to the next break", countdownHint: "On the large widget and in “Days off”",
-      tests: "Tests", testsHint: "An event like “Контролно по химия” in this calendar turns that class red. Empty = off.",
+      tests: "Tests", testsHint: "An event like “Контролно по химия” in this calendar turns that class red.",
+      city: "City", noCity: "Not set", cityHint: "Optional: for the days off your city declares itself (e.g. a flu break).",
+      ownOff: "Your calendar", ownOffHint: "Optional: a calendar with your school's own days off (e.g. its patron's day). The official ones come by themselves.",
+      calNone: "None", calOther: "Pick another calendar", calOff: "No calendar",
       off: "Off", remind: "Reminder before class", remindHint: "The first time, iOS will ask to allow notifications – allow it.",
       widget: "Widget", tap: "Tapping opens this menu", tapHint: "If you turn this off, the menu is still in Scriptable.",
       links: "Linked classes", linkColors: "Coloured links",
@@ -503,8 +463,7 @@ const STRINGS = {
     menuTitle: "School", menuTimetable: "Timetable", menuSettings: "Settings",
     menuMedium: "Medium widget", menuSmall: "Small widget", menuLarge: "Large widget",
     menuRect: "Lock Screen – rectangular", menuCirc: "Lock Screen – round", menuInline: "Lock Screen – one line", close: "Close", menuUpdates: "Updates",
-    codeChangedTitle: "The timetable in the code has changed", codeChangedMsg: "The timetable in the script's code differs from the saved one. Use it? (The saved one stays in the history.)",
-    useIt: "Yes, use it", keepMine: "No, keep the saved one", ok: "OK", restore: "Restore",
+    ok: "OK", restore: "Restore",
     brokenTitle: "The saved timetable is damaged", brokenMsg: "The timetable from the code is shown for now. Restore the last saved timetable?",
     brokenMsgNoHistory: "The timetable from the code is shown for now. There is no older saved timetable to restore.",
     menuImport: "Import a timetable",
@@ -518,16 +477,23 @@ const STRINGS = {
       subjects: "Subjects", name: "Name", shortName: "Short name", tinyName: "Very short", noRoom: "no room", shortIs: "short: %",
       groups: "Groups", whichGroup: "Which group are you in?", groupLead: "The class splits into groups: pick yours. The widget shows only your class and room. You can change it later: Timetable → Edit the timetable.",
       bells: "Bells", addBell: "+ Add a period",
-      off: "Days off", official: "The official days off. Turn one on if your school has classes that day.", addOff: "+ Add a school day off", addOffTitle: "The school's day off", from: "From", to: "To (optional)",
-      last: "Last day of school", lastShort: "Last day", grade: "Grade (1–12)", lastHint: "Default for grade %: %.", gradeHint: "Enter the grade (1–12): the last day of school and the days off for some grades only come from it.",
-      undo: "Restore an earlier one", undoLead: "The timetables from before each save. The current one goes into the history too, so this can be undone.",
+      off: "Days off", official: "The official days off come by themselves. Here are only the days your school has off on its own.", addOff: "+ Add a school day off", addOffTitle: "The school's day off", from: "From", to: "To (optional)",
+      grade: "Grade (1–12)", lastHint: "Last day of school for grade %: %. It comes with the official days off.", gradeHint: "Enter the grade (1–12): the last day of school and the days off for some grades only come from it.",
+      hist: "Earlier timetables", histLead: "The timetables from before your last saves (up to 5). Pick one to restore or delete it.", histNone: "No earlier timetables yet: they appear when you save a change.", histAll: "Delete all", histAllQ: "Every earlier timetable is deleted. The current one stays.", restoreThis: "Restore this one", del: "Delete", deleted: "Deleted.",
+      undoLead: "The timetables from before each save. The current one goes into the history too, so this can be undone.",
       saved: "Timetable saved ✓", restored: "The earlier timetable is back ✓", badHist: "This timetable in the history is damaged.",
       fixFirst: "Fix the errors (in red) first.",
-      welcome: "This is a demo timetable", welcomeLead: "Put in yours: photograph your timetable, give it to an AI (ChatGPT, Gemini, Claude…) with the prompt, and import the answer.",
-      copyPrompt: "Copy the AI prompt", importBtn: "Import a timetable", paste: "Paste from the AI", file: "From a file",
-      welcomeHint: "“Paste from the AI” reads the AI's copied answer (the whole text or the link). The timetable stays on the phone.",
+      
+      setupTitle: "Bring in your timetable", setupLead: "Copy it (the AI's answer or a classmate's timetable) and tap “Paste”, or scan its QR code.",
+      pasteTT: "Paste", scan: "Scan a QR code", scanMsg: "1. Open the Camera app.\n2. Point it at the QR code.\n3. Tap the yellow link → “Open in School Widget”.\n\nIs the QR code a picture? Open it in Photos and touch and hold the code.", ok: "OK",
+      noTT: "No timetable yet?", makeAI: "Make it with an AI", byHand: "Type it in",
+      aboutYou: "About you", ttHead: "The timetable", details: "Details: subjects, bells, days off", calSw: "The holidays in your calendar", calSwHint: "After “Save”, a page opens for Apple, Google and other calendars. They update by themselves.",
+      nameWarn: "This script is called “%”. Rename it to “School Widget” (in Scriptable: hold it → Rename), or timetable links won't find it.",
+      clipTitle: "A timetable on the clipboard", clipLead: "A timetable is copied (%). Bring it in?", clipYes: "Bring it in", no: "No",
+      addCal: "Add the holidays to your calendar", importBtn: "Import a timetable", paste: "Paste", file: "From a file",
+      welcomeHint: "“Paste” reads what you copied: the AI's whole answer, a link or a classmate's timetable. The timetable stays on the phone.",
       copied: "Prompt copied ✓ Paste it into the AI together with the photo of your timetable.", emptyClip: "The clipboard is empty. Copy the AI's whole answer and try again.",
-      newer: "This timetable is from a newer version of School Widget. Update School Widget first.", fileBad: "The import file (uchilishte-import.txt) didn't work. Delete it?", fileGone: "Delete the file",
+      newer: "This timetable is from a newer version of School Widget. Update School Widget first.", fileBad: "The import file (school-widget-import.txt) didn't work. Delete it?", fileGone: "Delete the file",
       doneTitle: "Timetable saved", doneLead: "Now add the widget. These steps are also in Settings → How to add the widget.", toMenu: "To the menu",
       share: "Share the timetable", shareLead: "For your classmates: one photo and one AI chat are enough for the whole class.", shareWhat: "What is shared",
       shareYes: ["The classes, rooms, bells and names", "Both groups (everyone picks theirs)"], shareNo: "Your important (red) classes and your group",
@@ -540,7 +506,7 @@ const STRINGS = {
       changed: "What changed", was: "was %", more: "and % more",
       gone: "“%” isn't in the new timetable (it was %). Where is it now?", pick: "Pick the cells", drop: "Not needed", pickLead: "Tap the cells that are “%”.",
       gradeQ: "Which grade are you in now?", gradeLead: "A new school year. The last day of school and some days off depend on the grade.",
-      oldHol: "The days off in School Widget are for %. The new ones come with an update (usually in September). Until then, check the days off in Timetable → Edit the timetable.",
+      oldHol: "The official days off for % aren't out yet. School Widget downloads them by itself once they are (usually in September).",
       names: "My names from the current timetable (use them again if the subjects are the same):", namesShort: "short “%”", namesTiny: "very short “%”", namesNoRoom: "no room", namesGroup: "My group: % (of “%”)",
       prompt: url => `Hi! I want to set up the “School Widget” widget with my timetable (the photo is attached).\nOpen and follow the steps at:\n${url}\nFirst write me the version line from the file. If you can't open links, tell me and I'll paste the file.`
     }
@@ -573,13 +539,31 @@ const shortName = n => (TT.short && TT.short[n]) || n;
 const tinyName = n => (TT.tiny && TT.tiny[n]) || shortName(n);
 
 // ───── Settings ─────
-const SETTINGS_FILE = "uchilishte-settings.json";
-function settingsPath() { const fm = FileManager.local(); return fm.joinPath(fm.documentsDirectory(), SETTINGS_FILE); }
+// Every file lives in Scriptable's own documents folder, in school-widget/ (settings.json, data.json, state.json,
+// holidays.json, history/, backups/). Before 1.8.5 the names were Bulgarian (uchilishte/, uchilishte-settings.json):
+// they are copied over once, not moved, so a rollback to an older version still finds its files.
+const DIR = "school-widget";
+(function englishNames() {
+  const fm = FileManager.local(), j = n => fm.joinPath(fm.documentsDirectory(), n), dir = j(DIR);
+  try {
+    if (fm.fileExists(dir)) return;
+    if (fm.fileExists(j("uchilishte"))) fm.copy(j("uchilishte"), dir); else fm.createDirectory(dir, true);
+    if (fm.fileExists(j("uchilishte-settings.json"))) fm.copy(j("uchilishte-settings.json"), fm.joinPath(dir, "settings.json"));
+    const st = fm.joinPath(dir, "state.json"); // the update state keeps whole paths (backups/)
+    if (fm.fileExists(st)) fm.writeString(st, fm.readString(st).split("/uchilishte/").join("/" + DIR + "/"));
+  } catch (e) { console.error("Renaming the files: " + e); }
+})();
+function settingsPath() { const fm = FileManager.local(); return fm.joinPath(fm.joinPath(fm.documentsDirectory(), DIR), "settings.json"); }
+// Before 1.8.5 these two calendars were read by name without asking (new installs pick them in Settings).
+const OLD_CALS = { offCalendar: "Off-School", testsCalendar: "Контролни" };
 function loadSaved() {
   const s = Object.assign({}, DEFAULTS);
   try {
     const fm = FileManager.local(), p = settingsPath();
-    if (fm.fileExists(p)) Object.assign(s, JSON.parse(fm.readString(p)));
+    // settings from before 1.8.5 (no calendar identifiers yet): a calendar they don't name is the old default
+    if (fm.fileExists(p)) { const f = JSON.parse(fm.readString(p)); Object.assign(s, "offCalendarId" in f ? {} : OLD_CALS, f); }
+    // no settings yet but a timetable (data.json): an install from before 1.8.5 → its calendars stay
+    else if (fm.fileExists(fm.joinPath(fm.joinPath(fm.documentsDirectory(), DIR), "data.json"))) { Object.assign(s, OLD_CALS); saveSettings(s); }
   } catch (e) { console.error("Reading settings: " + e); }
   return s;
 }
@@ -595,7 +579,6 @@ function cleanSettings(d) {
     const t = typeof DEFAULTS[k];
     out[k] = t === "boolean" ? !!d[k] : t === "number" ? (Number(d[k]) || 0) : String(d[k] || "").trim();
   }
-  if (!out.offCalendar) out.offCalendar = DEFAULTS.offCalendar;
   if (!STRINGS[out.language]) out.language = DEFAULTS.language;
   if (!["auto", "dark", "light"].includes(out.theme)) out.theme = "auto";
   if (!["row", "room"].includes(out.linkBox)) out.linkBox = DEFAULTS.linkBox;
@@ -609,14 +592,14 @@ function parseParam(p) {
   const YES = /^(yes|on|true|1|да|вкл)$/i, NO = /^(no|off|false|0|не|изкл)$/i;
   String(p).split(/[;\n]/).map(t => t.trim()).filter(Boolean).forEach(tok => {
     const m = tok.match(/^([^=]+)=(.*)$/);
-    if (!m) { if (!out.offCalendar) out.offCalendar = tok; return; }
+    if (!m) { if (!out.offCalendar) { out.offCalendar = tok; out.offCalendarId = ""; } return; }
     const k = m[1].trim().toLowerCase(), v = m[2].trim();
     const on = !NO.test(v);
     switch (k) {
-      case "calendar": case "календар": out.offCalendar = v || DEFAULTS.offCalendar; break;
+      case "calendar": case "календар": out.offCalendar = v; out.offCalendarId = ""; break; // by name
       case "countdown": case "ваканция": out.countdown = on; break;
       case "reason": case "причина": out.showReason = on; break;
-      case "tests": case "контролни": out.testsCalendar = (NO.test(v) || !v) ? "" : (YES.test(v) ? DEFAULTS.testsCalendar : v); break;
+      case "tests": case "контролни": out.testsCalendar = (NO.test(v) || !v) ? "" : (YES.test(v) ? OLD_CALS.testsCalendar : v); out.testsCalendarId = ""; break;
       case "tap": case "докосване": out.tapView = on; break;
       case "color": case "colors": case "colour": case "colours": case "цвят": case "цветове": out.linkColors = on; break;
       case "outline": case "outlines": case "рамки": out.linkOutlines = on; break;
@@ -651,12 +634,11 @@ let L = STRINGS[S.language] || STRINGS.bg;
 let C = makeColors(S.theme);
 
 // ════════════════════════ TIMETABLE DATA (since 1.5.0) ════════════════════════
-// The timetable lives in a data file, uchilishte/data.json in Scriptable's local documents
+// The timetable lives in a data file, school-widget/data.json in Scriptable's local documents
 // folder (next to the settings file), so an update can replace this code without touching it.
-// The built-in DATA above is used only when there is no data file; if it is not a demo
-// (meta.demo), it is moved into the data file by itself the first time ("adopted").
-const DATA_DIR = "uchilishte", HISTORY_KEEP = 5;
-const dataPath = (...p) => { const fm = FileManager.local(); return [DATA_DIR, ...p].reduce((a, b) => fm.joinPath(a, b), fm.documentsDirectory()); };
+// The built-in DATA above is a made-up demo, used only when there is no data file (never saved).
+const HISTORY_KEEP = 5;
+const dataPath = (...p) => { const fm = FileManager.local(); return [DIR, ...p].reduce((a, b) => fm.joinPath(a, b), fm.documentsDirectory()); };
 function ensureDir(p) { const fm = FileManager.local(); if (!fm.fileExists(p)) fm.createDirectory(p, true); }
 function readJSON(p) { const fm = FileManager.local(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; }
 function writeJSON(p, v) { ensureDir(p.slice(0, p.lastIndexOf("/"))); FileManager.local().writeString(p, JSON.stringify(v, null, 2)); }
@@ -714,14 +696,6 @@ function b64decode(s) {
     if (n >= 8) { n -= 8; out.push(acc >> n & 255); }
   }
   return out;
-}
-function b64urlencode(bytes) {
-  let s = "";
-  for (let i = 0; i < bytes.length; i += 3) {
-    const a = bytes[i], b = bytes[i + 1], c = bytes[i + 2], A = B64 + "-_";
-    s += A[a >> 2] + A[(a & 3) << 4 | (b || 0) >> 4] + (b === undefined ? "" : A[(b & 15) << 2 | (c || 0) >> 6]) + (c === undefined ? "" : A[c & 63]);
-  }
-  return s;
 }
 // Raw DEFLATE decoder (RFC 1951), after tiny-inflate by Devon Govett (MIT licence,
 // github.com/foliojs/tiny-inflate), itself a port of Mark Adler's puff. Plain JavaScript,
@@ -844,18 +818,18 @@ function parseImport(input) {
     } catch (e) { return { error: IMPORT_ERR.broken }; }
   };
   if (!text) return { error: IMPORT_ERR.none };
-  // 1–3: uchilishte:z: / :d: / :j: at the start
-  let m = text.match(/^uchilishte:([zdj]):([\s\S]*)$/);
+  // 1–3: school-widget:z: / :d: / :j: at the start (uchilishte: before 1.8.5)
+  let m = text.match(/^(?:school-widget|uchilishte):([zdj]):([\s\S]*)$/);
   if (m) return payload(m[1], m[1] === "j" ? m[2].trim() : m[2].trim().split(/\s/)[0]);
   // 4: a link with #z= / #d= / ?data=
   m = text.match(/[#&]([zd])=([A-Za-z0-9_\-+/=%]+)/);
   if (m) return payload(m[1], decodeURIComponent(m[2]));
   m = text.match(/[?&]data=([^&#\s]+)/);
-  if (m) { let v = m[1]; try { v = decodeURIComponent(v); } catch (e) { } if (/^uchilishte:/.test(v)) return parseImport(v); }
+  if (m) { let v = m[1]; try { v = decodeURIComponent(v); } catch (e) { } if (/^(school-widget|uchilishte):/.test(v)) return parseImport(v); }
   // 5: raw JSON
   try { return ok(JSON.parse(text)); } catch (e) { }
   // the prefix somewhere inside a longer text (a whole AI answer)
-  m = text.match(/uchilishte:([zd]):([A-Za-z0-9_\-]+)/);
+  m = text.match(/(?:school-widget|uchilishte):([zd]):([A-Za-z0-9_\-]+)/);
   if (m) return payload(m[1], m[2]);
   // 6: the first balanced {…} that parses (a ```json block, or JSON inside other text)
   for (let from = 0, found = false; ;) {
@@ -877,6 +851,7 @@ function migrate(d) {
   else if (d.meta.schema === undefined || d.meta.schema === 0) d.meta.schema = 1;
   // the grade comes from shared links and files, and the editor's page shows it: a whole number 1–12 or nothing
   if (d.meta.grade !== undefined) { const g = Number(d.meta.grade); if (Number.isInteger(g) && g >= 1 && g <= 12) d.meta.grade = g; else delete d.meta.grade; }
+  delete d.lastDay; // before 1.8.5 the last day of school could be set; now it's always the official one
   return d;
 }
 // The key of a split class's label set: labels sorted and joined with "|".
@@ -898,14 +873,13 @@ function resolveGroups(d) {
   }
   return out;
 }
-// The last day of school: the timetable's own, else the built-in one for the grade
-// (HOLIDAYS.lastDay keys: "10", or a range "8-11"), else 30 June of the school year.
+// The last day of school: always the official one for the grade (HOLIDAYS.lastDay keys: "10", or a range
+// "8-11"); without a grade, 30 June of the school year.
 // grade g in a range "10" / "8-11"
 const inGrades = (r, g) => { const [a, b] = String(r).split("-").map(Number); return g >= a && g <= (b || a); };
 function lastDayFor(d) {
-  if (d.lastDay) return d.lastDay;
   const g = d.meta && d.meta.grade;
-  for (const [k, v] of Object.entries(HOLIDAYS.lastDay || {})) if (inGrades(k, g)) return v;
+  if (g) for (const [k, v] of Object.entries(HOLIDAYS.lastDay || {})) if (inGrades(k, g)) return v;
   return `20${HOLIDAYS.schoolYear.slice(-2)}-06-30`;
 }
 const realDate = s => isYmd(s) && ymd(parseYmd(s)) === s;
@@ -1003,8 +977,7 @@ function validateData(d, opts = {}) {
     });
   }
   if (d.notOff !== undefined && (!Array.isArray(d.notOff) || !d.notOff.every(realDate))) E("not_off", "notOff", `notOff трябва да е списък от дати "ГГГГ-ММ-ДД".`, `notOff must be a list of "YYYY-MM-DD" dates.`);
-  if (d.lastDay !== undefined && !realDate(d.lastDay)) E("last_day", "lastDay", `Последният учебен ден трябва да е дата "ГГГГ-ММ-ДД".`, `The last day of school must be a "YYYY-MM-DD" date.`);
-  if (!d.lastDay && !(meta && meta.grade)) E("no_last_day", "lastDay", "Липсва последният учебен ден (или класът, meta.grade).", "The last day of school (or the grade, meta.grade) is missing.");
+  if (!(meta && meta.grade)) W("no_grade", "meta.grade", "Липсва класът (1–12): от него идват последният учебен ден и почивните дни.", "The grade (1–12) is missing: the last day of school and the days off come from it.");
   if (meta && meta.groups !== undefined && (!isObj(meta.groups) || Object.values(meta.groups).some(v => !Number.isInteger(v) || v < 0))) E("meta_groups", "meta.groups", "meta.groups трябва да е от вида { \"А|Б\": 0 }.", "meta.groups must look like { \"A|B\": 0 }.");
   if (meta && meta.noRoom !== undefined && (!Array.isArray(meta.noRoom) || meta.noRoom.some(v => typeof v !== "string"))) E("meta_noroom", "meta.noRoom", "meta.noRoom трябва да е списък от имена.", "meta.noRoom must be a list of names.");
   if (errors.length || opts.quick) return { errors, warnings };
@@ -1050,15 +1023,19 @@ function validateData(d, opts = {}) {
 // ───── Loading the timetable ─────
 let TT = null;      // the timetable the widgets use (groups resolved, lastDay set)
 let TT_FULL = null; // the same in full form (with groups), as saved
-const TINFO = {};   // how it was loaded: source "file" | "adopted" | "builtin" | "broken"; codeChanged; error
-// Saves a timetable as data.json; the one it replaces goes to history/ (the last HISTORY_KEEP).
-function saveTimetable(d) {
-  const fm = FileManager.local(), p = dataPath("data.json"), hd = dataPath("history");
-  if (fm.fileExists(p)) {
+const TINFO = {};   // how it was loaded: source "file" | "builtin" | "broken"; error
+// Saves a timetable as data.json; the one it replaces goes to history/ (the last HISTORY_KEEP, no two the same).
+// from: the history file being restored, which leaves the history (it is the current one now).
+function saveTimetable(d, from) {
+  const fm = FileManager.local(), p = dataPath("data.json"), hd = dataPath("history"), key = t => { try { return JSON.stringify(JSON.parse(t)); } catch (e) { return t; } };
+  if (from && fm.fileExists(fm.joinPath(hd, from))) fm.remove(fm.joinPath(hd, from));
+  if (fm.fileExists(p) && key(fm.readString(p)) !== JSON.stringify(d)) {
     ensureDir(hd);
-    fm.writeString(fm.joinPath(hd, `${Date.now()}.json`), fm.readString(p));
+    const cur = fm.readString(p), seen = new Set([key(cur), JSON.stringify(d)]);
+    fm.writeString(fm.joinPath(hd, `${Date.now()}.json`), cur);
     const old = fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a));
-    old.slice(HISTORY_KEEP).forEach(n => fm.remove(fm.joinPath(hd, n)));
+    old.slice(1).forEach(n => { const k = key(fm.readString(fm.joinPath(hd, n))); if (seen.has(k)) fm.remove(fm.joinPath(hd, n)); else seen.add(k); });
+    fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)).slice(HISTORY_KEEP).forEach(n => fm.remove(fm.joinPath(hd, n)));
   }
   writeJSON(p, d);
 }
@@ -1081,7 +1058,6 @@ function useTimetable(d) {
 function loadTimetable() {
   for (const k of Object.keys(TINFO)) delete TINFO[k];
   const fm = FileManager.local(), p = dataPath("data.json"), st = readState();
-  const own = !(DATA.meta && DATA.meta.demo), fp = fingerprint(JSON.stringify(DATA));
   let d = null;
   if (fm.fileExists(p)) {
     try {
@@ -1094,15 +1070,6 @@ function loadTimetable() {
       if (st.brokenLogged !== TINFO.error) { console.error("Reading the timetable: " + TINFO.error); st.brokenLogged = TINFO.error; writeState(st); }
     }
     if (d && st.brokenLogged) { delete st.brokenLogged; writeState(st); }
-    // the built-in DATA edited by hand, the old way, after the timetable moved into the file
-    if (d && own) {
-      if (!st.builtinFp) { st.builtinFp = fp; writeState(st); }
-      else if (st.builtinFp !== fp) TINFO.codeChanged = true;
-    }
-  } else if (own) {
-    d = migrate(DATA);
-    try { saveTimetable(d); st.builtinFp = fp; writeState(st); TINFO.source = "adopted"; }
-    catch (e) { console.error("Saving the timetable: " + e); TINFO.source = "builtin"; }
   }
   if (!d) { d = migrate(DATA); if (!TINFO.source) TINFO.source = "builtin"; }
   useTimetable(d);
@@ -1115,12 +1082,6 @@ async function timetableQuestions() {
     a.addAction(yes); a.addCancelAction(no);
     return (await a.presentAlert()) === 0;
   };
-  if (TINFO.codeChanged) {
-    const st = readState();
-    if (await ask(L.codeChangedTitle, L.codeChangedMsg, L.useIt, L.keepMine)) { saveTimetable(migrate(DATA)); useTimetable(migrate(DATA)); }
-    st.builtinFp = fingerprint(JSON.stringify(DATA)); writeState(st);
-    delete TINFO.codeChanged;
-  }
   if (TINFO.source === "broken") {
     const h = lastGoodHistory();
     if (await ask(L.brokenTitle, h ? L.brokenMsg : L.brokenMsgNoHistory, h ? L.restore : L.ok, L.close) && h) {
@@ -1264,6 +1225,44 @@ async function updateTick(secs) {
   } catch (e) { }
   return null;
 }
+// ───── The official days off (1.8.5): holidays.json from the website ─────
+// { years: [{ schoolYear: "2026-27", source, lastDay: { "1-3": "YYYY-MM-DD", … }, daysOff: [entries as in
+// a timetable's daysOff; { grades: "1-11" } / { city: "Варна" } at the end = only those] }, …] }
+const HOL_URL = PAGES + "holidays.json", HOL_APP_EVERY = 3600e3;
+const holPath = () => dataPath("holidays.json");
+const holValid = doc => !!doc && Array.isArray(doc.years) && doc.years.every(y => y && /^\d{4}-\d\d$/.test(y.schoolYear) && Array.isArray(y.daysOff));
+// This school year's entry; none yet (not published, or never downloaded): no official days off.
+function loadHolidays() {
+  let doc = null;
+  try { doc = readJSON(holPath()); } catch (e) { }
+  const sy = syName(syOf(NOW)), y = holValid(doc) ? doc.years.find(x => x.schoolYear === sy) : null;
+  HOLIDAYS = y ? Object.assign({ lastDay: {} }, y) : { schoolYear: sy, lastDay: {}, daysOff: [], missing: !doc ? "none" : "year" };
+  HOLIDAYS.cities = holValid(doc) && Array.isArray(doc.cities) ? doc.cities.filter(c => typeof c === "string") : [];
+}
+// Downloads holidays.json if the copy is older than maxAge (or missing). Offline or any error: silent.
+async function holidaysTick(maxAge, secs) {
+  const st = readState(), have = FileManager.local().fileExists(holPath());
+  if (have && st.holChecked && NOW - new Date(st.holChecked) < maxAge) return false;
+  let doc;
+  try { doc = JSON.parse(await fetchText(HOL_URL, secs)); } catch (e) { return false; }
+  if (!holValid(doc)) return false;
+  try { writeJSON(holPath(), doc); } catch (e) { return false; }
+  const st2 = readState(); st2.holChecked = NOW.toISOString(); writeState(st2);
+  return true;
+}
+// The city picker's options: the cities in holidays.json (and the saved one, should it have left the list).
+const cityOptions = () => [""].concat(HOLIDAYS.cities || []).concat(S.city && !(HOLIDAYS.cities || []).includes(S.city) ? [S.city] : [])
+  .map(c => `<option value="${esc(c)}">${esc(c || L.set.noCity)}</option>`).join("");
+// The calendar page (calendar/ on the website), with this grade and city filled in.
+// The page's city may have just been changed (saved, not yet in S).
+const calendarPage = (city = loadSaved().city) => PAGES + "calendar/?" + [TT && TT.meta && TT.meta.grade ? "grade=" + TT.meta.grade : "", city ? "city=" + encodeURIComponent(city) : "", S.language === "en" ? "lang=en" : ""].filter(Boolean).join("&");
+// A days-off entry's limits ({ grades }, { city }): does it apply to this grade and S.city?
+function offApplies(e, grade) {
+  const o = Array.isArray(e) ? e.find(x => x && typeof x === "object") : null;
+  if (!o) return true;
+  if (o.grades && grade && !inGrades(o.grades, grade)) return false;
+  return !o.city || norm(o.city) === norm(S.city || "");
+}
 // After the first good run of a new version: it's confirmed, the backup stays for "Предишна версия".
 function confirmVersion() {
   const st = readState();
@@ -1337,8 +1336,9 @@ function eventDays(ev) {
   if (!out.length) out.push(s);
   return out;
 }
-async function eventsFrom(calName, from, to) {
-  const cal = await Calendar.forEventsByTitle(calName);
+// A calendar picked in Settings is found by its identifier (it may have been renamed since), else by name.
+async function eventsFrom(calName, id, from, to) {
+  const cal = (id && (await Calendar.forEvents()).find(c => c.identifier === id)) || await Calendar.forEventsByTitle(calName);
   return await CalendarEvent.between(from, to, [cal]);
 }
 async function loadData() {
@@ -1348,8 +1348,7 @@ async function loadData() {
   for (const e of [...HOLIDAYS.daysOff, ...(TT.daysOff || [])]) {
     if (isYmd(e)) markOff(parseYmd(e), parseYmd(e), "");
     else if (Array.isArray(e) && isYmd(e[0])) {
-      const only = e.find(x => x && x.grades);
-      if (only && grade && !inGrades(only.grades, grade)) continue;
+      if (!offApplies(e, grade)) continue;
       const b = isYmd(e[1]) ? e[1] : e[0];
       const name = e.slice(1).find(x => typeof x === "string" && !isYmd(x)) || "";
       markOff(parseYmd(e[0]), parseYmd(b), name);
@@ -1361,14 +1360,14 @@ async function loadData() {
   const until = addDays(parseYmd(TT.lastDay), 1);
   if (today < until && S.offCalendar) {
     try {
-      for (const ev of await eventsFrom(S.offCalendar, today, until))
+      for (const ev of await eventsFrom(S.offCalendar, S.offCalendarId, today, until))
         for (const d of eventDays(ev)) markOff(d, d, (ev.title || "").trim(), true);
     } catch (e) { console.error(`Can't read calendar "${S.offCalendar}": ${e}`); }
   }
   // 3) the tests calendar, a few weeks around today
   if (S.testsCalendar) {
     try {
-      for (const ev of await eventsFrom(S.testsCalendar, addDays(today, -7), addDays(today, 22))) {
+      for (const ev of await eventsFrom(S.testsCalendar, S.testsCalendarId, addDays(today, -7), addDays(today, 22))) {
         for (const d of eventDays(ev)) {
           const k = ymd(d);
           if (!TESTS.has(k)) TESTS.set(k, []);
@@ -1516,9 +1515,8 @@ function offReason(s) {
 }
 
 // ════════════════════════ RINGS ════════════════════════
-// The ring is only a picture, used as the background of a stack. The icon or
-// number sits on top as normal widget text, kept inside the square that fits in
-// the circle and allowed to shrink, so it can never stick out of the ring.
+// The ring is only a picture, the background of a stack; the icon or number on top is normal widget
+// text, kept inside the square that fits the circle and allowed to shrink.
 // ext (v1.3, links between back-to-back classes): the picture is ext.h tall with the ring in
 // the middle, and line pieces from the ring to the top (ext.above) and bottom (ext.below) edge.
 function ringImage(d, w, p, color, track, disc, ext) {
@@ -1551,10 +1549,9 @@ function ringImage(d, w, p, color, track, disc, ext) {
   return ctx.getImage();
 }
 // o: { d: size, w: line width, p: 0…1, color, track, disc, ext (see ringImage) }
-// The ring is the stack's background picture. Scriptable's vertical stacks line
-// their contents up on the left, so each line inside goes on its own row with a
-// flexible gap on both sides. Each gap is at least ~8 pt wide, so the text gets
-// the ring's width minus 16 pt, and its size is worked out to fit that.
+// Vertical stacks line their contents up on the left, so each line inside the ring goes on its own
+// row with a flexible gap on both sides. Each gap is at least ~8 pt, so the text gets the ring's
+// width minus 16 pt, and its size is worked out to fit that.
 function ringStack(parent, o) {
   const st = parent.addStack();
   st.size = new Size(o.d, o.ext ? o.ext.h : o.d);
@@ -1569,8 +1566,7 @@ function ringRoom(o, kind) {
   const [fw, fh] = kind === "wide" ? [0.84, 0.54] : kind === "two" ? [0.72, 0.69] : [0.7, 0.7];
   return { w: Math.min(D * fw, o.d - 18), h: Math.min(D * fh, o.d - 18) };
 }
-// Font size that fits a box, worked out here because iOS sometimes cuts text off
-// instead of shrinking it. Widths are generous estimates for the rounded bold font.
+// Font size that fits a box (iOS sometimes cuts text off instead of shrinking it); generous widths.
 function fitFs(text, boxW, boxH, base) {
   const w = emWidth(text, true) || 1;
   return Math.max(7, Math.floor(Math.min(base, (boxW * 0.96) / w, boxH / 1.22)));
@@ -1836,9 +1832,8 @@ function roomColW(day, fs) {
 }
 
 // ════════════════════════ WIDGET HELPERS ════════════════════════
-// Rough width of a text, in "em" (1 em = the font size). Generous on purpose: the
-// script picks font sizes from these, because iOS sometimes cuts text off instead
-// of shrinking it. rounded = the rounded bold font used for numbers in rings.
+// Rough width of a text, in "em" (1 em = the font size). Generous on purpose: font sizes are picked
+// from these because iOS sometimes cuts text off instead of shrinking it. rounded = the rings' number font.
 function emWidth(s, rounded = false) {
   return [...String(s)].reduce((a, ch) => a + (
     /[0-9]/.test(ch) ? 0.66 :
@@ -1899,10 +1894,9 @@ function focusTint(r, f, radius) { r.backgroundColor = f.isClass ? C.tintClass :
 // The invisible stand-in for a missing room (ФВС), as wide as a usual room number.
 const NO_ROOM = "000";
 const ringColor = l => l.hot ? C.ringRed : C.normal;
-// Big number with small words on the same baseline, like "73%" in Batteries:
-// "15 мин", "след 8 мин", "Утре 08:00". iOS can only line up the bottoms of
-// text boxes, so the small words get a little bottom padding to sit on the
-// big number's baseline (the baseline is ~0.23 × font size above the bottom).
+// Big number with small words on the same baseline ("15 мин", "след 8 мин", "Утре 08:00"). iOS only
+// lines up the bottoms of text boxes, so the small words get bottom padding to sit on the big
+// number's baseline (~0.23 × font size above the bottom).
 // preOpts.maxW: the space available; the whole line shrinks evenly to fit it.
 function bigValue(row, value, unit, fs, ufs, pre, preOpts = {}) {
   if (preOpts.maxW) {
@@ -2511,7 +2505,7 @@ function errorWidget(e) {
 // Schedules a notification before each class for the next 2 school days and
 // removes ones that are no longer needed. Only the Settings page turns this on,
 // so different widgets can't fight over it.
-const THREAD = "uchilishte-widget";
+const THREAD = "school-widget";
 function hashStr(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
 // Never lets a reminder problem stop the widget or the menu.
 async function syncRemindersSafe() { try { await syncReminders(); } catch (e) { console.error("Reminders: " + e); } }
@@ -2594,7 +2588,7 @@ function clearNotices() {
   writeState(st); NOTICES.justUpdated = NOTICES.rolledBack = false;
 }
 let CODE_REPLACED = false; // this run has already put another version in the script's file
-// A button in the Версия card (uchilishte://update?a=…) → the message shown under it.
+// A button in the Версия card (school-widget://update?a=…) → the message shown under it.
 async function versionAction(a, v) {
   const X = L.set.v;
   if (CODE_REPLACED && a !== "check") return X.restart;
@@ -2617,18 +2611,21 @@ async function versionAction(a, v) {
 }
 // ════════════════════════ IMPORT AND THE TIMETABLE EDITOR (since 1.6.0) ════════════════════════
 // Sources: the link's ?data= and the import file next to the script (checked at start, in the app),
-// "Постави от AI" (the clipboard) and "От файл" (DocumentPicker). Every one goes through
+// "Постави" (the clipboard) and "От файл" (DocumentPicker). Every one goes through
 // parseImport → migrate → the editor page (validateData on every change), which saves through
-// uchilishte://data?a=save: history/, then data.json. The page's code is edPage (below), which runs
+// school-widget://data?a=save: history/, then data.json. The page's code is edPage (below), which runs
 // in the WebView; the script answers its links in dataAction.
-const IMPORT_FILE = "uchilishte-import.txt";
-const importPath = () => module.filename.slice(0, module.filename.lastIndexOf("/") + 1) + IMPORT_FILE;
+const IMPORT_FILES = ["school-widget-import.txt", "uchilishte-import.txt"]; // the second: Shortcuts and install scripts from before 1.8.5
+const importPaths = () => IMPORT_FILES.map(n => module.filename.slice(0, module.filename.lastIndexOf("/") + 1) + n);
 async function readImportFile() {
-  const fm = scriptFM(), p = importPath();
-  try { if (fm.fileExists(p) && fm.downloadFileFromiCloud) await fm.downloadFileFromiCloud(p); } catch (e) { }
-  try { return fm.fileExists(p) ? fm.readString(p) : null; } catch (e) { return null; }
+  const fm = scriptFM();
+  for (const p of importPaths()) {
+    try { if (fm.fileExists(p) && fm.downloadFileFromiCloud) await fm.downloadFileFromiCloud(p); } catch (e) { }
+    try { if (fm.fileExists(p)) return fm.readString(p); } catch (e) { }
+  }
+  return null;
 }
-function removeImportFile() { const fm = scriptFM(); try { if (fm.fileExists(importPath())) fm.remove(importPath()); } catch (e) { console.error("Import file: " + e); } }
+function removeImportFile() { const fm = scriptFM(); for (const p of importPaths()) try { if (fm.fileExists(p)) fm.remove(p); } catch (e) { console.error("Import file: " + e); } }
 // Text → { d } (migrated, not yet checked), { error: text } or { newer: true } (update first).
 function prepareImport(text) {
   const r = parseImport(text);
@@ -2703,7 +2700,7 @@ function mergeOld(n, o, sameYear) {
   if (nr.length) d.meta.noRoom = (d.meta.noRoom || []).concat(nr);
   if (!d.meta.grade && om.grade) d.meta.grade = om.grade;
   if (!d.meta.class && om.class) d.meta.class = om.class;
-  if (sameYear) for (const k of ["daysOff", "notOff", "lastDay"]) if (o[k] && !d[k]) d[k] = clone(o[k]);
+  if (sameYear) for (const k of ["daysOff", "notOff"]) if (o[k] && !d[k]) d[k] = clone(o[k]);
   // important: only when the new one has none (a shared timetable, or not asked): the same subject in the
   // same place, or a subject that was important everywhere
   let any = false;
@@ -2728,18 +2725,18 @@ function mergeOld(n, o, sameYear) {
 function editorPayload(ed = {}) {
   const fm = FileManager.local(), hd = dataPath("history"), imp = ed.mode === "import", own = ownTT(), newYear = imp && yearOld();
   const m = imp && own ? mergeOld(ed.d, TT_FULL, !newYear) : null, d = m ? m.d : imp ? ed.d : TT_FULL;
-  const when = t => `${t.getDate()} ${L.months[t.getMonth()]} ${t.getFullYear()}, ${hm(t)}`;
-  const hist = fm.fileExists(hd) ? fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)).map(f => ({ f, t: when(new Date(parseInt(f))) })) : [];
-  const hol = HOLIDAYS.daysOff.map(e => Array.isArray(e) ? e : [e]).filter(e => isYmd(e[0])).map(e => {
-    const only = e.find(x => x && x.grades);
-    return { a: e[0], b: isYmd(e[1]) ? e[1] : e[0], n: e.slice(1).find(x => typeof x === "string" && !isYmd(x)) || "", g: only ? only.grades : null };
-  });
-  return { mode: imp ? "import" : "edit", d, val: validateData(d), hist, hol, msg: ed.msg || "",
+  const hol = HOLIDAYS.daysOff.map(e => Array.isArray(e) ? e : [e]).filter(e => isYmd(e[0]) && offApplies(e, 0)).map(e => ({ a: e[0], b: isYmd(e[1]) ? e[1] : e[0] }));
+  if (imp && Array.isArray(d.daysOff)) { // older timetables (and AIs) copied the official days off: they come by themselves now
+    const off = new Set(), span = (a, b, f) => { for (let t = parseYmd(a); ymd(t) <= b; t = addDays(t, 1)) f(ymd(t)); };
+    hol.forEach(o => span(o.a, o.b, x => off.add(x)));
+    d.daysOff = d.daysOff.filter(e => { const a = Array.isArray(e) ? e : [e]; if (!isYmd(a[0])) return true; let mine = false; span(a[0], isYmd(a[1]) ? a[1] : a[0], x => { if (!off.has(x)) mine = true; }); return mine; });
+  }
+  return { mode: imp ? "import" : "edit", d, val: validateData(d), msg: ed.msg || "", cities: cityOptions(), city: loadSaved().city || "",
     ld: HOLIDAYS.lastDay || {}, ld0: `20${HOLIDAYS.schoolYear.slice(-2)}-06-30`,
     page: PAGES + "install/", sh: !imp && own ? sharedTimetable(TT_FULL) : null, old: m ? m.old : null, gone: m ? m.gone : {}, newYear,
-    oldGrade: own ? TT_FULL.meta.grade || 0 : 0, oldHol: +HOLIDAYS.schoolYear.slice(0, 4) < syOf(NOW) ? HOLIDAYS.schoolYear.replace("-", "/") : "" };
+    oldGrade: own ? TT_FULL.meta.grade || 0 : 0, oldHol: HOLIDAYS.missing ? HOLIDAYS.schoolYear.replace("-", "/") : "" };
 }
-// A link from the editor page or the welcome card (uchilishte://data?a=…).
+// A link from the menu, the landing page or the editor (school-widget://data?a=…).
 async function dataAction(q, wv, changed) {
   const E = L.ed, js = c => wv.evaluateJavaScript(c);
   const say = (t, b) => js(`say(${JSON.stringify(t)}${b ? "," + JSON.stringify(b) : ""})`);
@@ -2756,19 +2753,49 @@ async function dataAction(q, wv, changed) {
     else if (!d.meta.schoolYear && ownTT()) d.meta.schoolYear = syName(ttYear(TT_FULL));
     saveTimetable(d);
     if (q.m === "import") removeImportFile();
+    if (q.city !== undefined && q.city !== loadSaved().city) { const st = loadSaved(); st.city = S.city = q.city; saveSettings(st); }
     changed(); await reload();
-    return page(first ? "t1" : "t2", { done: first, msg: first ? "" : E.saved });
+    await page(first ? "t1" : "t2", { done: first, msg: first ? "" : E.saved });
+    if (q.cal) Safari.open(calendarPage(q.city));
+    return;
   }
   if (q.a === "cancel") { removeImportFile(); return page("t1"); }
+  if (q.a === "hist") { // Предишни програми: the history/ folder, each one restored or deleted
+    const fm = FileManager.local(), hd = dataPath("history"), t = f => { const d = new Date(parseInt(f)); return `${d.getDate()} ${L.months[d.getMonth()]} ${d.getFullYear()}, ${hm(d)}`; };
+    const fs = fm.fileExists(hd) ? fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)) : [];
+    const a = new Alert(); a.title = E.hist; a.message = fs.length ? E.histLead : E.histNone;
+    fs.forEach(f => a.addAction(t(f)));
+    if (fs.length) a.addDestructiveAction(E.histAll);
+    a.addCancelAction(E.cancel);
+    const i = await a.presentSheet();
+    if (i < 0) return;
+    const b = new Alert(); b.title = i < fs.length ? t(fs[i]) : E.histAll; b.message = i < fs.length ? E.undoLead : E.histAllQ;
+    if (i < fs.length) b.addAction(E.restoreThis);
+    b.addDestructiveAction(E.del); b.addCancelAction(E.cancel);
+    const j = await b.presentAlert();
+    if (j < 0) return;
+    if (i < fs.length && j === 0) q = { a: "undo", f: fs[i] };
+    else { (i < fs.length ? [fs[i]] : fs).forEach(f => fm.remove(fm.joinPath(hd, f))); return page("t2", { msg: E.deleted }); }
+  }
   if (q.a === "undo") {
     let d;
     try { d = migrate(JSON.parse(FileManager.local().readString(dataPath("history", q.f)))); } catch (e) { return say(String(e.message || e)); }
     if (validateData(d, { quick: true }).errors.length) return say(E.badHist);
-    saveTimetable(d); changed(); await reload();
+    saveTimetable(d, q.f); changed(); await reload();
     return page("t2", { msg: E.restored });
   }
-  if (q.a === "prompt" || q.a === "names") { Pasteboard.copyString(E.prompt(PAGES + "ai/INSTRUCTIONS.md") + (q.a === "names" ? "\n\n" + namesNote(TT_FULL) : "")); return say(E.copied); }
+  if (q.a === "prompt" || q.a === "names") {
+    // the full prompt (with the whole instructions: it works with an AI that can't open links); offline the short one with the link
+    let full = null;
+    try { full = await fetchText(PAGES + (S.language === "en" ? "ai/prompt-en.txt" : "ai/prompt.txt"), 8); } catch (e) { }
+    if (!full || !/School Widget instructions/.test(full)) full = E.prompt(PAGES + "ai/INSTRUCTIONS.md");
+    Pasteboard.copyString(full + (q.a === "names" ? "\n\n" + namesNote(TT_FULL) : ""));
+    return say(E.copied);
+  }
   if (q.a === "share") return ShareSheet.present([q.u]);
+  if (q.a === "cal") return Safari.open(calendarPage());
+  if (q.a === "scan") { const a = new Alert(); a.title = E.scan; a.message = E.scanMsg; a.addAction(E.ok); return a.presentAlert(); }
+  if (q.a === "blank") return page("t1", { mode: "import", d: blankTimetable() });
   if (q.a === "export") {
     const sh = sharedTimetable(TT_FULL);
     try { await DocumentPicker.exportString(JSON.stringify(sh, null, 1), `${sh.meta.class || "School Widget"}-${E.fileName}.json`); } catch (e) { } // cancelled
@@ -2783,6 +2810,22 @@ async function dataAction(q, wv, changed) {
     if (r.newer) return say(E.newer, { t: L.set.v.update, a: "install" });
     return page("t1", { mode: "import", d: r.d });
   }
+}
+// "Въведи я на ръка": the demo's bells, Monday–Friday empty (tap a cell to fill it).
+const blankTimetable = () => ({ meta: { schema: SCHEMA }, bells: JSON.parse(JSON.stringify(DATA.bells)), week: { 1: [], 2: [], 3: [], 4: [], 5: [] } });
+// At start, before there is a timetable: one copied (the link page copies it when School Widget wasn't
+// installed yet) is offered. Anything else on the clipboard is left alone.
+async function offerClipboard() {
+  const text = Pasteboard.pasteString();
+  if (!text || text.length > 200000) return false;
+  const r = prepareImport(text);
+  if (r.error || r.newer) return false;
+  const E = L.ed, a = new Alert(), m = r.d.meta || {};
+  a.title = E.clipTitle; a.message = fillP(E.clipLead, [m.class, m.school].filter(Boolean).join(", ") || "—");
+  a.addAction(E.clipYes); a.addCancelAction(E.no);
+  if (await a.presentAlert() !== 0) return false;
+  await startImport(text);
+  return true;
 }
 // From the app menu or at start (outside the page): check the text, then open the editor.
 async function startImport(text, fromFile) {
@@ -2812,9 +2855,9 @@ function edPage(P, E) {
   const h = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const F = (s, ...a) => a.reduce((t, x) => t.replace("%", x), s);
   const CODES = ["", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]; // validateData's cell codes ("Пн5")
-  let D = null, V = P.val, sure = false, stepDone = false, gradeDone = false, saveNext = false, onOk = null, pickN = null;
+  let D = null, V = P.val, city = P.city, cal = false, det = P.mode !== "import", sure = false, stepDone = false, gradeDone = false, saveNext = false, onOk = null, pickN = null;
   const pickWas = {}, skip = new Set();
-  const go = (a, o = {}) => { location.href = "uchilishte://data?a=" + a + Object.keys(o).map(k => "&" + k + "=" + encodeURIComponent(o[k])).join(""); };
+  const go = (a, o = {}) => { location.href = "school-widget://data?a=" + a + Object.keys(o).map(k => "&" + k + "=" + encodeURIComponent(o[k])).join(""); };
   const chk = () => go("check", { d: JSON.stringify(D) });
   const upd = () => { sure = false; draw(); chk(); };
   const meta = () => D.meta || (D.meta = { schema: 1 });
@@ -2828,7 +2871,7 @@ function edPage(P, E) {
   const splits = () => { const m = {}; for (const c of cells()) if (c.e.groups) { const k = key(c.e.groups); (m[k] = m[k] || { gs: c.e.groups, at: [] }).at.push(E.wd[c.k] + (c.p + 1)); } return m; };
   const txt = x => x.text[E.lang] || x.text.bg;
   const inG = (r, g) => { const [a, b] = String(r).split("-").map(Number); return g >= a && g <= (b || a); };
-  const lastDef = () => { const g = meta().grade; for (const k in P.ld) if (inG(k, g)) return P.ld[k]; return P.ld0; };
+  const lastDef = () => { const g = meta().grade; if (g) for (const k in P.ld) if (inG(k, g)) return P.ld[k]; return P.ld0; };
   const dates = (a, b) => { const out = []; for (let t = Date.parse(a + "T00:00Z"); t <= Date.parse(b + "T00:00Z"); t += 864e5) out.push(new Date(t).toISOString().slice(0, 10)); return out; };
   const fd = s => +s.slice(8) + " " + E.months[+s.slice(5, 7) - 1];
   const sw = (id, label, hint, on) => `<label class="sw"><span>${label}${hint ? `<small>${hint}</small>` : ""}</span><input type="checkbox" id="${id}"${on ? " checked" : ""}></label>`;
@@ -2868,7 +2911,7 @@ function edPage(P, E) {
   const groupsHtml = () => Object.entries(splits()).map(([k, o]) => `<div class="gp"><p>${h(o.at.join(", "))}</p><div class="seg" data-g="${h(k)}">${o.gs.map((g, i) => `<button data-i="${i}" class="${picks()[k] === i ? "on" : ""}">${h(g.label)}</button>`).join("")}</div></div>`).join("");
   function draw() {
     const imp = P.mode === "import", items = V.errors.map(x => [x, "e"]).concat(V.warnings.map(x => [x, ""]));
-    const nr = meta().noRoom || [], no = new Set(D.notOff || []), g = meta().grade;
+    const nr = meta().noRoom || [], g = meta().grade;
     const own = (D.daysOff || []).map((e, i) => {
       const a = Array.isArray(e) ? e : [e], b = /^\d{4}-\d\d-\d\d$/.test(a[1]) ? a[1] : a[0];
       const n = a.slice(1).find(x => typeof x === "string" && !/^\d{4}-\d\d-\d\d$/.test(x)) || "";
@@ -2881,16 +2924,15 @@ function edPage(P, E) {
       <div class="sum"><span class="chip ok">${F(E.daysN, days().filter(k => (D.week[k] || []).length).length, D.bells.length)}</span>${V.errors.length ? `<span class="chip e">${F(E.errs, V.errors.length)}</span>` : ""}${V.warnings.length ? `<span class="chip w">${F(E.toCheck, V.warnings.length)}</span>` : ""}</div>
       ${imp && meta().source === "shared" ? `<p class="note2">${E.sharedNote}</p>` : ""}
       ${pickN ? `<div class="note2 pk">${h(F(E.pickLead, pickN))}<button class="btn main" data-x="pickDone">${E.done}</button></div>` : ""}
-      ${grid()}${ch.length ? `<h3>${E.changed}</h3><div class="card chg">${ch.slice(0, 8).map(c => `<p><b>${E.wd[c.k]} ${c.p + 1}</b>: ${h(c.y || E.free)} <s>(${h(F(E.was, c.x || E.free))})</s></p>`).join("")}${ch.length > 8 ? `<p>${F(E.more, ch.length - 8)}</p>` : ""}</div>` : ""}
+      <h3>${E.aboutYou}</h3><div class="card">${field("grade", E.grade, g || "", "number", 'min="1" max="12" inputmode="numeric"')}<p class="hint">${g ? F(E.lastHint, h(g), fd(lastDef())) : E.gradeHint}</p>${gh ? `<p class="hint" style="margin-top:10px">${E.groups}</p>${gh}` : ""}<label class="field"><span>${E.city}</span><select id="ecity">${P.cities}</select></label><p class="hint">${E.cityHint}</p>${imp ? sw("ecal", E.calSw, E.calSwHint, cal) : ""}</div>
+      <h3>${E.ttHead}</h3>${grid()}${ch.length ? `<h3>${E.changed}</h3><div class="card chg">${ch.slice(0, 8).map(c => `<p><b>${E.wd[c.k]} ${c.p + 1}</b>: ${h(c.y || E.free)} <s>(${h(F(E.was, c.x || E.free))})</s></p>`).join("")}${ch.length > 8 ? `<p>${F(E.more, ch.length - 8)}</p>` : ""}</div>` : ""}
       ${gone.map(n => `<p class="note2">${h(F(E.gone, n, at(P.gone[n])))} <u data-x="pick" data-n="${h(n)}">${E.pick}</u> · <u data-x="drop" data-n="${h(n)}">${E.drop}</u></p>`).join("")}
       ${items.length ? `<ol class="wl">${items.map(([x, c]) => `<li class="${c}">${h(txt(x))}</li>`).join("")}</ol>` : ""}
-      <h3>${E.subjects}</h3><div class="card">${names().map(n => { const w = wOf(n)[0]; return row(`data-s="${h(n)}"`, h(n), w ? `<span class="wt">${h(txt(w))}</span>` : [short(n) !== n ? F(E.shortIs, h(short(n))) : "", nr.includes(n) ? E.noRoom : ""].filter(Boolean).join(" · ")); }).join("")}</div>
-      ${gh ? `<h3>${E.groups}</h3>${gh}` : ""}
+      <details id="det"${det ? " open" : ""}><summary class="card dsum">${E.details}</summary><h3>${E.subjects}</h3><div class="card">${names().map(n => { const w = wOf(n)[0]; return row(`data-s="${h(n)}"`, h(n), w ? `<span class="wt">${h(txt(w))}</span>` : [short(n) !== n ? F(E.shortIs, h(short(n))) : "", nr.includes(n) ? E.noRoom : ""].filter(Boolean).join(" · ")); }).join("")}</div>
       <h3>${E.bells}</h3><div class="card">${D.bells.map((b, i) => `<div class="bell"><span class="n">${i + 1}</span><input type="time" data-b="${i},0" value="${h(b[0])}"><span>–</span><input type="time" data-b="${i},1" value="${h(b[1])}">${i && i === D.bells.length - 1 ? `<span class="x" data-x="bell">⊖</span>` : ""}</div>`).join("")}<div class="bell add" data-x="addBell">${E.addBell}</div></div>
-      <h3>${E.off}</h3><div class="card"><p class="hint" style="margin-top:10px">${E.official}</p>${P.hol.map((o, i) => o.g && g && !inG(o.g, g) ? "" : sw("o" + i, `${fd(o.a)}${o.b !== o.a ? " – " + fd(o.b) : ""} · ${h(o.n)}`, "", dates(o.a, o.b).every(x => no.has(x)))).join("")}${own}<div class="bell add" data-x="addOff">${E.addOff}</div></div>
-      <h3>${E.last}</h3><div class="card">${field("grade", E.grade, g || "", "number", 'min="1" max="12" inputmode="numeric"')}${field("last", E.lastShort, D.lastDay || lastDef(), "date")}</div><p class="note">${g ? F(E.lastHint, h(g), fd(lastDef())) : E.gradeHint}</p>
-      ${!imp && P.hist.length ? `<div class="btns"><button class="btn" data-x="undo">${E.undo}</button></div>` : ""}
+      <h3>${E.off}</h3><div class="card"><p class="hint" style="margin-top:10px">${E.official}</p>${own}<div class="bell add" data-x="addOff">${E.addOff}</div></div></details>
       <div class="bar"><button class="btn" data-x="cancel">${E.cancel}</button><button class="btn main" data-x="save" id="sv">${sure ? E.saveAnyway : E.save}</button></div>`;
+    $("ecity").value = city;
   }
   // a bottom sheet; ok() returns false to skip the redraw and check
   function sheet(title, html, ok, okText, closeText) {
@@ -2953,7 +2995,7 @@ function edPage(P, E) {
         () => { meta().grade = +$("gv").textContent; gradeDone = saveNext = true; chk(); return false; }, E.cont);
     }
     if (V.warnings.length && !sure) { sure = true; $("sv").textContent = E.saveAnyway; return; }
-    go("save", { d: JSON.stringify(D), m: P.mode });
+    go("save", Object.assign({ d: JSON.stringify(D), m: P.mode, city }, cal ? { cal: 1 } : {}));
   }
   window.setVal = v => {
     V = v;
@@ -2966,6 +3008,7 @@ function edPage(P, E) {
     s.hidden = false; clearTimeout(window._say); window._say = setTimeout(() => { s.hidden = true; }, b ? 12000 : 4500);
     s.onclick = e => { s.hidden = true; if (b && e.target.tagName === "BUTTON") { document.querySelector('.tabs [data-t="t4"]').click(); $("verh").scrollIntoView(); act(b.a); } };
   };
+  document.addEventListener("toggle", ev => { if (ev.target.id === "det") det = ev.target.open; }, true);
   const open = () => { D = JSON.parse(JSON.stringify(P.d)); V = P.val; body.classList.add("ed"); scrollTo(0, 0); draw(); };
   // the install link with the shared timetable: deflate in the page (iOS 16.4+), else plain #d=
   const b64u = u8 => { let s = ""; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
@@ -3086,7 +3129,6 @@ function edPage(P, E) {
     }
     if (c.dataset.k) return cellSheet(+c.dataset.k, +c.dataset.p);
     if (c.dataset.s) return subjSheet(c.dataset.s);
-    if (c.dataset.h) return go("undo", { f: c.dataset.h });
     if (c.parentNode.dataset.g) {
       const gs = meta().groups = Object.assign({}, picks(), { [c.parentNode.dataset.g]: +c.dataset.i });
       c.parentNode.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.i === gs[c.parentNode.dataset.g]));
@@ -3096,9 +3138,10 @@ function edPage(P, E) {
     if (c.closest("#sh .seg")) { c.parentNode.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === c)); return; }
     const x = c.dataset.x;
     if (x === "edit") return open();
+    if (x === "hist") { location.href = "school-widget://data?a=hist"; return; }
     if (x === "imp") { const w = c.parentNode.nextElementSibling; w.hidden = !w.hidden; return; }
     if (x === "menu") { body.classList.remove("done"); return; }
-    if (["prompt", "paste", "file", "names", "later", "export"].includes(x)) return go(x);
+    if (["prompt", "paste", "file", "names", "later", "export", "cal", "blank", "scan"].includes(x)) return go(x);
     if (x === "pick") { pickN = c.dataset.n; draw(); return scrollTo(0, 0); }
     if (x === "pickDone") { pickN = null; return draw(); }
     if (x === "drop") { skip.add(c.dataset.n); return draw(); }
@@ -3110,7 +3153,6 @@ function edPage(P, E) {
     });
     if (x === "cancel") { if (P.mode === "import") return go("cancel"); body.classList.remove("ed"); $("sh").innerHTML = ""; return; }
     if (x === "save") return save();
-    if (x === "undo") return sheet(E.undo, `<p class="lead">${E.undoLead}</p><div class="card">${P.hist.map(r => row(`data-h="${h(r.f)}"`, h(r.t), "")).join("")}</div>`);
     if (x === "bell") { D.bells.pop(); Object.values(D.week).forEach(day => { if (day.length > D.bells.length) day.length = D.bells.length; }); return upd(); }
     if (x === "addBell") {
       const [a, b] = D.bells[D.bells.length - 1].map(s => +s.slice(0, 2) * 60 + +s.slice(3)), m = v => String(Math.floor(v / 60) % 24).padStart(2, "0") + ":" + String(v % 60).padStart(2, "0");
@@ -3128,14 +3170,11 @@ function edPage(P, E) {
     const t = ev.target;
     if (t.id === "cz") { $("cf").hidden = t.checked; return; }
     if (!t.closest("#ed")) return;
+    if (t.id === "ecity") { city = t.value; return; }
+    if (t.id === "ecal") { cal = t.checked; return; }
     if (t.dataset.b) { const [i, j] = t.dataset.b.split(","); D.bells[i][j] = t.value; }
     else if (t.id === "grade") { const g = parseInt(t.value, 10); if (g >= 1 && g <= 12) meta().grade = g; else delete meta().grade; }
-    else if (t.id === "last") { if (!t.value || t.value === lastDef()) delete D.lastDay; else D.lastDay = t.value; }
-    else if (/^o\d+$/.test(t.id)) {
-      const o = P.hol[+t.id.slice(1)], ds = dates(o.a, o.b), no = (D.notOff || []).filter(x => !ds.includes(x));
-      D.notOff = t.checked ? no.concat(ds).sort() : no;
-      if (!D.notOff.length) delete D.notOff;
-    } else return;
+    else return;
     upd();
   });
   if (P.mode === "import") open();
@@ -3157,13 +3196,16 @@ function settingsPane() {
   <p class="hint">${X.themeHint}</p></div>
   <h3>${X.daysOff}</h3>
   <div class="card">
-    <label class="field"><span>${X.calendar}</span><input id="offCalendar" placeholder="Off-School" autocapitalize="off" autocorrect="off"></label>
+    <label class="field"><span>${X.city}</span><select id="city">${cityOptions()}</select></label>
+    <p class="hint">${X.cityHint}</p>
+    <div class="field"><span>${X.ownOff}</span><button class="pick" data-cal="offCalendar" id="offCalendar"></button></div>
+    <p class="hint">${X.ownOffHint}</p>
     ${sw("showReason", X.reason, X.reasonHint)}
     ${sw("countdown", X.countdown, X.countdownHint)}
   </div>
   <h3>${X.tests}</h3>
   <div class="card">
-    <label class="field"><span>${X.calendar}</span><input id="testsCalendar" placeholder="${X.off}" autocapitalize="off" autocorrect="off"></label>
+    <div class="field"><span>${X.calendar}</span><button class="pick" data-cal="testsCalendar" id="testsCalendar"></button></div>
     <p class="hint">${X.testsHint}</p>
   </div>
   <h3>${X.remind}</h3>
@@ -3244,11 +3286,16 @@ function buildHTML(s, tab, jump, ed = {}) {
     return ls.map((l, i) => lessonRow(l, showProgress, { up: i ? pc(i - 1, links[i - 1]) : null, down: pc(i, links[i]) })).join("");
   };
   // Today: today's classes while school is on; after the last bell and on days off, only the next school day's
-  // the demo's welcome card (1.6.0) and the import buttons, also on the Week tab
+  // the import buttons (Внеси програма), also on the Week tab
   const impBtns = `<div class="btns" hidden><button class="btn" data-x="paste">${E.paste}</button><button class="btn" data-x="file">${E.file}</button></div>`;
-  // a card with a main button and Внеси програма (the demo's welcome, the new school year's)
+  // a card with a main button and Внеси програма (the new school year)
+  // the first thing a new install shows, and all it shows (no tabs, no demo): get the timetable in
+  const land = isDemo() && ed.mode !== "import" ? `<div id="land"><h1>${E.setupTitle}</h1><p class="lead">${E.setupLead}</p>` +
+    `<div class="btns col"><button class="btn main" data-x="paste">${E.pasteTT}</button><button class="btn main" data-x="scan">${E.scan}</button><button class="btn" data-x="file">${E.file}</button></div>` +
+    `<h3>${E.noTT}</h3><div class="btns col"><button class="btn" data-x="prompt">${E.makeAI}</button><button class="btn" data-x="blank">${E.byHand}</button></div>` +
+    `${Script.name() !== "School Widget" ? `<p class="note2">${esc(fillP(E.nameWarn, Script.name()))}</p>` : ""}</div>` : "";
   const wcard = (t, lead, x, b, tail) => `<div class="card wc"><div class="wt1">${t}</div><p class="lead">${lead}</p><div class="btns col"><button class="btn main" data-x="${x}">${b}</button><button class="btn" data-x="imp">${E.importBtn}</button></div>${impBtns}${tail}</div>`;
-  let today = (isDemo() ? wcard(E.welcome, E.welcomeLead, "prompt", E.copyPrompt, `<p class="hint">${E.welcomeHint}</p>`) : "") + hero();
+  let today = hero();
   if (s.mode === "class" || s.mode === "break") today += `<h3>${L.tabToday}</h3>` + dayList(s.lessons, true);
   else if ((s.mode === "done" || s.mode === "off") && s.nextDay)
     today += `<h3>${esc(dayLabel(s.nextDay, s.today, false))}</h3>` + dayList(s.nextLessons, false);
@@ -3364,6 +3411,7 @@ h1{font-size:30px;margin:6px 0 2px}h3{font-size:13px;text-transform:uppercase;le
 .sw input::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 4px rgba(0,0,0,.3)}
 .sw input:checked{background:#30d158}.sw input:checked::after{left:22px}
 .field input{flex:1;min-width:0;text-align:right;background:none;border:0;color:rgba(255,255,255,.75);font:16px -apple-system;outline:none}
+.field select,.field .pick{flex:1;min-width:0;text-align:right;text-align-last:right;background:none;border:0;color:#0a84ff;font:16px -apple-system,sans-serif;padding:0;-webkit-appearance:none;appearance:none}
 .seg{display:flex;gap:3px;background:#2c2c2e;border-radius:9px;padding:2px;margin:10px 0}
 .seg button{flex:1;border:0;border-radius:7px;padding:7px 2px;background:none;color:#fff;font:500 14px -apple-system}
 .seg button.on{background:#636366}
@@ -3395,7 +3443,7 @@ svg.qr{display:block;width:100%;max-width:300px;margin:6px auto 10px;border-radi
 .subj{display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}.subj>div{flex:1;min-width:0}.subj b{font-size:16px;font-weight:500}.subj small{display:block;color:rgba(255,255,255,.5);font-size:12.5px}.subj .go{color:rgba(255,255,255,.3);font-size:20px}
 .bell{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid rgba(255,255,255,.08);font-size:16px}.bell .n{width:22px;color:rgba(255,255,255,.5)}.bell .t2{flex:1}.bell .x{margin-left:auto;color:#ff453a;font-size:22px;padding:0 4px}.bell.add{color:#0a84ff}
 #say{position:fixed;left:16px;right:16px;bottom:90px;background:#2c2c2e;border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.35;z-index:7;box-shadow:0 6px 24px rgba(0,0,0,.5)}#say .btn{display:block;width:100%;margin-top:10px}
-#ed,#done{display:none}body.ed #ed,body.done #done{display:block}.dn{text-align:center;margin-top:30px}.dn h1{margin:6px 0}.big{font-size:34px;line-height:1;margin:6px 0 4px}
+#ed,#done,#land{display:none}body.ed #ed,body.done #done,body.land #land{display:block}body.land>:not(#land):not(#sh):not(#say){display:none!important}#land h1{margin:14px 2px 8px}.dsum{display:block;list-style:none;font-weight:600;padding:13px 14px;margin:20px 0 4px}.dsum::-webkit-details-marker{display:none}.dsum::after{content:" ›";opacity:.5}#det[open]>.dsum::after{content:" ⌄"}#land .btn{padding:15px 4px;font-size:17px}.dn{text-align:center;margin-top:30px}.dn h1{margin:6px 0}.big{font-size:34px;line-height:1;margin:6px 0 4px}
 body.ed>.date0,body.ed>h1,body.ed>.tabs,body.ed .pane:not(#t2),body.ed #t2>:not(#ed),body.done>:not(#done):not(#sh):not(#say){display:none!important}body.ed #t2{display:block}
 .btns{display:flex;gap:8px;margin:8px 0 12px}.btn{flex:1;border:0;border-radius:9px;padding:10px 4px;background:#2c2c2e;color:#fff;font:600 15px -apple-system,sans-serif}.btn.main{background:#30d158;color:#000}
 ${S.theme === "dark" ? "" : `@media ${S.theme === "light" ? "all" : "(prefers-color-scheme: light)"}{
@@ -3409,39 +3457,58 @@ ${S.theme === "dark" ? "" : `@media ${S.theme === "light" ? "all" : "(prefers-co
 .offcol{background:repeating-linear-gradient(135deg,#e5e5ea 0 8px,#f2f2f7 8px 16px)}
 .note2{color:#8a5a00}.pk{background:#fbf1d0}.lead,.gp p{color:rgba(60,60,67,.75)}.chip{background:#e5e5ea}.chip.w,.wl li,.wt{color:#a05a00!important}.cell.w{outline-color:#ff9f0a}.cell.w::after{background:#ff9f0a;color:#fff}.cell.free b,.subj .go{color:rgba(60,60,67,.4)}
 .bar{background:linear-gradient(rgba(242,242,247,0),#f2f2f7 30%)}.sheet,.gp,#say{background:#fff}.subj,.bell{border-color:rgba(0,0,0,.08)}.subj small,.bell .n{color:rgba(60,60,67,.6)}.grab{background:#d1d1d6}}`}
-</style></head><body class="${ed.mode === "import" ? "ed" : ed.done ? "done" : ""}">
-${done}<div id="sh"></div><div id="say" hidden></div>
+</style></head><body class="${ed.mode === "import" ? "ed" : ed.done ? "done" : land ? "land" : ""}">
+${done}${land}<div id="sh"></div><div id="say" hidden></div>
 <div class="date0">${cap(L.weekdays[now.getDay()])}, ${now.getDate()} ${L.monthsFull[now.getMonth()]}</div>
 <h1>${L.title}</h1>
 <div class="tabs">${tabs.map(t => `<button class="${t[0] === on ? "on" : ""}" data-t="${t[0]}">${t[1]}</button>`).join("")}</div>
 <div class="pane ${on === "t1" ? "on" : ""}" id="t1">${today}</div>
-<div class="pane ${on === "t2" ? "on" : ""}" id="t2">${newYearDue() ? wcard(E.newYear, E.newYearLead, "names", E.copyNames, `<div class="btns"><button class="btn" data-x="later">${E.later}</button></div>`) : ""}<div class="btns"><button class="btn" data-x="edit">${E.edit}</button><button class="btn" data-x="imp">${E.importBtn}</button></div>${impBtns}${ownTT() ? `<div class="btns"><button class="btn" data-x="share">${E.share}</button></div>` : ""}${grid}<div id="ed"></div></div>
-<div class="pane ${on === "t3" ? "on" : ""}" id="t3">${cd}${offList}</div>
+<div class="pane ${on === "t2" ? "on" : ""}" id="t2">${newYearDue() ? wcard(E.newYear, E.newYearLead, "names", E.copyNames, `<div class="btns"><button class="btn" data-x="later">${E.later}</button></div>`) : ""}<div class="btns"><button class="btn" data-x="edit">${E.edit}</button><button class="btn" data-x="imp">${E.importBtn}</button></div>${impBtns}${ownTT() ? `<div class="btns"><button class="btn" data-x="hist">${E.hist}</button></div>` : ""}${ownTT() ? `<div class="btns"><button class="btn" data-x="share">${E.share}</button></div>` : ""}${grid}<div id="ed"></div></div>
+<div class="pane ${on === "t3" ? "on" : ""}" id="t3">${cd}${offList}<div class="btns"><button class="btn" data-x="cal">${E.addCal}</button></div></div>
 <div class="pane ${on === "t4" ? "on" : ""}" id="t4">${settingsPane()}</div>
 <script>
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.pane').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.t).classList.add('on');scrollTo(0,0)});
 // Settings: every change is sent to Scriptable straight away (it intercepts this link).
 var ST=${jsonIn(SAVED)};
 var LANG0=ST.language;
-function send(){location.href='uchilishte://save?d='+encodeURIComponent(JSON.stringify(ST));var t=document.getElementById('toast');t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(function(){t.classList.remove('show')},1200)}
+function send(){location.href='school-widget://save?d='+encodeURIComponent(JSON.stringify(ST));var t=document.getElementById('toast');t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(function(){t.classList.remove('show')},1200)}
 function outl(){document.getElementById('linkOutlinesRow').hidden=!ST.linkColors}outl();
 ['showReason','countdown','tapView','linkColors','linkOutlines'].forEach(function(k){var el=document.getElementById(k);el.checked=!!ST[k];el.onchange=function(){ST[k]=el.checked;outl();send()}});
-['offCalendar','testsCalendar'].forEach(function(k){var el=document.getElementById(k);el.value=ST[k]||'';el.oninput=function(){ST[k]=el.value.trim()};el.onchange=function(){ST[k]=el.value.trim();if(k==='offCalendar'&&!ST[k]){ST[k]='Off-School';el.value=ST[k]}send()};el.onkeydown=function(e){if(e.key==='Enter')el.blur()}});
+// a calendar is picked in Scriptable (school-widget://cal), which then calls setCal; the city is a list
+function setCal(k,t,id){ST[k]=t;ST[k+'Id']=id;document.getElementById(k).textContent=t||${JSON.stringify(L.set.calNone)}}
+['offCalendar','testsCalendar'].forEach(function(k){var el=document.getElementById(k);setCal(k,ST[k]||'',ST[k+'Id']||'');el.onclick=function(){location.href='school-widget://cal?k='+k}});
+var ci=document.getElementById('city');ci.value=ST.city||'';ci.onchange=function(){ST.city=ci.value;send()};
 ['language','remindMinutes','theme','linkBox'].forEach(function(k){var box=document.getElementById(k);var mark=function(){box.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',String(ST[k])===b.dataset.v)})};mark();box.querySelectorAll('button').forEach(function(b){b.onclick=function(){ST[k]=k==='remindMinutes'?Number(b.dataset.v):b.dataset.v;mark();if(k==='language')document.getElementById('langNote').hidden=(ST.language===LANG0);send()}})});
 var ver=document.getElementById('ver'),taps=0,tt=0;
-function act(a,v){location.href='uchilishte://update?a='+a+(v?'&v='+v:'')}
+function act(a,v){location.href='school-widget://update?a='+a+(v?'&v='+v:'')}
 function bindVer(){var au=document.getElementById('autoUpdate');au.checked=ST.autoUpdate!==false;au.onchange=function(){ST.autoUpdate=au.checked;send()};
 document.querySelectorAll('#channel button').forEach(function(b){b.classList.toggle('on',(ST.channel||'stable')===b.dataset.v);b.onclick=function(){if((ST.channel||'stable')===b.dataset.v)return;ST.channel=b.dataset.v;bindVer();act('channel',b.dataset.v)}})}
 function setVer(h){ver.innerHTML=h;bindVer()}
 ver.onclick=function(e){var b=e.target.closest('[data-a]');if(b){if(b.dataset.a==='previous'&&!b.dataset.sure){b.dataset.sure=1;b.textContent=${JSON.stringify(L.set.v.sure)};return}b.textContent=${JSON.stringify(L.set.v.working)};act(b.dataset.a)}
 if(e.target.id==='vnum'){var n=Date.now();taps=n-tt<1500?taps+1:1;tt=n;if(taps>=5)document.getElementById('chan').hidden=false}};
-(${edPage})(${jsonIn(editorPayload(ed))}, ${jsonIn(Object.assign({ lang: S.language, months: L.months, wd: [""].concat(L.weekdaysShort.slice(1)), wdFull: [""].concat(L.weekdays.slice(1).map(cap)) }, E))});
+(${edPage})(${jsonIn(editorPayload(ed))}, ${jsonIn(Object.assign({ lang: S.language, months: L.months, wd: [""].concat(L.weekdaysShort.slice(1)), wdFull: [""].concat(L.weekdays.slice(1).map(cap)), city: L.set.city, cityHint: L.set.cityHint }, E))});
 bindVer();if(${JSON.stringify(jump || "")}==='ver')document.getElementById('verh').scrollIntoView();
 </script>
 </body></html>`;
 }
 // Shows the full-screen view. Returns true if settings or the timetable were changed.
 // ed: { mode: "import", d } opens the editor on an imported timetable; { done } the "Готово" screen.
+// Settings → a calendar: { title, id }, { "", "" } = none, null = cancelled. Calendar access is asked
+// for only here (and by the widget once one is picked).
+async function pickCalendar(k) {
+  const X = L.set;
+  if (loadSaved()[k]) {
+    const a = new Alert();
+    a.title = k === "testsCalendar" ? X.tests : X.ownOff; a.message = loadSaved()[k];
+    a.addAction(X.calOther); a.addDestructiveAction(X.calOff); a.addCancelAction(L.close);
+    const i = await a.presentSheet();
+    if (i < 0) return null;
+    if (i === 1) return { title: "", id: "" };
+  }
+  let cal;
+  try { cal = (await Calendar.presentPicker(false))[0]; } catch (e) { return null; } // cancelled
+  return cal ? { title: cal.title, id: cal.identifier } : null;
+}
 async function showView(s, tab, jump, ed) {
   const wv = new WebView();
   let changed = false, busy = Promise.resolve();
@@ -3449,7 +3516,7 @@ async function showView(s, tab, jump, ed) {
   wv.shouldAllowRequest = req => {
     const u = String((req && req.url) || "");
     // a button in Settings → Версия: run it, then redraw only that card (the page keeps its place)
-    const m = u.match(/^uchilishte:\/\/update\?a=(\w+)(?:&v=(\w+))?/);
+    const m = u.match(/^school-widget:\/\/update\?a=(\w+)(?:&v=(\w+))?/);
     if (m) {
       busy = busy.then(async () => {
         let msg;
@@ -3459,14 +3526,25 @@ async function showView(s, tab, jump, ed) {
       }).catch(e => console.error("Version: " + e));
       return false;
     }
-    // the timetable editor and the welcome card (uchilishte://data?a=…)
-    if (u.startsWith("uchilishte://data?")) {
+    // Settings → a calendar (school-widget://cal?k=offCalendar|testsCalendar): iOS's calendar picker
+    const c = u.match(/^school-widget:\/\/cal\?k=(offCalendar|testsCalendar)$/);
+    if (c) {
+      busy = busy.then(async () => {
+        const r = await pickCalendar(c[1]);
+        if (!r) return;
+        apply({ [c[1]]: r.title, [c[1] + "Id"]: r.id });
+        await wv.evaluateJavaScript(`setCal(${JSON.stringify(c[1])},${JSON.stringify(r.title)},${JSON.stringify(r.id)})`);
+      }).catch(e => console.error("Calendar: " + e));
+      return false;
+    }
+    // the landing page, the menu and the editor (school-widget://data?a=…)
+    if (u.startsWith("school-widget://data?")) {
       const q = {};
-      for (const kv of u.slice(18).split("&")) { const i = kv.indexOf("="); q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); }
+      for (const kv of u.slice(u.indexOf("?") + 1).split("&")) { const i = kv.indexOf("="); q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); }
       busy = busy.then(() => dataAction(q, wv, () => { changed = true; })).catch(e => console.error("Timetable: " + e));
       return false;
     }
-    if (u.startsWith("uchilishte://")) {
+    if (u.startsWith("school-widget://")) {
       try { apply(JSON.parse(decodeURIComponent(u.split("?d=")[1] || ""))); } catch (e) { console.error("Settings page: " + e); }
       return false;
     }
@@ -3537,6 +3615,10 @@ async function reload() {
 }
 
 async function main() {
+  // the official days off: in the app a copy older than an hour is downloaded first; a widget
+  // downloads only when it has none yet (else after Script.setWidget, below)
+  await holidaysTick(config.runsInWidget ? Infinity : HOL_APP_EVERY, 6);
+  loadHolidays();
   loadTimetable();
   if (!config.runsInWidget) await timetableQuestions();
   await loadData(); // the first run in Scriptable asks for calendar access here
@@ -3544,14 +3626,19 @@ async function main() {
     Script.setWidget(buildWidget(config.widgetFamily || "medium", computeState(NOW)));
     confirmVersion();
     await syncRemindersSafe();
-    await updateTick(8); // after the widget is set, so a slow network never delays it
+    if (!isDemo()) await updateTick(8); // after the widget is set, so a slow network never delays it
+    await holidaysTick(CHECK_EVERY, 8);
     return;
   }
   confirmVersion();
-  await updateTick(8);
-  // a timetable to import: from a link (?data=…) or the import file next to the script (1.6.0)
+  const setup = isDemo(); // a new install: no update check before the first timetable
+  if (!setup) await updateTick(8);
+  // a timetable to import: from a link (?data=…), the import file next to the script (1.6.0), or
+  // (a new install) the clipboard. After it, the script ends: no menu to close as well.
   const q = args.queryParameters || {}, file = q.data ? null : await readImportFile();
-  if (q.data || file) await startImport(q.data || file, !q.data);
+  if (q.data || file) return startImport(q.data || file, !q.data);
+  if (setup && !q.view && await offerClipboard()) return;
+  if (setup && !q.view) return showView(computeState(NOW), "t1"); // the setup page, not the menu
   if (q.view) {
     await showView(computeState(NOW), args.queryParameters.tab || "t1"); // opened by tapping the widget
   } else {
@@ -3561,8 +3648,8 @@ async function main() {
 }
 
 // For the tests in tools/ (undefined in Scriptable, so this does nothing there).
-if (typeof __TEST__ === "function") __TEST__({ validateData, migrate, parseImport, resolveGroups, fingerprint, inflateRaw, b64decode, b64urlencode,
-  utf8encode, utf8decode, cmpVersion, checkForUpdate, installUpdate, updateTick, previousVersion, resumeUpdates, switchChannel, readState, codeSize, loadTimetable, saveTimetable, lastDayFor, nameSpots, emWidth, fitSize, VERSION, SCHEMA, HOLIDAYS, DATA, OFF, TINFO, tt: () => TT, ttFull: () => TT_FULL });
+if (typeof __TEST__ === "function") __TEST__({ validateData, migrate, parseImport, resolveGroups, fingerprint, inflateRaw, b64decode,
+  utf8encode, utf8decode, cmpVersion, checkForUpdate, installUpdate, updateTick, previousVersion, resumeUpdates, switchChannel, readState, codeSize, loadTimetable, saveTimetable, lastDayFor, nameSpots, emWidth, fitSize, VERSION, SCHEMA, hol: () => HOLIDAYS, loadHolidays, holidaysTick, DATA, OFF, TINFO, tt: () => TT, ttFull: () => TT_FULL });
 
 try { await main(); }
 catch (e) {

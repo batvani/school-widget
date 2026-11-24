@@ -1,5 +1,5 @@
 // The menu page live in Chromium, with the real script behind it (run.js under the mock): the
-// page's uchilishte:// links go to the script's shouldAllowRequest, and the script's loadHTML /
+// page's school-widget:// links go to the script's shouldAllowRequest, and the script's loadHTML /
 // evaluateJavaScript go to the page. Used by tools/test/editor.test.js and editor.js (renders).
 // live(time, runOpts, drive, { scheme }) → run()'s result; drive(page, settle) taps the page.
 const run = require("./run");
@@ -9,7 +9,7 @@ async function live(time, opts, drive, o = {}) {
   browser = browser || await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, colorScheme: o.scheme || "dark" });
   let wv = null, pending = Promise.resolve(), presented = false;
-  page.on("request", r => { if (r.url().startsWith("uchilishte://") && wv && wv.shouldAllowRequest) pending = pending.then(() => wv.shouldAllowRequest({ url: r.url() })); });
+  page.on("request", r => { if (r.url().startsWith("school-widget://") && wv && wv.shouldAllowRequest) pending = pending.then(() => wv.shouldAllowRequest({ url: r.url() })); });
   const settle = async (ms = 120) => { await page.waitForTimeout(ms); await pending; await page.waitForTimeout(30); };
   class WebView {
     constructor() { wv = this; }

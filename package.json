@@ -12,6 +12,7 @@
     "instructions": "node tools/instructions.js"
   },
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "playwright": "1.65.1"
   }
 }

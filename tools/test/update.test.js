@@ -8,7 +8,7 @@ const VER = SRC.match(/\nconst VERSION = "([^"]+)";/)[1];
 // releases newer than this one: V(k) raises the patch number by k; BETA is the next minor's first beta
 const V = k => VER.replace(/^(\d+\.\d+\.)(\d+).*$/, (_, a, b) => a + (+b + k));
 const BETA = VER.replace(/^(\d+)\.(\d+)\..*$/, (_, a, b) => `${a}.${+b + 1}.0-beta.1`);
-const OWN = "/icloud/School Widget.js", STATE = "/docs/uchilishte/state.json", DATAF = "/docs/uchilishte/data.json", SETF = "/docs/uchilishte-settings.json";
+const OWN = "/icloud/School Widget.js", STATE = "/docs/school-widget/state.json", DATAF = "/docs/school-widget/data.json", SETF = "/docs/school-widget/settings.json";
 const DAY1 = "2026-11-05T10:20", DAY2 = "2026-11-06T10:20";
 const GH = "https://github.com/batvani/school-widget/releases/", API = "https://api.github.com/repos/batvani/school-widget/releases?per_page=10";
 const LATEST = GH + "latest/download/version.json", rel = (v, f) => `${GH}download/v${v}/${f}`;
@@ -42,6 +42,7 @@ function net(map) {
     for (const h of v.history || []) if (!rels[h.version]) rels[h.version] = { "version.json": JSON.stringify({ version: h.version, fingerprint: h.fingerprint }), pre: false };
   }
   const n = url => {
+    if (/\/holidays\.json$/.test(url)) return null; // the daily holidays download (data.test), not part of updating
     n.calls.push(url);
     if (url === LATEST) return map["stable/version.json"] == null ? null : map["stable/version.json"];
     if (url === API) return JSON.stringify(Object.entries(rels).map(([v, r]) => ({ tag_name: "v" + v, prerelease: r.pre, draft: false })));
@@ -93,12 +94,12 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
     const before = await run(DAY1, "medium", { files: base() });
     const r = await run(DAY1, "medium", { files: base(), net: n });
     assert.strictEqual(r.files[OWN], NEW);
-    assert.strictEqual(r.files[`/docs/uchilishte/backups/${VER}.js.txt`], SRC);
+    assert.strictEqual(r.files[`/docs/school-widget/backups/${VER}.js.txt`], SRC);
     assert.strictEqual(r.files[DATAF], before.files[DATAF]);
     assert.strictEqual(r.files[SETF], before.files[SETF]);
     assert.strictEqual(h(r.widget), h(before.widget), "the widget of this run is the same");
     const st = state(r);
-    assert.deepStrictEqual(st.pendingVerify, { version: `${V(1)}`, backup: `/docs/uchilishte/backups/${VER}.js.txt`, from: VER });
+    assert.deepStrictEqual(st.pendingVerify, { version: `${V(1)}`, backup: `/docs/school-widget/backups/${VER}.js.txt`, from: VER });
     assert.strictEqual(st.justUpdated, `${V(1)}`);
     assert.deepStrictEqual(r.logs, []);
     installed = r.files;
@@ -183,7 +184,7 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
 
   console.log("rollback");
   await test("a new version that fails on its first run goes back by itself; that version is skipped", async () => {
-    const BAD = make(`${V(1)}`, s => s.replace("async function main() {\n  loadTimetable();", "async function main() {\n  loadTimetable(); throw new Error(\"boom\");"));
+    const BAD = make(`${V(1)}`, s => s.replace("\n  loadTimetable();\n  if (!config.runsInWidget)", "\n  loadTimetable(); throw new Error(\"boom\");\n  if (!config.runsInWidget)"));
     const n = net({ "stable/version.json": vjson(`${V(1)}`, BAD, OLDREL), "stable/school-widget.js": BAD });
     const r1 = await run(DAY1, "small", { files: base(), net: n });
     assert.strictEqual(r1.files[OWN], BAD);
@@ -227,8 +228,8 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
       assert.strictEqual(r.files[OWN], next, v);
       files = r.files; code = next; hist.push([v, next]);
     }
-    const b = Object.keys(files).filter(f => f.startsWith("/docs/uchilishte/backups/")).sort();
-    assert.deepStrictEqual(b, [`${V(2)}`, `${V(3)}`, `${V(4)}`].map(v => `/docs/uchilishte/backups/${v}.js.txt`));
+    const b = Object.keys(files).filter(f => f.startsWith("/docs/school-widget/backups/")).sort();
+    assert.deepStrictEqual(b, [`${V(2)}`, `${V(3)}`, `${V(4)}`].map(v => `/docs/school-widget/backups/${v}.js.txt`));
   });
 
   console.log("widget runs that can't write, channels, offline");
@@ -270,9 +271,9 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
   });
 
   console.log("Settings → Версия and the menu");
-  // taps the card's buttons in order (the page navigates to uchilishte://update?a=…); returns the run
+  // taps the card's buttons in order (the page navigates to school-widget://update?a=…); returns the run
   const tap = (acts, o = {}) => run(DAY1, "medium", Object.assign({ app: true, query: { view: "today", tab: "t4" },
-    onPresent: async wv => { for (const [a, v] of acts) wv.shouldAllowRequest({ url: `uchilishte://update?a=${a}${v ? "&v=" + v : ""}` }); } }, o))
+    onPresent: async wv => { for (const [a, v] of acts) wv.shouldAllowRequest({ url: `school-widget://update?a=${a}${v ? "&v=" + v : ""}` }); } }, o))
     .then(r => Object.assign(r, { evals: r.evals.filter(js => js.startsWith("setVer(")) })); // only the card redraws
   const card = js => JSON.parse(js.slice("setVer(".length, -1));
   await test("the card offline: the version, never checked, the switch; no channel, no Предишна версия", async () => {
@@ -342,7 +343,7 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
     const b = await run(DAY1, "small", { files: base(), net: net({}), param: "channel=beta" });
     assert(b.files[STATE] === undefined || !state(b).lastCheck);
     const sv = await run(DAY1, "medium", { files: base(), app: true, query: { view: "today", tab: "t4" }, onPresent: wv =>
-      wv.shouldAllowRequest({ url: "uchilishte://save?d=" + encodeURIComponent(JSON.stringify({ channel: "nightly", autoUpdate: 0 })) }) });
+      wv.shouldAllowRequest({ url: "school-widget://save?d=" + encodeURIComponent(JSON.stringify({ channel: "nightly", autoUpdate: 0 })) }) });
     const saved = JSON.parse(sv.files[SETF]);
     assert.strictEqual(saved.channel, "stable");
     assert.strictEqual(saved.autoUpdate, false);

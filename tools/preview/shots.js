@@ -42,7 +42,7 @@ const SETS = {
     IMP.week["1"][4] = { name: "ПП Информатика", room: "111?" };
     IMP.week["2"][4] = { name: "Английски / Немски", room: "101 / 102", groups: [{ label: "Английски", name: "Английски език", room: "101" }, { label: "Немски", name: "Немски език", room: "102" }] };
     IMP.week["3"][5] = { name: "Физическо възпитание и спорт" };
-    const imp = { data: null, query: { data: "uchilishte:j:" + JSON.stringify(IMP) } }, edit = { data: FIX, query: { view: "1", tab: "t2" } };
+    const imp = { data: null, query: { data: "school-widget:j:" + JSON.stringify(IMP) } }, edit = { data: FIX, query: { view: "1", tab: "t2" } };
     await liveSet(b, "editor", [
       ["1-welcome", { data: null, query: { view: "1" } }, async () => { }],
       ["2-import", imp, async () => { }],
@@ -66,12 +66,12 @@ const SETS = {
     const w = NEW.week["3"]; [w[0], w[1]] = [w[1], w[0]];
     const SH = copy(OLD); delete SH.meta.created; SH.meta.source = "shared"; Object.values(SH.week).forEach(d => d.forEach(e => { delete e.important; }));
     SH.week["2"][4] = { name: "Английски / Немски", room: "101 / 102", groups: [{ label: "Английски", name: "Английски език", room: "101" }, { label: "Немски", name: "Немски език", room: "102" }] };
-    const SEPT = "2027-09-07T10:00", prog = { data: OLD, query: { view: "1", tab: "t2" } }, merge = { data: OLD, query: { data: "uchilishte:j:" + JSON.stringify(NEW) } };
+    const SEPT = "2027-09-07T10:00", prog = { data: OLD, query: { view: "1", tab: "t2" } }, merge = { data: OLD, query: { data: "school-widget:j:" + JSON.stringify(NEW) } };
     await liveSet(b, "share", [
       ["1-program", prog, async () => { }, SEPT],
       ["2-share", prog, async (p, settle) => { await p.click('[data-x="share"]'); await settle(); }],
       ["3-qr", prog, async (p, settle) => { await p.click('[data-x="share"]'); await p.click('#sh [data-x="qr"]'); await settle(400); }],
-      ["4-shared", { data: null, query: { data: "uchilishte:j:" + JSON.stringify(SH) } }, async (p, settle) => { await p.click("#sv"); await settle(); }],
+      ["4-shared", { data: null, query: { data: "school-widget:j:" + JSON.stringify(SH) } }, async (p, settle) => { await p.click("#sv"); await settle(); }],
       ["5-merge", merge, async () => { }, SEPT, true],
       ["6-grade", merge, async (p, settle) => { await p.click('[data-x="drop"]'); await p.click("#sv"); await settle(); }, SEPT]
     ]);
@@ -92,7 +92,7 @@ const SETS = {
     };
     const shots = [];
     for (const [name, c] of Object.entries(STATES)) {
-      const files = { "/docs/uchilishte/state.json": JSON.stringify(c.st), "/docs/uchilishte-settings.json": JSON.stringify(Object.assign({ language: "bg" }, c.set)) };
+      const files = { "/docs/school-widget/state.json": JSON.stringify(c.st), "/docs/school-widget/settings.json": JSON.stringify(Object.assign({ language: "bg" }, c.set)) };
       const r = await run(T0, "medium", { src: c.src, files, app: true, query: { view: "today", tab: "t4" } });
       for (const scheme of ["dark", "light"]) {
         const page = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, colorScheme: scheme });

@@ -37,9 +37,9 @@ const hash = x => crypto.createHash("sha256").update(typeof x === "string" ? x :
       lines.push(`menu ${mode} ${t} ${JSON.stringify(st || {})} ${JSON.stringify(q)} ${hash((await run(t, "medium", { app: true, query: q, settings: st })).html)}`);
     }
   const sv = await run("2026-11-05T10:20", "medium", { app: true, query: { view: "today", tab: "t4" }, onPresent: wv =>
-    wv.shouldAllowRequest({ url: "uchilishte://save?d=" + encodeURIComponent(JSON.stringify({ language: "en", remindMinutes: 5, countdown: false, offCalendar: "", theme: "x", linkBox: "q", junk: 1 })) }) });
-  // only the settings file: the data folder (uchilishte/) isn't part of this case
-  lines.push(`settings ${hash([{ "/docs/uchilishte-settings.json": sv.files["/docs/uchilishte-settings.json"] }, sv.scheduled.length, sv.logs])}`);
+    wv.shouldAllowRequest({ url: "school-widget://save?d=" + encodeURIComponent(JSON.stringify({ language: "en", remindMinutes: 5, countdown: false, offCalendar: "", theme: "x", linkBox: "q", junk: 1 })) }) });
+  // only the settings file: the data folder (school-widget/) isn't part of this case
+  lines.push(`settings ${hash([{ "/docs/school-widget/settings.json": sv.files["/docs/school-widget/settings.json"] }, sv.scheduled.length, sv.logs])}`);
   fs.writeFileSync(`${dir}/tree.txt`, lines.join("\n") + "\n");
   console.log(`${lines.length} cases → ${dir}/tree.txt`);
 })().catch(e => { console.error(e); process.exit(1); });

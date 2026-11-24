@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.8.5 — 24 Nov 2026
+Накратко: Инсталирането и програмата са отделни: първо School Widget, после той пита за програмата (Постави, линк, QR код, AI или на ръка). Ваканциите идват от интернет за твоя клас и могат да влязат в календара ти. Град по желание.
+In short: Installing and the timetable are separate: first School Widget, then it asks for your timetable (Paste, a link, a QR code, an AI or by hand). The holidays come from the internet for your grade and can go into your calendar. An optional city.
+
+- **Install:** the install page has three steps (Scriptable, add the Shortcut, run it), with the install script and a way by hand under "Не става с прекия път?". The Shortcut and the install script only install the code and open School Widget; the timetable no longer goes through them.
+- **The landing page:** with no timetable yet, School Widget shows only **Внеси програмата си** (no tabs, no demo): **Постави** and **Сканирай QR код** (how to use the Camera, or Photos for a QR picture), **От файл**, then **Направи я с AI** (copies the whole prompt, instructions included, for AIs that can't open links) / **Въведи я на ръка**. A copied timetable is offered on the first start. It warns when the script isn't called "School Widget". No update check before the first timetable.
+- **The editor:** **За теб** on top (grade, group, city, and on import "the holidays in your calendar", which opens the calendar page after Save), then the timetable; subjects, bells and days off are folded under **Подробности** when importing. Official days off that an imported timetable repeats are dropped from its own.
+- **Links:** a timetable link opens the page's preview → **Отвори в School Widget** (straight into Scriptable). "Още нямаш School Widget?" copies the timetable and shows the install. The page also turns an AI answer from a computer into a QR code.
+- **The AI's answer** ends with "copy this whole answer → School Widget → Постави"; no install script or Shortcut link inside it any more.
+- **Holidays:** the official days off are downloaded daily from GitHub Pages (`holidays.json`, from `holidays/list.json`) instead of being built in, so a change needs no release. They include the national exams (матури, НВО) for the grades that sit them and the days some cities declare.
+- **City** (Settings or the editor's За теб, optional) adds a city's own days off.
+- **Calendars:** your own days-off calendar and the tests calendar are picked from your calendars (found even after a rename); new installs read none. Settings from before 1.8.5 keep "Off-School" and "Контролни".
+- **The holidays in your calendar app:** a calendar page (Почивни → **Добави ваканциите в календара си**) subscribes Apple, Google or any calendar app to your grade's days off; it follows the class into the next grade.
+- **The widgets don't change** (checked in 18,855 cases); the menu's cases change (setup page, Settings, the Почивни button).
+- **Предишни програми** (Програма): the last 5 saved timetables, each restored (it leaves the list, the replaced one joins it; never two the same) or deleted, and **Изтрий всички**. It replaces **Върни предишна** in the editor.
+- The editor's **Почивни дни** lists only your school's own days off: the official ones come by themselves and are no longer listed with switches.
+- **Smaller download:** a release publishes a squashed copy of the script (about 203 kB instead of 255 kB); the readable one stays in the repo. Unused code from before 1.8.5 is gone (the old welcome card, "the timetable in the code has changed", unused icons and strings).
+- **The last day of school** is always the official one for the grade (30 June without a grade): there's no field for it any more, and one set before is dropped. A missing grade is a warning, and **Клас** is the first thing in **За теб**.
+- **English file names:** everything is in one folder, `school-widget/` (`settings.json`, `data.json`, `state.json`, `holidays.json`, `history/`, `backups/`), instead of `uchilishte/` and `uchilishte-settings.json`. The old files are copied once on the first start and left in place, so a rollback to 1.8 still finds them. The import file is `school-widget-import.txt`, a saved timetable is `<class>-timetable.json`, the page links are `school-widget://`, the clipboard marker is `school-widget:z:` and the AI's version line is "School Widget instructions". The old import file name and `uchilishte:` markers are still read.
+- **Docs:** a short README; settings in `docs/SETTINGS.md`, development and the holiday list in `CONTRIBUTING.md`.
+
 ## 1.8.0 — 22 Nov 2026 (the first public version)
 Накратко: Първата публична версия. Обновленията идват от версиите (releases) в GitHub: бета е предварителна версия, стабилна е последната.
 In short: The first public version. Updates come from the GitHub releases: beta is a pre-release, stable is the latest release.

@@ -6,7 +6,7 @@
 const fs = require("fs"), path = require("path"), assert = require("assert");
 const live = require("../preview/live");
 const FIX = JSON.parse(fs.readFileSync(path.join(__dirname, "../preview/fixtures/sample-2027.json"), "utf8"));
-const T = "2026-11-05T10:20", DATA = "/docs/uchilishte/data.json", STATE = "/docs/uchilishte/state.json";
+const T = "2026-11-05T10:20", DATA = "/docs/school-widget/data.json", STATE = "/docs/school-widget/state.json";
 const clone = o => JSON.parse(JSON.stringify(o));
 const saved = r => JSON.parse(r.files[DATA]);
 const text = (p, sel) => p.$eval(sel, e => e.textContent);
@@ -74,12 +74,12 @@ const program = { view: "1", tab: "t2" };
     assert(svg, "the QR code is drawn");
     if (JSQR) assert.strictEqual(got, link);
   });
-  await test("Запази като файл: <class>-програма.json with the shared timetable", async () => {
+  await test("Запази като файл: <class>-timetable.json with the shared timetable", async () => {
     const r = await live(T, { data: OLD, query: program }, async (page, settle) => {
       await settle(); await page.click('[data-x="share"]'); await page.click('#sh [data-x="export"]'); await settle(300);
     });
     assert.strictEqual(r.exported.length, 1);
-    assert.strictEqual(r.exported[0][0], "11б-програма.json");
+    assert.strictEqual(r.exported[0][0], "11б-timetable.json");
     assert.deepStrictEqual(JSON.parse(r.exported[0][1]), SHARED);
   });
   await test("the demo has nothing to share", async () => {
@@ -90,7 +90,7 @@ const program = { view: "1", tab: "t2" };
   await test("a classmate imports the shared link: the note, then the group step; their important classes start empty", async () => {
     let note, step;
     const u = await (async () => { let x; await live(T, { data: OLD, query: program }, async (page, settle) => { await settle(); await page.click('[data-x="share"]'); await page.click('#sh [data-x="link"]'); await settle(300); }).then(r => { x = r.shared[0][0]; }); return x; })();
-    const r = await live(T, { data: null, query: { data: "uchilishte:z:" + u.split("#z=")[1] } }, async (page, settle) => {
+    const r = await live(T, { data: null, query: { data: "school-widget:z:" + u.split("#z=")[1] } }, async (page, settle) => {
       await settle();
       note = await text(page, "#ed .note2");
       await page.click("#sv"); await settle();
@@ -134,7 +134,7 @@ const program = { view: "1", tab: "t2" };
     NEW.week["2"][4].groups.reverse();
     const a = NEW.week["3"][0], b = NEW.week["3"][1]; NEW.week["3"][0] = b; NEW.week["3"][1] = a;
     let seen = {};
-    const r = await live("2027-09-07T10:00", { data: OLD, query: { data: "uchilishte:j:" + JSON.stringify(NEW) } }, async (page, settle) => {
+    const r = await live("2027-09-07T10:00", { data: OLD, query: { data: "school-widget:j:" + JSON.stringify(NEW) } }, async (page, settle) => {
       await settle();
       seen.blue = await page.$$eval("#ed .cell.n", l => l.map(e => e.dataset.k + "," + e.dataset.p));
       seen.list = await page.$$eval("#ed .chg p", l => l.map(e => e.textContent));
@@ -160,7 +160,7 @@ const program = { view: "1", tab: "t2" };
     assert.strictEqual(seen.step, "В кой клас си сега?");
     assert.strictEqual(seen.grade, "12", "last year's 11 + 1");
     assert.strictEqual(seen.max, "12");
-    assert(seen.hol.includes("2026/27"), seen.hol);
+    assert(seen.hol.includes("2027/28"), seen.hol); // that year's official days off aren't published (in the mock's holidays.json) yet
     const d = saved(r);
     assert.deepStrictEqual(d.short, FIX.short);
     assert.deepStrictEqual(d.tiny, FIX.tiny);
@@ -178,7 +178,7 @@ const program = { view: "1", tab: "t2" };
   await test("a new term in the same school year: no grade question; the school's own days off kept", async () => {
     const NEW = clone(SHARED); delete NEW.daysOff; NEW.meta.source = "ai";
     let step = null;
-    const r = await live("2027-02-08T10:00", { data: OLD, query: { data: "uchilishte:j:" + JSON.stringify(NEW) } }, async (page, settle) => {
+    const r = await live("2027-02-08T10:00", { data: OLD, query: { data: "school-widget:j:" + JSON.stringify(NEW) } }, async (page, settle) => {
       await settle();
       for (let i = 0; i < 3 && await page.evaluate(() => document.body.className) === "ed"; i++) {
         if (await page.$("#sh h2")) { step = await text(page, "#sh h2"); await page.click('[data-y="ok"]'); } else await page.click("#sv");

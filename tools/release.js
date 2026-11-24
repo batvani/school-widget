@@ -4,6 +4,9 @@
 // (what every phone reads) and notes.md (the GitHub release's text).
 // The fingerprint is FNV-1a 64 over the text with \n line endings, computed here with BigInt
 // (independent of the script's own code; tools/test/release.test.js compares the two).
+// The published copy is squashed (esbuild, minified): lines 1–5 (Scriptable's header, the version and id lines)
+// and the lines `const VERSION = "…";` and `const TEST_NOW = null;` stay as they are, because the self-update (also 1.8's) and the Shortcut
+// look for them; the rest is minified. The fingerprint and size are the squashed file's.
 // Usage: node tools/release.js [vX.Y.Z]   (without a tag: this script's own version)
 const fs = require("fs"), path = require("path");
 const ROOT = path.join(__dirname, "..");
@@ -23,6 +26,18 @@ function notesFor(changelog, version) {
   return { bg: line("Накратко:"), en: line("In short:") };
 }
 
+// The squashed copy of the script (see the top). Non-ASCII text becomes \u escapes, so no encoding can garble it.
+function squash(src) {
+  const lines = src.replace(/\r\n?/g, "\n").split("\n"), head = lines.slice(0, 5), body = lines.slice(5);
+  // kept lines: const VERSION (the update checks) and const TEST_NOW (the preview tools set the time there)
+  const keep = [/^const VERSION = "[^"]+";$/, /^const TEST_NOW = null;/].map(re => {
+    const i = body.findIndex(l => re.test(l)); if (i < 0) throw new Error("no line " + re);
+    return body.splice(i, 1)[0].replace(/\s*\/\/.*$/, "");
+  });
+  const code = require("esbuild").transformSync(body.join("\n"), { minify: true, target: "safari16", legalComments: "none" }).code;
+  return head.concat(keep).join("\n") + "\n" + code;
+}
+
 // opts: src, changelog, tag ("v1.8.0"), shortcut (the Shortcut's iCloud link) → { versionJson, notesMd, src }
 function build(opts = {}) {
   const src = opts.src != null ? opts.src : fs.readFileSync(path.join(ROOT, "school-widget.js"), "utf8");
@@ -30,7 +45,6 @@ function build(opts = {}) {
   const lines = src.split(/\r?\n/);
   const vLine = (lines[3] || "").match(/^\/\/ Version (\S+) — /), idLine = (lines[4] || "").match(/^\/\/ id: uchilishte-widget; schema: (\d+)/);
   const vConst = src.match(/\nconst VERSION = "([^"]+)";/), sConst = src.match(/\nconst SCHEMA = (\d+);/);
-  const hol = src.match(/\nconst HOLIDAYS = \{\s*schoolYear: "([^"]+)"/);
   const errs = [], version = vConst && vConst[1];
   if (!vLine) errs.push("line 4 is not \"// Version X — <date>. See CHANGELOG.md.\"");
   if (!idLine) errs.push("line 5 is not \"// id: uchilishte-widget; schema: N\"");
@@ -43,14 +57,14 @@ function build(opts = {}) {
   if (version && !notes) errs.push(`CHANGELOG.md has no "## ${version.replace(/-.*/, "")} …" section`);
   else if (notes && (!notes.bg || !notes.en)) errs.push(`CHANGELOG.md's ${version} section needs a "Накратко: …" and an "In short: …" line`);
   if (errs.length) { const e = new Error("release refused:\n  " + errs.join("\n  ")); e.errors = errs; throw e; }
-  const v = { version, schema: Number(sConst ? sConst[1] : idLine[1]), file: "school-widget.js", fingerprint: fnv(src), size: size(src), notes };
-  if (hol) v.holidays = hol[1];
+  const out = opts.squash === false ? src : squash(src);
+  const v = { version, schema: Number(sConst ? sConst[1] : idLine[1]), file: "school-widget.js", fingerprint: fnv(out), size: size(out), notes };
   if (opts.shortcut) v.shortcut = opts.shortcut;
   v.instructions = "1";
-  return { versionJson: v, notesMd: `${notes.bg}\n\n${notes.en}\n`, src };
+  return { versionJson: v, notesMd: `${notes.bg}\n\n${notes.en}\n`, src: out };
 }
 
-module.exports = { build, fnv, size, notesFor };
+module.exports = { build, squash, fnv, size, notesFor };
 if (require.main === module) {
   try {
     const r = build({ tag: process.argv[2], shortcut: require("./instructions").shortcutLink() });

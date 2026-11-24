@@ -47,19 +47,25 @@ function shortcutLink() {
   if (!m) throw new Error("install/index.html: no SHORTCUT_LINK with a Shortcut's iCloud link");
   return m[1];
 }
+// The full prompt (ai/prompt.txt, -en): a few lines, then the whole instructions, so it works with an AI
+// that can't open links (a school account). The app's "Направи я с AI" and the install page copy it.
+const PROMPT = {
+  bg: "Здравей! Искам да настроя уиджета „School Widget“ с моята училищна програма (снимката е приложена).\nСледвай инструкциите по-долу, стъпка по стъпка. Първо ми напиши реда с версията им.",
+  en: "Hi! I want to set up the “School Widget” widget with my school timetable (the photo is attached).\nFollow the instructions below, step by step. First write me their version line."
+};
 async function make() {
   let A;
   await run("2026-11-05T10:20", "small", { expose: o => A = o });
   const ex = example(A.DATA);
-  const shortcut = shortcutLink();
   let t = fs.readFileSync(P("tools/ai/INSTRUCTIONS.template.md"), "utf8");
-  const fill = { LIMITS: limits(A), YEAR: A.HOLIDAYS.schoolYear.replace("-", "/"), HOLIDAYS: holidays(A.HOLIDAYS), EXAMPLE: ex.text,
-    ENCODE_PY: fs.readFileSync(P("ai/encode.py"), "utf8").trim(), INSTALL_SCRIPT: fs.readFileSync(P("ai/install-script.js"), "utf8").trim(),
-    PAGES: "https://batvani.github.io/school-widget/", README: "https://github.com/batvani/school-widget#readme", SHORTCUT: shortcut };
+  const fill = { LIMITS: limits(A), YEAR: A.hol().schoolYear.replace("-", "/"), HOLIDAYS: holidays(A.hol()), EXAMPLE: ex.text,
+    ENCODE_PY: fs.readFileSync(P("ai/encode.py"), "utf8").trim(),
+    PAGES: "https://batvani.github.io/school-widget/", README: "https://github.com/batvani/school-widget#readme" };
   t = t.replace(/\{\{(\w+)\}\}/g, (m, k) => { if (!(k in fill)) throw new Error("unknown placeholder " + m); return fill[k]; });
   t = t.replace(/\n{3,}/g, "\n\n");
   if (t.length > MAX_CHARS) throw new Error(`ai/INSTRUCTIONS.md would be ${t.length} characters, over ${MAX_CHARS}`);
-  return { "ai/INSTRUCTIONS.md": t, "ai/example.json": JSON.stringify(ex.d, null, 2) + "\n" };
+  return { "ai/INSTRUCTIONS.md": t, "ai/example.json": JSON.stringify(ex.d, null, 2) + "\n",
+    "ai/prompt.txt": PROMPT.bg + "\n\n---\n\n" + t, "ai/prompt-en.txt": PROMPT.en + "\n\n---\n\n" + t };
 }
 // the files that are out of date (empty: all current)
 async function stale() { const f = await make(); return Object.keys(f).filter(n => !fs.existsSync(P(n)) || fs.readFileSync(P(n), "utf8") !== f[n]); }

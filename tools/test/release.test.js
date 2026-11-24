@@ -8,7 +8,7 @@ const ROOT = path.join(__dirname, "..", "..");
 const SRC = fs.readFileSync(path.join(ROOT, "school-widget.js"), "utf8");
 const CL = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
 const VER = SRC.match(/\nconst VERSION = "([^"]+)";/)[1];
-const OWN = "/icloud/School Widget.js", STATE = "/docs/uchilishte/state.json";
+const OWN = "/icloud/School Widget.js", STATE = "/docs/school-widget/state.json";
 const GH = "https://github.com/batvani/school-widget/releases/";
 const make = v => SRC.replace(`// Version ${VER} —`, `// Version ${v} —`).replace(`\nconst VERSION = "${VER}";`, `\nconst VERSION = "${v}";`);
 const NEXT = VER.replace(/\d+$/, n => +n + 1), ESC = v => v.replace(/\./g, "\\."); // the version after this one (the tests are about the next release)
@@ -35,7 +35,7 @@ const refused = (fn, re) => assert.throws(fn, e => re.test(e.message), re);
     assert.strictEqual(v.version, VER);
     assert.strictEqual(v.file, "school-widget.js");
     assert.strictEqual(v.schema, A.SCHEMA);
-    assert.strictEqual(v.holidays, A.HOLIDAYS.schoolYear);
+    assert(!("holidays" in v), "the holidays are downloaded, not part of a release (1.8.5)");
     assert.strictEqual(v.shortcut, "https://www.icloud.com/shortcuts/0123456789abcdef0123456789abcdef");
     assert(v.notes.bg && v.notes.en);
     assert.strictEqual(r.notesMd, `${v.notes.bg}\n\n${v.notes.en}\n`);
@@ -47,11 +47,12 @@ const refused = (fn, re) => assert.throws(fn, e => re.test(e.message), re);
     refused(() => build({ src: make(`${NEXT}`), changelog: CL.replace(new RegExp(`^(## ${ESC(VER)} )`, "m"), `## ${NEXT} — x\n- a\n\n$1`) }), /Накратко/);
     assert.strictEqual(build({ src: make(`${NEXT}`), changelog: withNotes(`${NEXT}`), tag: `v${NEXT}` }).versionJson.notes.en, "test");
   });
-  await test("the script installs what release.js makes; the version it replaces counts as unedited", async () => {
-    const NEW = make(`${NEXT}`), v = build({ src: NEW, changelog: withNotes(`${NEXT}`) }).versionJson;
+  await test("the script installs what release.js makes (the squashed copy); the version it replaces counts as unedited", async () => {
+    const B = build({ src: make(`${NEXT}`), changelog: withNotes(`${NEXT}`) }), NEW = B.src, v = B.versionJson;
+    assert(NEW.length < make(`${NEXT}`).length * 0.9, "squashed");
     const map = { [GH + "latest/download/version.json"]: JSON.stringify(v), [`${GH}download/v${NEXT}/school-widget.js`]: NEW,
       [`${GH}download/v${VER}/version.json`]: JSON.stringify(build().versionJson) };
-    const r = await run("2026-11-05T10:20", "small", { files: { [OWN]: SRC }, net: url => map[url] || null });
+    const r = await run("2026-11-05T10:20", "small", { src: build().src, files: { [OWN]: build().src }, net: url => map[url] || null }); // the installed copy is a squashed release too
     const st = JSON.parse(r.files[STATE]);
     assert.strictEqual(r.files[OWN], NEW, JSON.stringify(st));
     assert(!st.autoPaused);

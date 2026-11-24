@@ -7,21 +7,26 @@
 // run(time, family, opts): opts.app, opts.param, opts.query, opts.settings, opts.onPresent, and
 //   opts.src      another script's text instead of ../../school-widget.js
 //   opts.data     the data file's content (object or text); null = no data file (overrides DATA_FILE)
+//   opts.holidays the downloaded holidays.json (object or text; default holidays/list.json); null = none yet
 //   opts.files    more mock files { path: text } ("/docs/…" = FileManager.local, "/icloud/…" = iCloud)
 //   opts.net      url => text (or a Promise) for Request; without it every request fails (offline)
 //   opts.expose   called by the script with its internals (validateData, parseImport, …) before main()
 //   opts.alerts   [index, …]: what the user taps in each Alert, in order (default: cancel, -1)
+//   result.calendar: the calendars read (by name; "*" = the list, to find one by its identifier)
 //   result.evals: the JavaScript the script sent to its WebView (e.g. setVer(…) after a Версия button)
 //   opts.readOnly [path, …]: writing these throws (iOS not letting a widget write the script)
 //   opts.WebView  a WebView class instead of the mock's (live.js: a real Chromium page)
 //   opts.filename the script's own path (module.filename; default /icloud/School Widget.js)
 //   opts.mtime data.json's modification date (FileManager.modificationDate); opts.clipboard the clipboard's text (Pasteboard); opts.pick a file path DocumentPicker returns (none: cancelled)
+//   opts.calPick  the calendar picked in iOS's calendar picker (none: cancelled); opts.name Script.name()
 const fs = require("fs");
 const path = require("path");
 const M = require("./mock");
 const SRC = fs.readFileSync(path.join(__dirname, "..", "..", "school-widget.js"), "utf8");
 const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, "fixtures", "sample.json");
 const DATA_TEXT = DATA_FILE === "builtin" ? null : fs.readFileSync(DATA_FILE, "utf8");
+// the official days off as the phone keeps them after a download (opts.holidays: another text, or null = none)
+const HOLIDAYS_TEXT = fs.readFileSync(path.join(__dirname, "..", "..", "holidays", "list.json"), "utf8");
 
 // A file store shared by FileManager.local() (/docs) and FileManager.iCloud() (/icloud).
 function makeFS(files, dirs, readOnly = [], mtime = null) {
@@ -35,6 +40,11 @@ function makeFS(files, dirs, readOnly = [], mtime = null) {
     listContents: p => [...Object.keys(files), ...dirs].filter(q => parent(q) === p).map(q => q.slice(p.length + 1)),
     readString: p => { if (!(p in files)) throw new Error("no file " + p); return files[p]; },
     writeString: (p, s) => { if (readOnly.includes(p)) throw new Error("not allowed to write " + p); if (!dirs.has(parent(p)) && parent(p) !== root) throw new Error("no folder " + parent(p)); files[p] = String(s); },
+    copy: (a, b) => { // a file or a whole folder
+      if (a in files) files[b] = files[a];
+      for (const d of [...dirs]) if (d === a || d.startsWith(a + "/")) dirs.add(b + d.slice(a.length));
+      for (const f of Object.keys(files)) if (f.startsWith(a + "/")) files[b + f.slice(a.length)] = files[f];
+    },
     remove: p => { delete files[p]; for (const d of [...dirs]) if (d === p || d.startsWith(p + "/")) dirs.delete(d); for (const f of Object.keys(files)) if (f.startsWith(p + "/")) delete files[f]; },
     isFileStoredIniCloud: p => p.startsWith("/icloud/"),
     downloadFileFromiCloud: async () => { },
@@ -61,13 +71,18 @@ async function run(nowStr, family, opts = {}) {
   opts.settings = opts.settings || (LANG ? { language: LANG } : undefined);
   let src = SRC.replace("const TEST_NOW = null;", `const TEST_NOW = ${JSON.stringify(nowStr)};`);
   if (opts.src) src = opts.src.replace("const TEST_NOW = null;", `const TEST_NOW = ${JSON.stringify(nowStr)};`);
-  let widget = null, logs = [], html = null, scheduled = [], alerts = [], evals = [], copied = [], opened = [], shared = [], exported = [];
+  let calendar = [], widget = null, logs = [], html = null, scheduled = [], alerts = [], evals = [], copied = [], opened = [], shared = [], exported = [];
   const files = Object.assign({}, opts.files || {}), dirs = new Set();
   for (const f of Object.keys(files)) for (let q = f.slice(0, f.lastIndexOf("/")); q.split("/").length > 2; q = q.slice(0, q.lastIndexOf("/"))) dirs.add(q);
   const data = "data" in opts ? opts.data : DATA_TEXT;
-  if (data != null && !("/docs/uchilishte/data.json" in files)) {
-    dirs.add("/docs/uchilishte");
-    files["/docs/uchilishte/data.json"] = typeof data === "string" ? data : JSON.stringify(data);
+  if (data != null && !("/docs/school-widget/data.json" in files)) {
+    dirs.add("/docs/school-widget");
+    files["/docs/school-widget/data.json"] = typeof data === "string" ? data : JSON.stringify(data);
+  }
+  const hol = "holidays" in opts ? opts.holidays : HOLIDAYS_TEXT;
+  if (hol != null && !("/docs/school-widget/holidays.json" in files)) {
+    dirs.add("/docs/school-widget");
+    files["/docs/school-widget/holidays.json"] = typeof hol === "string" ? hol : JSON.stringify(hol);
   }
   const taps = (opts.alerts || []).slice();
   const g = {
@@ -75,7 +90,7 @@ async function run(nowStr, family, opts = {}) {
     console: { log: (...a) => logs.push(a.join(" ")), error: (...a) => logs.push("ERR " + a.join(" ")) },
     config: { runsInWidget: !opts.app, widgetFamily: family, runsInApp: !!opts.app },
     args: { widgetParameter: opts.param || null, queryParameters: opts.query || {} },
-    Script: { setWidget: w => widget = w, complete: () => { }, name: () => "Uchilishte" },
+    Script: { setWidget: w => widget = w, complete: () => { }, name: () => opts.name || "School Widget" },
     URLScheme: { forRunningScript: () => "scriptable:///run/%D0%A3%D1%87%D0%B8%D0%BB%D0%B8%D1%89%D0%B5" },
     FileManager: makeFS(files, dirs, opts.readOnly, opts.mtime),
     module: { filename: opts.filename || "/icloud/School Widget.js" },
@@ -91,7 +106,11 @@ async function run(nowStr, family, opts = {}) {
       }
       async loadJSON() { return JSON.parse(await this.loadString()); }
     },
-    Calendar: { forEventsByTitle: async n => { if (!CAL[n]) throw new Error("No calendar named " + n); return { title: n }; } },
+    Calendar: {
+      forEventsByTitle: async n => { calendar.push(n); if (!CAL[n]) throw new Error("No calendar named " + n); return { title: n, identifier: "id:" + n }; },
+      forEvents: async () => calendar.push("*") && Object.keys(CAL).map(n => ({ title: n, identifier: "id:" + n })),
+      presentPicker: async () => { if (!opts.calPick || !CAL[opts.calPick]) throw new Error("cancelled (mock)"); return [{ title: opts.calPick, identifier: "id:" + opts.calPick }]; }
+    },
     CalendarEvent: { between: async (a, b, cals) => cals.flatMap(c => CAL[c.title]).filter(e => e.startDate < b && e.endDate > a) },
     Notification: class { static async allPending() { return []; } static async removePending() { } schedule() { scheduled.push(this); } setTriggerDate(t) { this.trigger = t; } },
     WebView: opts.WebView || class { async loadHTML(h) { html = h; } async present() { if (opts.onPresent) await opts.onPresent(this); } async evaluateJavaScript(js) { evals.push(js); return null; } },
@@ -107,11 +126,11 @@ async function run(nowStr, family, opts = {}) {
       tap() { const i = taps.length ? taps.shift() : -1; alerts.push({ title: this.title, message: this.message, actions: this.actions, tapped: i }); return i; }
     }
   };
-  if (opts.settings) files["/docs/uchilishte-settings.json"] = JSON.stringify(opts.settings);
+  if (opts.settings) files["/docs/school-widget/settings.json"] = JSON.stringify(opts.settings);
   const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
   const fn = new AsyncFunction(...Object.keys(g), src);
   await fn(...Object.values(g));
-  return { widget, logs, html, scheduled, files, alerts, evals, copied, opened, shared, exported };
+  return { widget, logs, html, scheduled, files, alerts, evals, copied, opened, shared, exported, calendar };
 }
 
 module.exports = run;
@@ -155,10 +174,10 @@ LANG = process.argv[2] || null;
   fs.writeFileSync(path.join(__dirname, "out", `dayweek-${LANG || "bg"}.html`), v.html);
   // settings round-trip: page "navigates" to the save link, Scriptable stores it
   const sv = await run("2026-11-05T10:20", "medium", { app: true, query: { view: "today", tab: "t4" }, onPresent: wv => {
-    const ok = wv.shouldAllowRequest({ url: "uchilishte://save?d=" + encodeURIComponent(JSON.stringify({ language: "en", remindMinutes: 5, countdown: false, offCalendar: "" })) });
+    const ok = wv.shouldAllowRequest({ url: "school-widget://save?d=" + encodeURIComponent(JSON.stringify({ language: "en", remindMinutes: 5, countdown: false, offCalendar: "" })) });
     console.log("intercepted save link (should be false):", ok, "| normal load allowed:", wv.shouldAllowRequest({ url: "about:blank" }));
   } });
-  console.log("saved settings:", sv.files["/docs/uchilishte-settings.json"]);
+  console.log("saved settings:", sv.files["/docs/school-widget/settings.json"]);
   console.log("reminders after save:", sv.scheduled.length, sv.scheduled[0] && sv.scheduled[0].body);
   // reminders
   const rm = await run("2026-11-05T10:20", "medium", { settings: { remindMinutes: 5 } });

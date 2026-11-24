@@ -43,7 +43,6 @@
         "created": { "type": "string" }, "source": { "type": "string" }, "instructions": { "type": "string" }
       }
     },
-    "lastDay": { "$ref": "#/$defs/date" },
     "bells": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "type": "array", "prefixItems": [{ "$ref": "#/$defs/time" }, { "$ref": "#/$defs/time" }], "minItems": 2, "maxItems": 2 } },
     "week": {
       "type": "object", "minProperties": 1, "additionalProperties": false,

@@ -70,8 +70,8 @@ small{display:block;color:var(--dim);font-size:13px;margin-top:20px}
       if (F.cohorts.indexOf(y) < 0) { go.innerHTML = '<p class="lead">' + L.err + '</p>'; return; }
       var https = base + "feeds/" + file, webcal = https.replace(/^https?:/, "webcal:");
       go.innerHTML = '<a class="btn main" id="apple" href="' + esc(webcal) + '">' + L.apple + '</a>' +
-        '<a class="btn sec" id="google" href="' + esc("https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcal)) + '">' + L.google + '</a>' +
-        '<button class="btn sec" id="copy">' + L.other + '</button><code id="url">' + esc(https) + '</code><p class="lead">' + L.otherLead + '</p>' +
+        '<a class="btn main" id="google" href="' + esc("https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcal)) + '">' + L.google + '</a>' +
+        '<button class="btn main" id="copy">' + L.other + '</button><code id="url">' + esc(https) + '</code><p class="lead">' + L.otherLead + '</p>' +
         '<p class="lead">' + L.follows + '</p>';
       document.getElementById("copy").onclick = function () {
         var b = this, done = function () { b.textContent = L.copied; setTimeout(function () { b.textContent = L.other; }, 1500); };
