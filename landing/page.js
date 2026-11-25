@@ -116,18 +116,10 @@
   var holdUntil = 0, glide = null, mounts = [], menu = null;
   var hm = function (m, pad) { var h = Math.floor(m / 60); return (pad && h < 10 ? "0" : "") + h + ":" + String(m % 60).padStart(2, "0"); };
 
-  function stateText(m) {
-    var s = SW.state(m), n = s.next || {};
-    if (s.kind === "class") return s.name + ": " + s.left + " min left";
-    if (s.kind === "break") return "Break: " + (n.name || s.name) + " in " + s.left + " min";
-    if (s.kind === "before") return "Before school: " + (n.name || s.name) + " at " + (n.start || "");
-    return "School is over for today";
-  }
   function draw() {
     mounts.forEach(function (w) { w.update(T); });
     if (menu) menu.update(T);
     $$("[data-clock]").forEach(function (e) { e.textContent = hm(T, e.getAttribute("data-clock") === "pad"); });
-    var st = $("#stateTxt"); if (st) st.textContent = stateText(T);
     var sl = $("#slider");
     if (sl) { sl.value = T; sl.style.setProperty("--p", (T - RANGE[0]) / (RANGE[1] - RANGE[0]) * 100 + "%"); }
   }
@@ -158,7 +150,7 @@
     $$("[data-w]").forEach(function (el) {
       var kind = el.getAttribute("data-w"), w = SW.mount(el, kind, { min: T, mode: mode });
       w.kind = kind; mounts.push(w);
-      el.addEventListener("click", function () { $("#menu").scrollIntoView({ behavior: reduce.matches ? "auto" : "smooth", block: "start" }); });
+      el.addEventListener("click", function () { jumpPrep($("#menu")); $("#menu").scrollIntoView({ behavior: reduce.matches ? "auto" : "smooth", block: "start" }); });
     });
     var mm = $("[data-menu]");
     if (mm) {
@@ -246,6 +238,29 @@
     var queue = function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
     addEventListener("scroll", queue, { passive: true }); addEventListener("resize", queue);
     update();
+    // the bar at the top slides away while you scroll down and comes back when you scroll up
+    var nav = $("nav"), lastY = scrollY;
+    addEventListener("scroll", function () {
+      var y = scrollY;
+      if (!phone.matches || y < 60 || sheet.classList.contains("open") || performance.now() < jumping) { lastY = y; if (performance.now() >= jumping) nav.classList.toggle("away", false); return; }
+      if (Math.abs(y - lastY) < 8) return;
+      nav.classList.toggle("away", y > lastY); lastY = y;
+    }, { passive: true });
+    phone.addEventListener && phone.addEventListener("change", function () { nav.classList.toggle("away", false); });
+    // a link to a section: going down, the bar hides and the section starts at the top; going up, the bar shows above it
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]'), el = a && document.getElementById(a.getAttribute("href").slice(1));
+      if (el) jumpPrep(el);
+    }, true);
+  }
+  var phone = matchMedia("(max-width:820px)"), jumping = 0;
+  function jumpPrep(el) {
+    var nav = $("nav"), root = document.documentElement;
+    if (!phone.matches) { root.style.scrollPaddingTop = ""; return; }
+    var down = el.getBoundingClientRect().top > 0 && el.id !== "top";
+    nav.classList.toggle("away", down);
+    root.style.scrollPaddingTop = down ? "0px" : "";
+    jumping = performance.now() + 1200; // the jump's own scrolling doesn't move the bar
   }
 
   // ───── install steps ─────
@@ -343,18 +358,45 @@
     g.innerHTML = h;
   }
 
+  // ───── accordions: one slide + fade, the same both ways (Safari's own close left a ghost line) ─────
+  function accordions() {
+    $$("details").forEach(function (d) {
+      var sum = d.querySelector("summary"), box = document.createElement("div");
+      box.className = "acc";
+      while (sum.nextSibling) box.appendChild(sum.nextSibling);
+      d.appendChild(box);
+      var anim = null, shown = d.open; // shown: open, or opening (not closing)
+      sum.addEventListener("click", function (e) {
+        e.preventDefault();
+        shown = !shown;
+        if (reduce.matches || !box.animate) { d.open = shown; return; }
+        // start from where it is now: mid-way if it was still moving, else fully closed / open
+        // (a closed <details> still reports its hidden content's full height, so don't measure it then)
+        var now = anim ? box.getBoundingClientRect().height : shown ? 0 : box.scrollHeight;
+        var fade = anim ? +getComputedStyle(box).opacity : shown ? 0 : 1;
+        if (anim) anim.cancel();
+        d.open = true; d.classList.toggle("closing", !shown);
+        var full = box.scrollHeight;
+        anim = box.animate([
+          { height: now + "px", opacity: fade, transform: "translateY(" + (-8 * (1 - fade)) + "px)" },
+          { height: (shown ? full : 0) + "px", opacity: shown ? 1 : 0, transform: shown ? "none" : "translateY(-8px)" }
+        ], { duration: 340, easing: "cubic-bezier(.25,.8,.25,1)" });
+        anim.onfinish = function () { anim = null; if (!shown) d.open = false; d.classList.toggle("closing", false); };
+      });
+    });
+  }
+
   // ───── start ─────
   function init() {
-    boot(); sizes(); phoneBits(); steps(); copying(); handover(); qrBox(); calendar();
-    var det = $("#computer");
-    var open = function () { if (location.hash === "#computer") det.open = true; };
-    addEventListener("hashchange", open); open();
+    accordions(); boot(); sizes(); phoneBits(); steps(); copying(); handover(); qrBox(); calendar();
     fit(); addEventListener("resize", fit);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     // sizes are set by this script, so the browser's own jump to #id lands too early: go again once laid out
     // (a timetable address, #install&z=…, is not an element id at all)
     var id = (location.hash.match(/^#([A-Za-z]+)/) || [])[1], target = id && document.getElementById(id);
+    if (target && !target.offsetParent) target = $("#timetable"); // hidden here (#computer on a phone)
     if (target) {
+      jumpPrep(target);
       var there = function () { target.scrollIntoView({ behavior: "instant", block: "start" }); };
       there(); addEventListener("load", there); setTimeout(there, 250);
     }

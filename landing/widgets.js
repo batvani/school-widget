@@ -385,19 +385,30 @@
   var px = function (v) { return Math.round(v * 100) / 100 + "px"; };
   function makeSvg(name, attrs) { var e = document.createElementNS(NS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
 
-  function pieceSvg(g, pc, x, y0, y1, above) {
+  // A line piece. Pieces in neighbouring pictures meet at fractional pixels, and two soft edges
+  // there show a dark seam: an opaque line runs SEAM past each end into the next picture or under
+  // its ring (a see-through one stops exactly, or the overlap shows as a brighter patch). The fade
+  // (the stub above the first row) is one line with a stepped gradient, not separate pieces.
+  var SEAM = 0.75, gid = 0;
+  function opaque(c) { return typeof c === "string" && !/rgba|hsla|transparent/.test(c) || /rgba\([^)]*,\s*1\)/.test(c); }
+  function pieceSvg(g, pc, x, y0, y1, above, ends) {
     if (pc.split) { if (above) y0 += pc.split / 2; else y1 -= pc.split / 2; }
     if (y1 <= y0) return;
     var n = pc.fade ? 6 : 1, step = (y1 - y0) / n;
-    for (var i = 0; i < n; i++) {
-      var k = pc.fade ? (i + 1) / (n + 1) : 1;
-      [pc.track, pc.color].forEach(function (col) {
-        var a = { x1: x, x2: x, y1: y0 + i * step, y2: y0 + (i + 1) * step, stroke: col, "stroke-width": pc.w };
-        if (k < 1) a["stroke-opacity"] = k;
-        if (pc.dash) { a["stroke-dasharray"] = pc.dash[0] + " " + pc.dash[1]; a["stroke-dashoffset"] = (pc.phase || 0) + i * step; }
-        g.appendChild(makeSvg("line", a));
-      });
-    }
+    [pc.track, pc.color].forEach(function (col) {
+      if (!col) return;
+      var ext = opaque(col) && !pc.fade ? SEAM : 0, a0 = y0 - (ends[0] ? ext : 0), a1 = y1 + (ends[1] ? ext : 0);
+      var a = { x1: x, x2: x, y1: a0, y2: a1, stroke: col, "stroke-width": pc.w };
+      if (pc.dash) { a["stroke-dasharray"] = pc.dash[0] + " " + pc.dash[1]; a["stroke-dashoffset"] = (pc.phase || 0) - (y0 - a0); }
+      if (pc.fade) {
+        var id = "swf" + (++gid), gr = makeSvg("linearGradient", { id: id, gradientUnits: "userSpaceOnUse", x1: 0, x2: 0, y1: y0, y2: y1 });
+        for (var i = 0; i < n; i++) [i / n, (i + 1) / n].forEach(function (off) {
+          gr.appendChild(makeSvg("stop", { offset: off, "stop-color": col, "stop-opacity": (i + 1) / (n + 1) }));
+        });
+        g.appendChild(gr); a.stroke = "url(#" + id + ")";
+      }
+      g.appendChild(makeSvg("line", a));
+    });
   }
   function syncRing(el, o) {
     var d = o.d, H = o.H || d, oy = o.ext ? o.oy : (H - d) / 2, c = d / 2, cy = c + oy, r = (d - o.w) / 2, full = o.p >= 0.995;
@@ -413,10 +424,10 @@
       el._sig = sig; el.setAttribute("width", d); el.setAttribute("height", H); el.setAttribute("viewBox", "0 0 " + d + " " + H);
       while (el._g.firstChild) el._g.removeChild(el._g.firstChild);
       var tk = o.track;
-      if (o.gapPiece) pieceSvg(el._g, Object.assign({ track: tk }, o.gapPiece), c, 0, H, false);
+      if (o.gapPiece) pieceSvg(el._g, Object.assign({ track: tk }, o.gapPiece), c, 0, H, false, [1, 1]);
       if (o.ext) {
-        if (o.above) pieceSvg(el._g, Object.assign({ track: tk }, o.above), c, 0, oy, true);
-        if (o.below) pieceSvg(el._g, Object.assign({ track: tk }, o.below), c, oy + d, H, false);
+        if (o.above) pieceSvg(el._g, Object.assign({ track: tk }, o.above), c, 0, oy, true, [1, 1]);
+        if (o.below) pieceSvg(el._g, Object.assign({ track: tk }, o.below), c, oy + d, H, false, [1, 1]);
       }
     }
     var gp = !!o.gapPiece;
@@ -426,7 +437,7 @@
     var di = o.w * 1.45;
     el._dc.setAttribute("cx", c); el._dc.setAttribute("cy", cy); el._dc.setAttribute("r", Math.max(0, d / 2 - di));
     css(el._tr, { stroke: o.track, display: gp ? "none" : "" });
-    css(el._pr, { stroke: o.color, strokeLinecap: full ? "butt" : "round", strokeDasharray: (full ? 100 : o.p * 100) + " 100", opacity: o.p > 0 && !gp ? "1" : "0", display: gp ? "none" : "" });
+    css(el._pr, { stroke: o.color, strokeLinecap: full ? "butt" : "round", strokeDasharray: full ? "none" : o.p * 100 + " 100", opacity: o.p > 0 && !gp ? "1" : "0", display: gp ? "none" : "" });
     css(el._dc, { fill: o.disc || "transparent", opacity: o.disc ? "1" : "0" });
   }
   var ICONS = {
@@ -618,7 +629,7 @@
   }
   function setRing(e, p, color, num, faded) {
     var pr = e.querySelector(".pr");
-    pr.style.stroke = color; pr.style.strokeDasharray = (p >= 0.995 ? 100 : p * 100) + " 100"; pr.style.strokeLinecap = p >= 0.995 ? "butt" : "round"; pr.style.opacity = p > 0 ? "1" : "0";
+    pr.style.stroke = color; pr.style.strokeDasharray = p >= 0.995 ? "none" : p * 100 + " 100"; pr.style.strokeLinecap = p >= 0.995 ? "butt" : "round"; pr.style.opacity = p > 0 ? "1" : "0";
     e.querySelector(".mn").textContent = num; e.classList.toggle("fd", !!faded);
   }
   function mountMenu(host, o) {
@@ -647,13 +658,20 @@
         var r = h("div", "mrow"), ringE = mring(36, 4.5), mid2 = h("div", "mid");
         r.appendChild(ringE); var nm = h("div", "nm", l.name), sub = h("div", "sub", hm(l.start) + "–" + hm(l.end));
         mid2.appendChild(nm); mid2.appendChild(sub); r.appendChild(mid2); r.appendChild(h("div", "mroom", l.room ? "Room " + l.room : ""));
-        if (i && links[i - 1]) { var lk = h("i", "lk"); lk.setAttribute("aria-hidden", "true"); r.appendChild(lk); live.rows[l.num + "k"] = lk; }
-        live.rows[l.num] = { r: r, ring: ringE, nm: nm, sub: sub }; v.appendChild(r);
+        // as in the app: each row draws its half of a link, from its edge to its ring (solid for the
+        // same class, dashed for only the same room)
+        var row = { r: r, ring: ringE, nm: nm, sub: sub };
+        [["up", i ? links[i - 1] : null], ["down", links[i]]].forEach(function (x) {
+          if (!x[1]) return;
+          var lk = h("i", "lk " + x[0] + (x[1] === "room" ? " room" : "")); lk.setAttribute("aria-hidden", "true"); r.appendChild(lk); row[x[0]] = lk;
+        });
+        live.rows[l.num] = row; v.appendChild(r);
       });
-      v.appendChild(h("p", "foot", "🎁 " + BREAK_NAME + " in " + DAYS_LEFT.school + " school days"));
+      live.foot = h("p", "foot"); v.appendChild(live.foot);
       return v;
     }
     function tick() {
+      if (live.cells) live.cells.forEach(function (x) { x[1].classList.toggle("cur", x[0][0] <= min && min < x[0][1]); });
       if (!live.hr) return;
       var s = compute(min), f = focus(s), l = f.l, C = COL[mode];
       live.hn.textContent = l.short; live.hn.classList.toggle("hot", l.hot);
@@ -670,16 +688,20 @@
         setRing(o.ring, rg.p, C[rg.color], x.num, done);
         o.r.className = "mrow" + (done ? " past" : "") + (now ? " cur" : "") + (x.hot ? " hot" : "");
         var t = hm(x.start) + "–" + hm(x.end); if (now && f.isClass) t += " · " + s.minsLeft + " min left"; o.sub.textContent = t;
-        var lk = live.rows[x.num + "k"];
-        if (lk) {
-          var st = [TODAY[i - 1] === l && f.isClass ? "now" : "next", now ? "now" : "next"];
-          lk.style.background = C[linkColor([TODAY[i - 1], x], st, f)];
-        }
+        if (o.up) o.up.style.setProperty("--c", lineCss(TODAY[i - 1], x));
+        if (o.down) o.down.style.setProperty("--c", lineCss(x, TODAY[i + 1]));
       });
+      live.foot.textContent = "🎁 " + BREAK_NAME + " in " + (f.live ? DAYS_LEFT.school : DAYS_LEFT.done) + " days";
+      // the app's line colour: green next to the class on now, red if both are important, else grey;
+      // between two finished classes mixed with the page (opaque, so it can pass under a ring)
+      function lineCss(a, b) {
+        var on = function (x) { return f.live && f.isClass && x === l; }, done = function (x) { return f.live && x.end <= min && x !== l; };
+        var c = on(a) || on(b) ? "#30d158" : a.hot && b.hot ? "var(--red)" : "#8e8e93";
+        return done(a) && done(b) ? "color-mix(in srgb, " + c + " 40%, var(--bg))" : c;
+      }
     }
     function timetable() {
-      var v = h("div", "mview"); live = {};
-      ["Edit the timetable", "Import a timetable", "Share the timetable"].forEach(function (t) { var b = h("button", "mbtn", t); b.type = "button"; v.appendChild(b); });
+      var v = h("div", "mview"); live = { cells: [] };
       var g = h("div", "mgrid"); g.appendChild(h("span", ""));
       WEEK.forEach(function (d, i) { var c = h("div", "dh" + (i === 3 ? " today" : ""), d); c.appendChild(h("span", "", DATES[i])); g.appendChild(c); });
       for (var p = 0; p < 6; p++) {
@@ -687,7 +709,18 @@
         for (var d = 1; d <= 5; d++) {
           var c = DEMO.week[d][p], cell = h("div", "cell" + (d === 4 ? " today" : "") + (c && c.important ? " hot" : ""));
           if (c) { cell.appendChild(h("b", "", c.name)); if (c.room) cell.appendChild(h("span", "", c.room)); } else cell.className += " empty";
+          if (d === 4 && c) live.cells.push([BELLS[p], cell]);
           g.appendChild(cell);
+        }
+      }
+      // as in the app: a box round back-to-back classes in the same room (solid for the same class)
+      for (var dd = 1; dd <= 5; dd++) {
+        var col = DEMO.week[dd], ls = [];
+        col.forEach(function (c, p) { if (c) ls.push({ num: p + 1, name: c.name, room: c.room }); });
+        var lk = dayLinks(ls);
+        for (var a = 0; a < ls.length; a++) {
+          var b = a; while (b < ls.length - 1 && lk[b] === lk[a] && lk[a]) b++;
+          if (b > a) { var bx = h("div", "wbox" + (lk[a] === "room" ? " dash" : "")); bx.style.gridColumn = (dd + 1) + " / " + (dd + 2); bx.style.gridRow = (ls[a].num + 1) + " / " + (ls[b].num + 2); g.appendChild(bx); a = b; }
         }
       }
       v.appendChild(g); return v;
@@ -695,7 +728,7 @@
     function daysoff() {
       var v = h("div", "mview"); live = {};
       var cd = h("div", "mhero"); cd.appendChild(h("div", "emoji", "🎁"));
-      var m = h("div", "hmid"), b = h("div", "hbig", String(DAYS_LEFT.school)); b.appendChild(h("span", "", "school days")); m.appendChild(b); m.appendChild(h("div", "hsub", "until " + BREAK_NAME)); cd.appendChild(m); v.appendChild(cd);
+      var m = h("div", "hmid"), b = h("div", "hbig", String(DAYS_LEFT.school)); b.appendChild(h("span", "", "days")); m.appendChild(b); m.appendChild(h("div", "hsub", "until " + BREAK_NAME)); cd.appendChild(m); v.appendChild(cd);
       OFF.forEach(function (x) { var r = h("div", "mrow"); r.appendChild(h("div", "em", x[0])); var mid = h("div", "mid"); mid.appendChild(h("div", "nm", x[1])); mid.appendChild(h("div", "sub", x[2])); r.appendChild(mid); v.appendChild(r); });
       var bt = h("button", "mbtn", "Add the holidays to your calendar"); bt.type = "button"; bt.style.marginTop = "12px"; v.appendChild(bt); return v;
     }

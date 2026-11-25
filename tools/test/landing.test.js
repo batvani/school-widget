@@ -128,10 +128,15 @@ async function test(name, fn) {
     assert(await o.page.$eval("#tt", e => e.hidden || !e.offsetHeight), "no timetable, no card");
     await o.close();
   });
-  await test("the AI on a computer (#computer): its whole answer (or only the link) → a QR code of install/#z=…; no timetable → says so", async () => {
+  await test("the AI on a computer (#computer, only on a computer): its whole answer (or only the link) → a QR code of install/#z=…; no timetable → says so", async () => {
     const answer = "Here it is:\n```json\n" + JSON.stringify(FIX) + "\n```\n**Copy this whole answer → School Widget → Paste.**";
-    const o = await open(browser, SITE + "#computer");
-    const sum = await o.page.$("#computer summary"); if (sum && !(await o.page.$("#computer[open]"))) await sum.click();
+    const ph = await open(browser, SITE + "#computer", { touch: true, wait: 600 });
+    assert(!(await ph.page.$eval("#computer", e => e.offsetHeight)), "on a phone the box is hidden");
+    const top = await ph.page.$eval("#timetable", e => Math.round(e.getBoundingClientRect().top));
+    assert(top >= 0 && top <= 60, "a #computer link on a phone lands on the timetable section: " + top);
+    await ph.close();
+    const o = await open(browser, SITE + "#computer", { viewport: { width: 1280, height: 860 } });
+    assert(await o.page.$eval("#computer", e => e.offsetHeight > 0), "on a computer it is always open");
     await o.page.fill("#ans", answer); await o.page.click("#mk"); await o.page.waitForTimeout(300);
     const [u] = await o.qrs();
     assert(u.startsWith(SITE + "install/#z="), u);
@@ -212,6 +217,7 @@ async function test(name, fn) {
     for (const y of [0, 30, 2000]) {
       const o = await open(browser, SITE, { viewport: PHONE, touch: true });
       await o.page.evaluate(y => scrollTo(0, y), y); await o.page.waitForTimeout(300);
+      if (y) { await o.page.evaluate(y => scrollTo(0, y - 40), y); await o.page.waitForTimeout(400); } // scrolling up brings the bar back
       await o.page.tap("#mb"); await o.page.waitForTimeout(500);
       const r = await o.page.evaluate(() => {
         const nav = document.querySelector("nav").getBoundingClientRect(), a = document.querySelector("#sheet a").getBoundingClientRect();

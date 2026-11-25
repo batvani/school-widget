@@ -38,7 +38,7 @@
 
 /* the full-screen menu copy (SW.mountMenu) */
 .mw { --bg: #000; --fg: #fff; --dim: rgba(255,255,255,.65); --card: #1c1c1e; --seg: #3a3a3c; --line: rgba(255,255,255,.08); --red: #ff453a; --track: rgba(255,255,255,.2); --btn: #2c2c2e;
-  box-sizing: border-box; height: 100%; overflow: auto; background: var(--bg); color: var(--fg); padding: 16px 14px 28px;
+  box-sizing: border-box; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); padding: 16px 14px 28px;
   font: 15px -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 .mw[data-mode="light"] { --bg: #f2f2f7; --fg: #000; --dim: rgba(60,60,67,.62); --card: #fff; --seg: #e5e5ea; --line: rgba(0,0,0,.08); --red: #ff3b30; --track: rgba(0,0,0,.09); --btn: #e5e5ea; }
 .mw *, .mw { box-sizing: border-box; }
@@ -59,17 +59,21 @@
 .mrow .mid { flex: 1; min-width: 0; } .mrow .nm { font-weight: 600; font-size: 16px; } .mrow.hot .nm { color: var(--red); } .mrow.cur .nm { color: #30d158; } .mrow.cur.hot .nm { color: var(--red); }
 .mrow .sub { color: var(--dim); font-size: 13px; } .mroom { color: var(--dim); font-size: 14px; } .mrow.past .mid, .mrow.past .mroom { opacity: .4; }
 .mrow .em { font-size: 24px; width: 40px; text-align: center; }
-.mrow .lk { position: absolute; left: 16px; top: -13px; width: 4px; height: 17px; z-index: 0; }
-.mr { flex: none; position: relative; z-index: 1; } .mr .tr { stroke: var(--track); } .mr .pr { transition: stroke-dasharray .8s ease, stroke .4s; }
+.mrow .lk { position: absolute; z-index: 0; left: 16px; width: 4px; background: var(--c); }
+.mrow .lk.up { top: -1px; height: calc(50% - 17.5px); } .mrow .lk.down { top: calc(50% + 17.5px); bottom: -1px; }
+.mrow .lk.room { background: linear-gradient(var(--c) 0 3px, transparent 3px) 0 0 / 100% 5.5px repeat-y; }
+.mrow .lk.room.down { background-position: 0 100%; } .mrow .lk.room.up { background-position: 0 1px; }
+.mr { flex: none; position: relative; z-index: 1; } .mr .tr { stroke: color-mix(in srgb, #8e8e93 30%, var(--bg)); } .mr .pr { transition: stroke-dasharray .8s ease, stroke .4s; }
 .mr .mn { fill: var(--fg); font-weight: 700; } .mr.fd .mn { fill: var(--dim); opacity: .6; }
 .foot { color: var(--dim); font-size: 14px; margin: 14px 2px; }
-.mbtn { display: block; width: 100%; border: 0; border-radius: 10px; background: var(--btn); color: var(--fg); font: 600 15px -apple-system, system-ui, sans-serif; padding: 12px; margin: 0 0 8px; cursor: pointer; }
 .mgrid { display: grid; grid-template-columns: 30px repeat(5, 1fr); gap: 3px; margin-top: 14px; }
 .mgrid .dh { text-align: center; font-weight: 600; font-size: 13px; padding: 4px 0; border-radius: 8px; } .mgrid .dh span { display: block; font-size: 10.5px; color: var(--dim); font-weight: 400; }
 .mgrid .dh.today { background: #30d158; color: #000; } .mgrid .dh.today span { color: rgba(0,0,0,.6); }
 .pn { font-size: 12px; color: var(--dim); text-align: center; padding-top: 6px; } .pn span { display: block; font-size: 9px; }
+.mbtn { display: block; width: 100%; border: 0; border-radius: 10px; background: var(--btn); color: var(--fg); font: 600 15px -apple-system, system-ui, sans-serif; padding: 12px; margin: 0 0 8px; cursor: pointer; }
 .cell { background: var(--card); border-radius: 8px; padding: 6px 2px; min-height: 48px; text-align: center; font-size: 11px; overflow: hidden; }
-.cell b { display: block; font-size: 11px; font-weight: 600; } .cell span { color: var(--dim); } .cell.hot b { color: var(--red); } .cell.empty { background: none; }
+.cell b { display: block; font-size: 11px; font-weight: 600; } .cell span { color: var(--dim); } .cell.hot b { color: var(--red); } .cell.empty { background: none; } .cell.today { background: var(--btn); } .cell.cur { outline: 2px solid #30d158; outline-offset: -2px; }
+.mgrid { position: relative; } .wbox { position: absolute; inset: -1px; border: 1.5px solid #8e8e93; border-radius: 10px; pointer-events: none; } .wbox.dash { border-style: dashed; }
 .mnote { color: var(--dim); font-size: 13px; line-height: 1.4; margin: 0 4px 6px; }
 .mcard { background: var(--card); border-radius: 12px; padding: 4px 14px; } .seg { display: flex; gap: 3px; background: var(--btn); border-radius: 9px; padding: 2px; margin: 10px 0; }
 .seg span { flex: 1; text-align: center; border-radius: 7px; padding: 7px 2px; font-size: 13px; } .seg span.on { background: #636366; color: #fff; }

@@ -21,7 +21,7 @@
 }
 @media (prefers-color-scheme:light){:root{--bg:#fff;--sec:#f5f5f7;--fg:#1d1d1f;--dim:#6e6e73;--line:#d2d2d7;--chip:#e8e8ed;--card:#fff;--gt:#1c7a34;--nav:rgba(255,255,255,.8)}}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:60px;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth;scroll-padding-top:52px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.47 var(--sys);letter-spacing:-.022em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:var(--gt)}
 img,svg{max-width:100%}
@@ -60,7 +60,7 @@ h3{font:600 21px/1.2 var(--disp);letter-spacing:-.015em;margin:0 0 6px}
 .status{display:flex;justify-content:space-between;align-items:center;padding:0 34px 0 48px;height:54px;font:600 17px var(--sys)}
 .status .sig{display:flex;align-items:center;gap:6px}
 .status .sig i{display:block;background:#fff;border-radius:2px}
-.hs{display:grid;grid-template-columns:repeat(4,82.25px);grid-auto-rows:85px;padding:8px 30.5px 0;justify-content:center;align-content:start}
+.hs{display:grid;grid-template-columns:repeat(4,68px);column-gap:19px;grid-auto-rows:85px;padding:8px 30.5px 0;justify-content:center;align-content:start}
 .hs .slot{place-self:center}
 .hs .s1{grid-column:1/3;grid-row:1/3}
 .hs .s2{grid-column:1/5;grid-row:3/5}
@@ -69,7 +69,6 @@ h3{font:600 21px/1.2 var(--disp);letter-spacing:-.015em;margin:0 0 6px}
 .dots{position:absolute;left:0;right:0;bottom:122px;display:flex;justify-content:center;gap:8px}
 .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4)}.dots i:first-child{background:#fff}
 .dock{position:absolute;left:12px;right:12px;bottom:12px;height:92px;border-radius:36px;background:rgba(255,255,255,.24);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);display:flex;justify-content:space-around;align-items:center;padding:0 10px}
-.homebar{position:absolute;left:50%;bottom:8px;width:140px;height:5px;margin-left:-70px;border-radius:3px;background:rgba(255,255,255,.85)}
 [data-w]{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .rise{animation:rise 1.1s cubic-bezier(.2,.7,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(48px) scale(.97)}}
@@ -104,7 +103,6 @@ h3{font:600 21px/1.2 var(--disp);letter-spacing:-.015em;margin:0 0 6px}
 /* ───── Try it ───── */
 .try{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
 .clockbig{font:700 76px/1 var(--disp);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
-.state{color:var(--gt);font:600 21px/1.3 var(--sys);margin:8px 0 26px;min-height:28px;letter-spacing:-.015em}
 input[type=range]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:6px;border-radius:3px;margin:12px 0;background:linear-gradient(90deg,var(--green) var(--p,40%),var(--line) var(--p,40%));outline-offset:8px;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4),0 0 0 .5px rgba(0,0,0,.1);cursor:grab}
 input[type=range]::-moz-range-thumb{width:32px;height:32px;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
@@ -144,7 +142,6 @@ input[type=range]::-moz-range-thumb{width:32px;height:32px;border:0;border-radiu
 .cal .today{box-shadow:inset 0 0 0 2px #1d1d1f;font-weight:700}
 .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:14px;color:#515154}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:7px;vertical-align:-1px}
-.note-s{font-size:17px;color:var(--dim);margin:22px 0 0;max-width:32em}
 
 /* ───── Timetable ───── */
 .ways{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:20px}
@@ -160,15 +157,23 @@ details.last{border-bottom:1px solid var(--line)}
 summary{font:600 19px/1.3 var(--sys);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;letter-spacing:-.015em}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"+";color:var(--gt);font-size:28px;line-height:1;transition:transform .25s;flex:none}
-details[open]>summary::after{transform:rotate(45deg)}
-details>p,details>div{color:var(--dim);margin:12px 0 0}
+details[open]:not(.closing)>summary::after{transform:rotate(45deg)}
+details>p,details>div:not(.acc),.acc>p,.acc>div{color:var(--dim);margin:12px 0 0}
+.acc{overflow:hidden}
+details.closing>summary::after{transform:none}
 details .btn{margin-top:14px}
-#computer{margin-top:32px}
-#ans{display:block;width:100%;min-height:110px;margin:6px 0 0;border:0;border-radius:14px;padding:14px 16px;background:var(--card);color:var(--fg);font:16px/1.4 var(--sys);resize:vertical;box-shadow:inset 0 0 0 1px var(--line)}
-#qr{margin-top:16px}
+/* the AI on a computer: always open, and only on a computer (a phone has no use for a QR code it can't scan) */
+.pc{margin-top:40px;border-radius:28px;background:var(--card);padding:30px;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:32px;align-items:center;box-shadow:inset 0 0 0 1px var(--line)}
+.pc-tag{font:600 13px var(--sys);color:var(--gt);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
+.pc h3{font:700 28px/1.15 var(--disp);letter-spacing:-.025em;margin:0 0 12px}
+.pc ol{margin:0 0 18px;padding-left:1.3em;color:var(--dim)}.pc ol b{color:var(--fg);font-weight:600}
+#ans{display:block;width:100%;box-sizing:border-box;min-height:110px;margin:0 0 14px;border:0;border-radius:14px;padding:14px 16px;background:var(--bg);color:var(--fg);font:16px/1.4 var(--sys);resize:vertical;box-shadow:inset 0 0 0 1px var(--line)}
+#qr{min-height:260px;border:2px dashed var(--line);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;box-sizing:border-box;color:var(--dim)}
+#qr:has(.qrbox){border-color:transparent}
 #qr .qrbox{display:inline-block;background:#fff;border-radius:16px;padding:14px;color:#000}
-#qr svg{display:block;width:220px;height:220px}
-#qr p{margin:10px 0 0}
+#qr svg{display:block;width:200px;height:200px}
+#qr p{margin:10px 0 0}#qr .ph{margin:0}
+@media (hover:none) and (pointer:coarse),(max-width:700px){.pc{display:none}}
 
 /* ───── Install ───── */
 #tt{max-width:640px;margin:0 0 36px;border-radius:24px;padding:24px 26px;background:var(--sec);box-shadow:inset 0 0 0 2px var(--green)}
@@ -201,12 +206,14 @@ footer a{color:var(--dim)}
   body{font-size:17px}
   .wrap{padding:0 20px}
   .band{padding:68px 0}
-  nav{height:48px;padding:0 12px 0 16px;gap:8px}
+  html{scroll-padding-top:56px}
+  nav{height:56px;padding:0 10px 0 20px;gap:10px;transition:transform .3s cubic-bezier(.3,.7,.2,1)}
+  nav.away{transform:translateY(-100%)}
   nav a:not(.get):not(.brand){display:none}
-  nav .brand{font-size:18px}
-  nav a.get{font-size:14px;padding:6px 14px}
-  #mb{display:flex;width:44px;height:44px;align-items:center;justify-content:center;border:0;background:none;color:var(--fg);font-size:24px;cursor:pointer;padding:0}
-  #sheet{display:block;position:absolute;left:0;right:0;top:100%;padding:6px 20px 18px;background:var(--bg);box-shadow:0 20px 40px rgba(0,0,0,.35);visibility:hidden;opacity:0;transform:translateY(-12px);transition:opacity .25s,transform .3s cubic-bezier(.3,.7,.2,1),visibility 0s .3s;max-height:calc(100vh - 48px);overflow-y:auto}
+  nav .brand{font-size:21px}
+  nav a.get{font-size:16px;padding:8px 18px}
+  #mb{display:flex;width:48px;height:48px;align-items:center;justify-content:center;border:0;background:none;color:var(--fg);font-size:27px;cursor:pointer;padding:0}
+  #sheet{display:block;position:absolute;left:0;right:0;top:100%;padding:6px 20px 18px;background:var(--bg);box-shadow:0 20px 40px rgba(0,0,0,.35);visibility:hidden;opacity:0;transform:translateY(-12px);transition:opacity .25s,transform .3s cubic-bezier(.3,.7,.2,1),visibility 0s .3s;max-height:calc(100vh - 56px);overflow-y:auto}
   #sheet.open{visibility:visible;opacity:1;transform:none;transition:opacity .25s,transform .3s cubic-bezier(.3,.7,.2,1),visibility 0s}
   #sheet a{display:block;padding:13px 0;font:600 22px var(--disp);color:var(--fg);border-bottom:1px solid var(--line);letter-spacing:-.02em}
   #sheet a:last-child{border-bottom:0}
@@ -235,8 +242,7 @@ footer a{color:var(--dim)}
   .band.s .ctl{background:var(--bg)}
   .ctl-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
   .clockbig{font-size:44px}
-  .state{font-size:16px;margin:0 0 6px;text-align:right}
-  .marks{margin:14px 0 18px}
+    .marks{margin:14px 0 18px}
   .split,.hol{display:flex;flex-direction:column;gap:40px}
   #menu .split{flex-direction:column-reverse}
   .feat b{font-size:19px}
@@ -253,7 +259,7 @@ footer a{color:var(--dim)}
   .step .n{width:40px;height:40px}
   .step .btn{width:100%}
   summary{font-size:18px}
-  footer{flex-direction:column}
+  footer{flex-direction:column;padding-bottom:calc(98px + env(safe-area-inset-bottom))}
   #bar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:25;transform:translateY(160%);transition:transform .4s cubic-bezier(.3,.7,.2,1)}
   #bar.show{transform:none}
   #bar a{flex:1;min-height:54px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -310,7 +316,6 @@ footer a{color:var(--dim)}
       </div>
       <div class="dots" aria-hidden="true"><i></i><i></i></div>
       <div class="dock" aria-hidden="true"><i style="--a:#34c759;--b:#1f9d45"></i><i style="--a:#5ac8fa;--b:#0a84ff"></i><i style="--a:#ff9f0a;--b:#ff6a00"></i><i style="--a:#bf5af2;--b:#5e5ce6"></i></div>
-      <div class="homebar"></div>
     </div></div>
   </div>
   <div class="hero-act">
@@ -353,7 +358,7 @@ footer a{color:var(--dim)}
     <div class="row"><div data-w="small"></div><div class="col"><div data-w="lockRect"></div><div data-w="lockRound"></div></div></div>
   </div></div></div>
   <div class="ctl">
-    <div class="ctl-row"><div class="clockbig" data-clock="pad">09:10</div><div class="state" id="stateTxt" aria-live="polite"></div></div>
+    <div class="ctl-row"><div class="clockbig" data-clock="pad">09:10</div></div>
     <input type="range" id="slider" min="420" max="960" value="550" step="1" aria-label="Time of day">
     <div class="marks">
       <button type="button" data-at="450">Before school</button><button type="button" data-at="550">In class</button><button type="button" data-at="640">Break</button><button type="button" data-at="900">After school</button>
@@ -383,7 +388,6 @@ footer a{color:var(--dim)}
     <h2>Every day off, in your calendar too.</h2>
     <p class="lead">School Widget downloads the official holidays and exam days for <b>your grade</b> by itself. Add them to Apple, Google or Outlook Calendar as a subscription: it updates itself and moves up a grade every September.</p>
     <div class="ctas"><a class="btn p" href="calendar/?lang=en">Add the holidays to your calendar</a></div>
-    <p class="note-s">Your city announces its own days off? Pick your city and they are added too.</p>
   </div>
   <div class="cal" aria-label="Example: December 2026 for grade 10">
     <div class="cal-h">December 2026<span>Grade 10, an example</span></div>
@@ -405,13 +409,17 @@ footer a{color:var(--dim)}
     <div class="way"><h3>By hand</h3>
       <p>Type it into School Widget's editor. You can fix anything there later too.</p></div>
   </div>
-  <details id="computer"><summary>The AI is on a computer?</summary>
-    <div><p style="margin:0 0 6px">Paste its whole answer here. Scan the QR code with your iPhone's camera to open the timetable in School Widget.</p>
+  <div id="computer" class="pc">
+    <div>
+      <p class="pc-tag">AI on a computer</p>
+      <h3>Made it on a computer? Send it to your iPhone.</h3>
+      <ol><li><b>Paste</b> the AI's whole answer below.</li><li><b>Scan</b> the QR code with your iPhone's camera.</li><li>It opens in <b>School Widget</b>.</li></ol>
       <label for="ans" style="position:absolute;left:-9999px">The AI's answer</label>
       <textarea id="ans" placeholder="Paste the AI's answer here"></textarea>
       <button class="btn p" id="mk" type="button">Make the QR code</button>
-      <div id="qr" aria-live="polite"></div></div>
-  </details>
+    </div>
+    <div id="qr" aria-live="polite"><p class="ph">The QR code appears here</p></div>
+  </div>
 </div></section>
 
 <section class="band" id="install"><div class="wrap">
