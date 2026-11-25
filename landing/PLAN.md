@@ -84,3 +84,43 @@ Phone-only: an **Install in 2 minutes** bar slides up from the bottom after the 
   - Step 2, parallel: **A** widget copies (all sizes, every slider moment) + pixel test · **B** page sections, layout (desktop + phone), motion · **C** the automatic `install/` page + every address change (template, prompts, docs, tools, `pages.yml`, serving) · **D** stepper, timetable handoff, AI prompt copy, QR box, slider and Light/Dark wiring.
   - Step 3: merge, `npm test`, the regression check (`tools/preview/tree.js`: no visible widget change), before/after screenshots and a screen recording (from Chromium; the phone is the real test), serve to the phone, then 1.8.6 (beta) if the script changed.
 - Still open: the user's phone screenshots of the widgets.
+
+## The user's phone screenshots (25 Nov 2026)
+
+Five screenshots of the real widgets on the phone, Dark Mode: small, medium `layout=list`, medium **default** (the one to copy for "medium"), large, Lock Screen rectangular. They show the user's own timetable, so **they never go into the repo**; Claude keeps them as references only. What they confirm (the mock already renders it this way; the test compares with the mock):
+- Small: ring (period number inside, green fill = progress) top left; "room" over the number top right; big minutes + small dim "min"; the class name bold at the bottom.
+- Medium (default): small's hero cell on the left, a thin vertical divider, the next three classes on the right (ring with number, name bold, "09:50 · 208" dim). Rings of neighbouring classes in the same room are joined by a line (red for important, green fading from the current class).
+- Large: hero (big ring, name, minutes, "until 09:40", room on the right), a line, six rows (ring | start time | name | room); the current row has a green tint; done rows dim; important ones red; then a line and the bottom row (gift icon | break name | count + "days").
+- Lock Screen rectangular: a white disc with the minutes (filled only during a class), a knockout pill with the name, "Room 208", "until 09:40".
+- Widget background: near-black `#1c1c1e`-like with a slight gradient, 22-ish pt corners, sitting on the wallpaper.
+
+## Build contract (step 0, 25 Nov 2026): who owns what
+
+Files (served at the site root; `pages.yml` copies them to `_site/`):
+
+| File | Owner | What |
+|---|---|---|
+| `landing/demo.js` | Claude (done) | `SW_DEMO = { DEMO, DEMO_DATE, MOMENTS, RANGE }`: the made-up English class (Thursday 3 Dec 2026), the slider's moments. Same timetable goes into the real script in the tests. |
+| `landing/widgets.js` + `landing/widgets.css` | **A** | The widget copies and the menu copy. Global `window.SW`. |
+| `landing/index.html` | **B** | The markup and all page CSS (one `<style>`), loads `demo.js`, `widgets.js`, `widgets.css`, `page.js` (`defer`). CSP: `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; img-src data:`. No inline script. |
+| `landing/page.js` | **D** | Everything that moves or reacts (see ids below). Holds `SHORTCUT_LINK` (`var SHORTCUT_LINK = "https://www.icloud.com/shortcuts/…";`) and the `qrSvg` copy between `/*QR*/` and `/*QR end*/`. |
+| `install/index.html`, addresses, docs, tools | **C** | The automatic page and every address change. |
+
+`window.SW` (A):
+- `SW.html(kind, min, {mode})` → HTML string; `kind` ∈ `small`, `medium`, `large`, `lockRect`, `lockRound`, `lockInline`; `mode` `dark`/`light` (Lock Screen ignores it: always white). Root: `<div class="sw" data-kind data-min data-mode>` at Apple's sizes in CSS px = pt (small 155×155, medium 329×155, large 329×352, lockRect 155×66, lockRound 68×68, lockInline 260×22). Every visible text is its own element with class `t`; every picture (ring, tint, line) is an element with `data-img` and the same box as the script's picture.
+- `SW.mount(el, kind, {min, mode})` → `{ update(min), setMode(mode) }`: renders into `el`, then **updates in place** (the root element stays; the ring fill and texts animate; no rebuild).
+- `SW.state(min)` → `{ kind: "before"|"class"|"break"|"after", period, name, room, left, next: {period, name, room, start} }`.
+- `SW.mountMenu(el, {tab, min, mode})` → `{ update(min), setTab(tab), setMode(mode) }`: the full-screen menu inside a phone: tabs `[data-tab]` today / timetable / daysoff / settings; the view is `.mview`; animates **only** on `setTab`.
+- Reduce Motion: no transitions or animations at all.
+
+Page ids and hooks (B writes the markup, D wires it):
+- Sections: `#widgets`, `#try`, `#menu`, `#holidays`, `#timetable`, `#computer` (a `<details>` inside Your timetable, or its own block), `#install`, `#help`. The opening screen is `.hero`.
+- Widget slots: any `[data-w="<kind>"]` (D mounts `SW` into each one; tap → scroll to `#menu`). The hero phone has `[data-w=small]` and `[data-w=medium]` inside `.hero`. Size stage: `#sizes` (tabs `[data-s=small|medium|large|lock]`, `role=tab`, `aria-selected`), `#sizeStage` holds a slot for each (`lock` shows the three lock kinds on a lock screen). Try it: `#tryStage` with slots, `#slider` (`type=range`, minutes, `SW_DEMO.RANGE`), `[data-clock]`, `#stateTxt`, shortcut buttons `[data-at=<min>]`, `#dk` / `#lt`. Menu: `#menu .mphone` with `[data-menu]` (D calls `SW.mountMenu`), the explanation list beside it.
+- Install: `#progress` (`data-done` 0–3), three `.step` (`.done` when ticked): `a#store` (App Store), `a#add` (`SHORTCUT_LINK`), `button#run` (`shortcuts://run-shortcut?name=School%20Widget%20Installer` through `window.__go || location`); `details#alt` with `button#cs` (copies `ai/install-script.js`) and `a#code` (`school-widget.js`). Progress in `localStorage`. `#tt` (hidden unless the address is `#install&z=…` / `&d=…`): `#ttCopy` copies `school-widget:z:…`, `#ttOpen` opens `open.scriptable.app/run/School%20Widget?data=…`.
+- Timetable: `button#ai` copies `ai/prompt-en.txt` (fetched when the page opens). `#computer`: `textarea#ans`, `button#mk`, `#qr` (the link is `…/install/#z=…`; `window.__qr(link)` for the tests).
+- Phone: `button#mb` (☰, `aria-expanded`), `#sheet` (links; inside `nav`, `top:100%`), `#bar` (`.show`; one rule: shown when the hero buttons are above the screen and neither `#try` nor `#install` is on screen).
+- `window.__go(url)` replaces every navigation the page makes by itself, and `navigator.clipboard.writeText` is used for copying (the tests catch both).
+
+install/ (C): `install/#z=…`/`#d=…` → `go(open.scriptable.app/run/School%20Widget?data=school-widget%3Az%3A…)` at once; after 2 s, if the page is still visible, `go(SITE + "#install&z=…")`; `button#open` does the same as the first jump; a cut-off link says "This link is broken" and links to `SITE#timetable`; plain `install/` (any query) → `go(SITE + "#install")`. English, under 8 kB, no inputs.
+
+Tests (step 0, failing until built): `tools/test/widgets.test.js` (A), `tools/test/landing.test.js` (B + D, and C's last test), `tools/test/install.test.js` (C); helper `tools/test/site.js` serves the site as Pages would. Playwright here: the project's own copy didn't match the installed browser, so the tests use the preinstalled one (`/opt/node-tools`, via `NODE_PATH`).
