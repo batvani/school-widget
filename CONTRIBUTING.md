@@ -15,7 +15,8 @@ npm run serve                    # the script over Wi-Fi, to paste into Scriptab
 | Path | What it is |
 |---|---|
 | `school-widget.js` | The whole widget: one Scriptable script |
-| `install/` | The install page (GitHub Pages): the install steps, the AI prompt, the AI answer → QR box; with a timetable in the link (`#z=`), its preview and **Open in School Widget** |
+| `landing/` | The landing page at the site root (GitHub Pages): what it is, demo widgets, the install steps (`#install`), the AI prompt, the AI answer → QR box (`#computer`); `SHORTCUT_LINK` lives in `page.js` |
+| `install/` | The small automatic page for `#z=` / `#d=` links (QR codes, classmates, the AI): opens School Widget with the timetable, or goes to the landing page's `#install`. Nothing to type |
 | `calendar/` | The calendar page: the official days off as a subscription for any calendar app |
 | `holidays/list.json` | The official days off, every grade (and cities). `tools/holidays.js` checks it and builds what Pages serves |
 | `ai/` | What an AI reads: `INSTRUCTIONS.md` and the full prompts `prompt.txt` / `prompt-en.txt` (all made by `node tools/instructions.js` from `tools/ai/INSTRUCTIONS.template.md`; don't edit them by hand), `START.md`, `schema.json`, `example.json`, `encode.py`, the install script. `ai/tests/`: AI tests |

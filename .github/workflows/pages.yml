@@ -1,4 +1,4 @@
-# GitHub Pages (batvani.github.io/school-widget/): the install page, ai/ (the AI's instructions),
+# GitHub Pages (batvani.github.io/school-widget/): the landing page (landing/ → the site root), the small automatic install/ page, ai/ (the AI's instructions),
 # the official days off (holidays.json, which School Widget downloads, and the calendar feeds, both
 # built from holidays/list.json by tools/holidays.js) and the latest STABLE release's school-widget.js,
 # so the Shortcut, the install script and Safari have one plain address for the script. Runs when
@@ -8,7 +8,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["install/**", "ai/**", "calendar/**", "holidays/**", "tools/holidays.js", ".github/workflows/pages.yml"]
+    paths: ["landing/**", "install/**", "ai/**", "calendar/**", "holidays/**", "tools/holidays.js", ".github/workflows/pages.yml"]
   release:
     types: [released]
   workflow_dispatch:
@@ -34,6 +34,7 @@ jobs:
           mkdir _site
           node tools/holidays.js _site
           cp calendar/index.html _site/calendar/index.html
+          cp landing/index.html landing/demo.js landing/widgets.js landing/widgets.css landing/page.js _site/
           cp -r install _site/install
           cp -r ai _site/ai
           rm -rf _site/ai/tests

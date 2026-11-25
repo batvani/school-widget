@@ -41,10 +41,10 @@ function example(DATA) {
     : `  "${k}": ${JSON.stringify(v)}`).join(",\n");
   return { d, text: `{\n${body}\n}` };
 }
-// the Shortcut's iCloud link: install/index.html is its one place
+// the Shortcut's iCloud link: landing/page.js is its one place
 function shortcutLink() {
-  const m = fs.readFileSync(P("install/index.html"), "utf8").match(/var SHORTCUT_LINK = "(https:\/\/www\.icloud\.com\/shortcuts\/[0-9a-f]{32})";/);
-  if (!m) throw new Error("install/index.html: no SHORTCUT_LINK with a Shortcut's iCloud link");
+  const m = fs.readFileSync(P("landing/page.js"), "utf8").match(/var SHORTCUT_LINK = "(https:\/\/www\.icloud\.com\/shortcuts\/[0-9a-f]{32})";/);
+  if (!m) throw new Error("landing/page.js: no SHORTCUT_LINK with a Shortcut's iCloud link");
   return m[1];
 }
 // The full prompt (ai/prompt.txt, -en): a few lines, then the whole instructions, so it works with an AI

@@ -14,7 +14,7 @@
 ## Инсталиране (2 минути)
 
 1. Инсталирай **[Scriptable](https://apps.apple.com/app/scriptable/id1405459188)** от App Store и го отвори веднъж.
-2. Отвори **[страницата за инсталиране](https://batvani.github.io/school-widget/install/)** → **Добави прекия път** → **Пусни го**. Той изтегля School Widget и го отваря. (Не става? Там има и скрипт за инсталиране, и начин на ръка.)
+2. Отвори **[страницата за инсталиране](https://batvani.github.io/school-widget/#install)** (на английски) → **Add the Shortcut** → **Run it**. Той изтегля School Widget и го отваря. (Не става? Там има и скрипт за инсталиране, и начин на ръка.)
 3. School Widget пита за **програмата ти** (виж по-долу) → **Запази** → показва как се добавя уиджетът.
 
 Нищо повече: School Widget се обновява сам.
@@ -70,7 +70,7 @@
 ## Install (2 minutes)
 
 1. Install **[Scriptable](https://apps.apple.com/app/scriptable/id1405459188)** from the App Store and open it once.
-2. Open the **[install page](https://batvani.github.io/school-widget/install/?lang=en)** → **Add the Shortcut** → **Run it**. It downloads School Widget and opens it. (Doesn't work? The page also has an install script and a way by hand.)
+2. Open the **[install page](https://batvani.github.io/school-widget/#install)**: **Get Scriptable** → **Add the Shortcut** → **Run it**. It downloads School Widget and opens it. (Doesn't work? The page also has an install script and a way by hand.)
 3. School Widget asks for **your timetable** (see below) → **Save** → it shows how to add the widget.
 
 That's all: School Widget updates itself.

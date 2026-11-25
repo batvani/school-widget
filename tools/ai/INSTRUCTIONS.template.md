@@ -60,5 +60,5 @@ Give **one** ```json block with the whole timetable (compact, one day per line i
 Then end with exactly these three lines (translate them if the user doesn't write Bulgarian):
 
 **Копирай целия този отговор → School Widget → Внеси програма → Постави.** (Или натисни линка → **Отвори в School Widget**.)
-Още нямаш School Widget? Инсталирай го от {{PAGES}}install/ (2 минути): щом се отвори, ще предложи копираната програма.
-AI-ът е на компютър? Постави отговора на {{PAGES}}install/ → „AI-ът е на компютър?“ и снимай QR кода с iPhone.
+Още нямаш School Widget? Инсталирай го от {{PAGES}}#install (2 минути): щом се отвори, ще предложи копираната програма.
+AI-ът е на компютър? Постави отговора на {{PAGES}}#computer („The AI is on a computer?“) и снимай QR кода с iPhone.

@@ -33,7 +33,7 @@ async function test(name, fn) {
     assert(t.length < instructions.MAX_CHARS, t.length);
     assert(/^School Widget instructions v1 \(\d+ \w+ \d{4}\)\n/.test(t));
     assert(!/\{\{|<!--/.test(t));
-    assert(t.includes("Копирай целия този отговор → School Widget → Внеси програма → Постави") && t.includes("https://batvani.github.io/school-widget/install/"));
+    assert(t.includes("Копирай целия този отговор → School Widget → Внеси програма → Постави") && t.includes("https://batvani.github.io/school-widget/#install"));
     assert(!/TIMETABLE = null|icloud\.com\/shortcuts/.test(t), "no installer with the timetable, no Shortcut: the timetable always goes into an installed School Widget");
   });
   await test("the full prompt (ai/prompt.txt, -en): a few lines, then the whole instructions; START.md points to it", async () => {

@@ -70,4 +70,4 @@ Run Script School Widget (Run In App: on)
 3. **Ако не стане:** снимка на екрана с грешката и на прекия път (целия, с отворените ›).
 
 ## Споделяне
-Shortcuts → задръж пръст върху **School Widget Installer** → **Share** → **Copy iCloud Link** → постави линка в чата. Той влиза в `install/index.html` (`SHORTCUT_LINK`), оттам в страницата за инсталиране и README.
+Shortcuts → задръж пръст върху **School Widget Installer** → **Share** → **Copy iCloud Link** → постави линка в чата. Той влиза в `landing/page.js` (`SHORTCUT_LINK`), оттам в страницата за инсталиране и README.

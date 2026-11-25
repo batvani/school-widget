@@ -9,6 +9,7 @@ IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')
 [ -n "$IP" ] || { echo "No network address found: is the PC on Wi-Fi?"; exit 1; }
 echo "On the iPhone (same Wi-Fi), open in Safari:"
 echo "  http://$IP:$PORT/school-widget.js"
+[ -f landing/index.html ] && echo "  http://$IP:$PORT/        (the landing page)"
 [ -d install ] && echo "  http://$IP:$PORT/install/"
 echo "If the page doesn't load: the firewall may block port $PORT. Allow it once with"
 echo "  sudo firewall-cmd --add-port=$PORT/tcp      (until the next restart)"

@@ -3,7 +3,7 @@
 //   editor   the timetable editor (import, a cell, groups, edit, a subject, done), live (live.js)
 //   share    sharing and the new school year (Програма, Сподели, QR, a shared import, merge, grade), live
 //   version  Settings → Версия in each update state
-//   install  install/index.html: with a link, without, a cut-off link, English
+//   install  the landing page (phone, desktop) and install/ with a cut-off link, served as Pages would
 //   readme   the README's picture img/widgets.png: every widget size, the built-in demo, during a class
 // Usage: node tools/preview/shots.js [editor|share|version|install|readme …]   (none: all of them)
 const fs = require("fs"), path = require("path"), zlib = require("zlib"), { execFileSync } = require("child_process");
@@ -105,18 +105,19 @@ const SETS = {
     await sheet(b, "version", shots);
   },
   async install(b) {
-    const { T, expected } = require(path.join(ROOT, "ai/tests/timetables"));
-    const PAGE = "file://" + path.join(ROOT, "install/index.html");
-    const hash = "z=" + zlib.deflateRawSync(Buffer.from(JSON.stringify(expected(T[4])), "utf8"), { level: 9 }).toString("base64url");
+    // the landing page (phone + desktop) and install/ with a broken link, served as Pages would (tools/test/site.js)
+    const { SITE, open } = require("../test/site");
+    const hash = "z=" + zlib.deflateRawSync(Buffer.from(JSON.stringify(FIX), "utf8"), { level: 9 }).toString("base64url");
+    const pages = [["1-landing-phone", SITE, { width: 375, height: 812 }, true], ["2-landing-desktop", SITE, { width: 1280, height: 800 }, true],
+      ["3-install-broken", SITE + "install/#" + hash.slice(0, 40), { width: 375, height: 812 }, false]];
     const shots = [];
-    for (const scheme of ["dark", "light"]) for (const [n, q] of [["1-link", "#" + hash], ["2-none", ""], ["3-broken", "#z=" + hash.slice(2, 60)], ["4-en", "?lang=en#" + hash]]) {
-      const ctx = await b.newContext({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, colorScheme: scheme });
-      const p = await ctx.newPage();
-      await p.goto(PAGE + q); await p.waitForTimeout(300);
+    for (const scheme of ["dark", "light"]) for (const [n, url, viewport, needsLanding] of pages) {
+      if (needsLanding && !fs.existsSync(path.join(ROOT, "landing/index.html"))) { console.log(`install: ${n} skipped (no landing/index.html yet)`); continue; }
+      const o = await open(b, url, { viewport, colorScheme: scheme, wait: 600 });
       const f = path.join(OUT, `install-${n}-${scheme}.png`);
-      await p.screenshot({ path: f, fullPage: true }); shots.push([n, scheme, f]); await ctx.close();
+      await o.page.screenshot({ path: f, fullPage: false }); shots.push([n, scheme, f]); await o.close();
     }
-    await sheet(b, "install", shots);
+    if (shots.length) await sheet(b, "install", shots);
   },
   async readme() {
     // the built-in demo, scenario 0 of check.js (during a class), Dark Mode
