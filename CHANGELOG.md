@@ -1,13 +1,15 @@
 # Changelog
 
 ## 1.8.6 — 25 Nov 2026
-Накратко: Нова начална страница на сайта: уиджетите на живо, плъзгач през учебния ден, менюто, ваканциите и инсталиране в 3 стъпки. Самият уиджет не се променя.
-In short: A new home page for the site: the widgets live, a slider through the school day, the menu, the holidays and a 3-step install. The widget itself doesn't change.
+Накратко: Обратното броене до ваканцията е в дни, не в учебни дни. Менюто има за заглавие датата и бутон за споделяне на School Widget. Нова начална страница на сайта.
+In short: The countdown to the next break is in days, not school days. The menu's heading is the date, with a button to share School Widget. A new home page for the site.
 
+- **The countdown** (the large widget's bottom line, Днес and Почивни in the menu) counts days, weekends included, until the break starts: "Коледна ваканция след 29 дни", instead of counting only school days.
+- **The menu's heading** is the date (it was the date small and "Разписание" big). Beside it a share button sends School Widget's page (`batvani.github.io/school-widget/`) through the share sheet. A long date ("Понеделник, 28 септември") breaks after the weekday.
 - **The landing page** (the site's root, `batvani.github.io/school-widget/`, in English): an iPhone with the widgets and apps, every widget size, **Try it** (a slider and shortcuts through a made-up school day, Dark / Light), the full-screen menu to tap through, the holidays in your calendar, the ways to get a timetable, the install steps and the questions. The widgets on it are hand-made copies that the tests compare with the real script at every moment.
 - **AI on a computer:** on a computer the page turns the AI's whole answer into a QR code to scan with the iPhone (hidden on a phone).
 - **Install:** the steps live on the landing page (`#install`); `install/` is only the automatic page for timetable links (`#z=`), which opens School Widget at once and falls back to the landing page. The AI's last lines and the docs point to `#install` / `#computer`.
-- **The widgets and the menu don't change**; only the version.
+- Small, medium and the Lock Screen don't change (tree.js: only large and the menu).
 
 ## 1.8.5 — 24 Nov 2026
 Накратко: Инсталирането и програмата са отделни: първо School Widget, после той пита за програмата (Постави, линк, QR код, AI или на ръка). Ваканциите идват от интернет за твоя клас и могат да влязат в календара ти. Град по желание.

@@ -9,7 +9,7 @@
 | City | Optional. Adds the days off a city declares itself (e.g. a flu break). Chosen from a list |
 | Your calendar | Optional. A calendar with your school's own days off (e.g. its patron's day). Picked from your calendars; Calendar access is asked only then. The official days off come by themselves |
 | Reason for the day off | Shows the holiday's name, e.g. "Коледна ваканция" (large widget when there is room, rectangular Lock Screen) |
-| Countdown | "Коледна ваканция след 34 учебни дни" at the bottom of the large widget, and in Days off |
+| Countdown | "Коледна ваканция след 34 дни" (days, weekends included) at the bottom of the large widget, and in Days off |
 | Tests | A calendar where an event like "Контролно по химия" turns that class red. Picked from your calendars |
 | Reminder before class | 3/5/10/15 minutes before each class (off by default) |
 | Tap opens this menu | On/off |

@@ -141,7 +141,7 @@ const DEFAULTS = {
   testsCalendarId: "",
   city: "",                    // for the days off a city declares itself (holidays.json); "" = none
   showReason: true,            // show why it's a day off, e.g. "Day off · Коледна ваканция"
-  countdown: true,             // "Коледна ваканция in 12 school days" (large widget)
+  countdown: true,             // "Коледна ваканция · 21 дни" (large widget, the menu)
   tapView: true,               // tapping the widget opens Today / Week / Days off / Settings
   remindMinutes: 0,            // notification N minutes before each class (0 = off)
   linkColors: true,            // lines between back-to-back rings in the rings' colours (else grey)
@@ -289,11 +289,11 @@ const STRINGS = {
     dayOff: "Почивен ден", noMore: "Няма повече часове днес", doneShort: "Край за днес",
     tomorrow: "Утре", end: "Край", vacation: "Ваканция", enjoy: "Приятна почивка!", weekend: "Уикенд",
     summer: "Лятна ваканция",
-    countdown: (r, n) => `${r} след ${n} ${n === 1 ? "учебен ден" : "учебни дни"}`, daysShort: n => n === 1 ? "уч. ден" : "уч. дни",
+    countdown: (r, n) => `${r} след ${n} ${n === 1 ? "ден" : "дни"}`, daysShort: n => n === 1 ? "ден" : "дни",
     error: "Грешка в разписанието",
     notifStart: t => `Започва в ${t}`, notifTest: (x, t) => `Контролно: ${x} · започва в ${t}`,
-    title: "Разписание", tabToday: "Днес", tabWeek: "Програма", tabOff: "Почивни", tabSettings: "Настройки",
-    now: "Сега", next: "Следва", minLeft: n => `още ${n} мин`, schoolDay1: "учебен ден", schoolDays: "учебни дни", noDaysOff: "Няма записани почивни дни.",
+    shareApp: "Сподели School Widget", tabToday: "Днес", tabWeek: "Програма", tabOff: "Почивни", tabSettings: "Настройки",
+    now: "Сега", next: "Следва", minLeft: n => `още ${n} мин`, day1: "ден", days: "дни", noDaysOff: "Няма записани почивни дни.",
     set: {
       applyNote: "Промените се запазват веднага. Уиджетите ги показват при следващото си обновяване (обикновено до няколко минути).",
       paramNote: p => `Този уиджет има Parameter „${p}“ – неговите стойности са с предимство пред тези тук.`,
@@ -406,11 +406,11 @@ const STRINGS = {
     dayOff: "Day off", noMore: "No more classes today", doneShort: "Done for today",
     tomorrow: "Tomorrow", end: "End", vacation: "Vacation", enjoy: "Enjoy the break!", weekend: "Weekend",
     summer: "Summer vacation",
-    countdown: (r, n) => `${r} in ${n} school ${n === 1 ? "day" : "days"}`, daysShort: n => n === 1 ? "day" : "days",
+    countdown: (r, n) => `${r} in ${n} ${n === 1 ? "day" : "days"}`, daysShort: n => n === 1 ? "day" : "days",
     error: "Timetable error",
     notifStart: t => `Starts at ${t}`, notifTest: (x, t) => `Test: ${x} · starts at ${t}`,
-    title: "Timetable", tabToday: "Today", tabWeek: "Timetable", tabOff: "Days off", tabSettings: "Settings",
-    now: "Now", next: "Next", minLeft: n => `${n} min left`, schoolDay1: "school day", schoolDays: "school days", noDaysOff: "No days off recorded.",
+    shareApp: "Share School Widget", tabToday: "Today", tabWeek: "Timetable", tabOff: "Days off", tabSettings: "Settings",
+    now: "Now", next: "Next", minLeft: n => `${n} min left`, day1: "day", days: "days", noDaysOff: "No days off recorded.",
     set: {
       applyNote: "Changes are saved straight away. Widgets show them on their next refresh (usually within a few minutes).",
       paramNote: p => `This widget has the Parameter “${p}” – its values take priority over these.`,
@@ -1485,15 +1485,16 @@ function nextRefresh(s) {
   if (s.mode === "class" || s.mode === "break") next = Math.min(next, +s.now + 5 * 60000);
   return new Date(next);
 }
-// School days left until the next weekday off (or until the end of the year).
+// Days (calendar days, weekends included) until the next break starts, or the summer after the
+// last day of school. On a day off, it counts to the break after the next school day.
 function countdown(s) {
-  let d = (s.status.school && s.mode !== "done") ? s.today : addDays(s.today, 1);
-  let n = 0;
+  let d = s.today, school = false;
+  const n = () => Math.round((d - s.today) / 864e5);
   for (let i = 0; i < 400; i++, d = addDays(d, 1)) {
-    if (ymd(d) > TT.lastDay) return n ? { n, reason: L.summer } : null;
+    if (ymd(d) > TT.lastDay) return school ? { n: n(), reason: L.summer } : null;
     const st = dayStatus(d);
-    if (st.kind === "off") { if (n === 0) continue; return { n, reason: st.reason || L.dayOff }; }
-    if (st.school) n++;
+    if (st.kind === "off") { if (!school) continue; return { n: n(), reason: st.reason || L.dayOff }; }
+    if (st.school) school = true;
   }
   return null;
 }
@@ -2733,7 +2734,7 @@ function editorPayload(ed = {}) {
   }
   return { mode: imp ? "import" : "edit", d, val: validateData(d), msg: ed.msg || "", cities: cityOptions(), city: loadSaved().city || "",
     ld: HOLIDAYS.lastDay || {}, ld0: `20${HOLIDAYS.schoolYear.slice(-2)}-06-30`,
-    page: PAGES + "install/", sh: !imp && own ? sharedTimetable(TT_FULL) : null, old: m ? m.old : null, gone: m ? m.gone : {}, newYear,
+    page: PAGES + "install/", home: PAGES, sh: !imp && own ? sharedTimetable(TT_FULL) : null, old: m ? m.old : null, gone: m ? m.gone : {}, newYear,
     oldGrade: own ? TT_FULL.meta.grade || 0 : 0, oldHol: HOLIDAYS.missing ? HOLIDAYS.schoolYear.replace("-", "/") : "" };
 }
 // A link from the menu, the landing page or the editor (school-widget://data?a=…).
@@ -3139,6 +3140,7 @@ function edPage(P, E) {
     const x = c.dataset.x;
     if (x === "edit") return open();
     if (x === "hist") { location.href = "school-widget://data?a=hist"; return; }
+    if (x === "app") return go("share", { u: P.home }); // the heading's share button: School Widget's own page
     if (x === "imp") { const w = c.parentNode.nextElementSibling; w.hidden = !w.hidden; return; }
     if (x === "menu") { body.classList.remove("done"); return; }
     if (["prompt", "paste", "file", "names", "later", "export", "cal", "blank", "scan"].includes(x)) return go(x);
@@ -3230,6 +3232,9 @@ function settingsPane() {
 }
 function buildHTML(s, tab, jump, ed = {}) {
   const now = s.now, E = L.ed;
+  // the heading: the date, as big as fits beside the share button (30 down to 24); longer ones
+  // break after the weekday ("Понеделник," / "28 септември")
+  const dateHead = `${cap(L.weekdays[now.getDay()])}, ${now.getDate()}\u00a0${L.monthsFull[now.getMonth()]}`, dateFs = Math.max(24, fitSize(dateHead, 30, 290, false));
   // upcoming rings and the lines between them: solid, as on the widgets (finished rows are dimmed)
   const GREY = "#8e8e93", GREEN = "#30d158", RED = "#ff453a";
   // Rows: ring with the period number, like the widget (green = now, red = important).
@@ -3352,7 +3357,7 @@ function buildHTML(s, tab, jump, ed = {}) {
   }
   const fmt = k => { const d = parseYmd(k); return `${d.getDate()} ${L.months[d.getMonth()]}`; };
   const cdc = countdown(s);
-  const cd = cdc ? `<div class="cd"><div class="emoji">${holidayEmoji(cdc.reason) || "📅"}</div><div><div class="cdn">${cdc.n}<span>${cdc.n === 1 ? L.schoolDay1 : L.schoolDays}</span></div><div class="hsub">${esc(L.until(cdc.reason))}</div></div></div>` : "";
+  const cd = cdc ? `<div class="cd"><div class="emoji">${holidayEmoji(cdc.reason) || "📅"}</div><div><div class="cdn">${cdc.n}<span>${cdc.n === 1 ? L.day1 : L.days}</span></div><div class="hsub">${esc(L.until(cdc.reason))}</div></div></div>` : "";
   const offList = groups.slice(0, 14).map(g => {
     const d = parseYmd(g.from);
     return `<div class="row"><div class="em">${holidayEmoji(g.reason) || "📅"}</div><div class="mid"><div class="nm">${esc(g.reason || L.dayOff)}</div><div class="sub">${g.from === g.to ? `${L.weekdaysShort[d.getDay()]}, ${fmt(g.from)}` : `${fmt(g.from)} – ${fmt(g.to)}`}</div></div></div>`;
@@ -3367,7 +3372,7 @@ function buildHTML(s, tab, jump, ed = {}) {
 :root{color-scheme:dark;--bg:#000;--fg:#fff}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}[hidden]{display:none!important}
 body{margin:0;background:#000;color:#fff;font:16px -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px 60px}
 h1{font-size:30px;margin:6px 0 2px}h3{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:rgba(255,255,255,.55);margin:24px 4px 8px;font-weight:500}
-.date0{color:rgba(255,255,255,.65);font-size:15px}
+.hd{display:flex;align-items:center;gap:12px;margin:6px 0 0}.hd h1{flex:1;min-width:0;margin:0;line-height:1.15}.shr{flex:none;width:40px;height:40px;border:0;border-radius:20px;background:#1c1c1e;color:#30d158;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
 .tabs{display:flex;gap:4px;background:#1c1c1e;border-radius:10px;padding:3px;margin:16px 0;position:sticky;top:6px;z-index:2}
 .tabs button{flex:1;border:0;border-radius:8px;padding:8px 2px;background:none;color:#fff;font:600 13.5px -apple-system}
 .tabs button.on{background:#3a3a3c}
@@ -3444,11 +3449,11 @@ svg.qr{display:block;width:100%;max-width:300px;margin:6px auto 10px;border-radi
 .bell{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid rgba(255,255,255,.08);font-size:16px}.bell .n{width:22px;color:rgba(255,255,255,.5)}.bell .t2{flex:1}.bell .x{margin-left:auto;color:#ff453a;font-size:22px;padding:0 4px}.bell.add{color:#0a84ff}
 #say{position:fixed;left:16px;right:16px;bottom:90px;background:#2c2c2e;border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.35;z-index:7;box-shadow:0 6px 24px rgba(0,0,0,.5)}#say .btn{display:block;width:100%;margin-top:10px}
 #ed,#done,#land{display:none}body.ed #ed,body.done #done,body.land #land{display:block}body.land>:not(#land):not(#sh):not(#say){display:none!important}#land h1{margin:14px 2px 8px}.dsum{display:block;list-style:none;font-weight:600;padding:13px 14px;margin:20px 0 4px}.dsum::-webkit-details-marker{display:none}.dsum::after{content:" ›";opacity:.5}#det[open]>.dsum::after{content:" ⌄"}#land .btn{padding:15px 4px;font-size:17px}.dn{text-align:center;margin-top:30px}.dn h1{margin:6px 0}.big{font-size:34px;line-height:1;margin:6px 0 4px}
-body.ed>.date0,body.ed>h1,body.ed>.tabs,body.ed .pane:not(#t2),body.ed #t2>:not(#ed),body.done>:not(#done):not(#sh):not(#say){display:none!important}body.ed #t2{display:block}
+body.ed>.hd,body.ed>.tabs,body.ed .pane:not(#t2),body.ed #t2>:not(#ed),body.done>:not(#done):not(#sh):not(#say){display:none!important}body.ed #t2{display:block}
 .btns{display:flex;gap:8px;margin:8px 0 12px}.btn{flex:1;border:0;border-radius:9px;padding:10px 4px;background:#2c2c2e;color:#fff;font:600 15px -apple-system,sans-serif}.btn.main{background:#30d158;color:#000}
 ${S.theme === "dark" ? "" : `@media ${S.theme === "light" ? "all" : "(prefers-color-scheme: light)"}{
 :root{color-scheme:light;--bg:#f2f2f7;--fg:#000}body{background:#f2f2f7;color:#000}
-.date0,.sub,.room,h3,.pn,.hint,.note,.sw small,.field input,.dh span,.cell span,.offcol{color:rgba(60,60,67,.6)}
+.sub,.room,h3,.pn,.hint,.note,.sw small,.field input,.dh span,.cell span,.offcol{color:rgba(60,60,67,.6)}.shr{background:#e5e5ea;color:#248a3d}
 .tabs,.card,.cd,.cell,.hero{background:#fff}.hbig span,.cdn span,.hroom small,.hsub,.foot,.hday{color:rgba(60,60,67,.6)}.tabs button,.seg button{color:#000}.tabs button.on{background:#e5e5ea}
 .row,.sw,.field{border-color:rgba(0,0,0,.08)}.cell.today{background:#e8f8ec}
 .seg{background:#e5e5ea}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
@@ -3459,8 +3464,7 @@ ${S.theme === "dark" ? "" : `@media ${S.theme === "light" ? "all" : "(prefers-co
 .bar{background:linear-gradient(rgba(242,242,247,0),#f2f2f7 30%)}.sheet,.gp,#say{background:#fff}.subj,.bell{border-color:rgba(0,0,0,.08)}.subj small,.bell .n{color:rgba(60,60,67,.6)}.grab{background:#d1d1d6}}`}
 </style></head><body class="${ed.mode === "import" ? "ed" : ed.done ? "done" : land ? "land" : ""}">
 ${done}${land}<div id="sh"></div><div id="say" hidden></div>
-<div class="date0">${cap(L.weekdays[now.getDay()])}, ${now.getDate()} ${L.monthsFull[now.getMonth()]}</div>
-<h1>${L.title}</h1>
+<div class="hd"><h1 style="font-size:${dateFs}px">${dateHead}</h1><button class="shr" data-x="app" aria-label="${esc(L.shareApp)}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.5v11M7.8 7.4 12 3.2l4.2 4.2M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 <div class="tabs">${tabs.map(t => `<button class="${t[0] === on ? "on" : ""}" data-t="${t[0]}">${t[1]}</button>`).join("")}</div>
 <div class="pane ${on === "t1" ? "on" : ""}" id="t1">${today}</div>
 <div class="pane ${on === "t2" ? "on" : ""}" id="t2">${newYearDue() ? wcard(E.newYear, E.newYearLead, "names", E.copyNames, `<div class="btns"><button class="btn" data-x="later">${E.later}</button></div>`) : ""}<div class="btns"><button class="btn" data-x="edit">${E.edit}</button><button class="btn" data-x="imp">${E.importBtn}</button></div>${impBtns}${ownTT() ? `<div class="btns"><button class="btn" data-x="hist">${E.hist}</button></div>` : ""}${ownTT() ? `<div class="btns"><button class="btn" data-x="share">${E.share}</button></div>` : ""}${grid}<div id="ed"></div></div>

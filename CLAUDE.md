@@ -44,7 +44,7 @@ Every size lives in `T` (~line 266): text `T.fs`, gaps `T.sp`, rings `T.ring`, p
 5. **Fill the height:** rows stretch to the real widget height (6 vs 7 classes). Large solves for row padding (rows ≥ 25) using `largeInnerH()` / `LARGE_H` (375 × 812 → 352, measured on the user's phone).
 6. **Show what matters now:** during school only today (done classes dimmed, current one highlighted); tomorrow only after the last bell. Notes ("контролно", "Утре") only when needed, and the cell goes compact to fit them.
 7. **Labels:** "стая" always above the room. ФВС has no room: empty space, no "стая", no stray "·". Room 3 is "03". Start times have no "в" ("08:00"). "Край за днес" and holiday names don't show on small/medium.
-8. **Large's bottom line is always shown** (the user asked; the hero was shrunk to fit), laid out on its own, not on the list's columns: icon | break name | count + "уч. дни"; on a named day off the holiday's name, no count.
+8. **Large's bottom line is always shown** (the user asked; the hero was shrunk to fit), laid out on its own, not on the list's columns: icon | break name | count + "дни" (calendar days to the break, weekends included; 1.8.6); on a named day off the holiday's name, no count.
 9. **Lock Screen:** always white, knockout pill / solid disc. The round widget's disc is filled **only** during a class.
 10. **Fonts:** system font; big numbers semibold, names bold, notes/labels semibold dim, times regular dim (`nameText` / `noteText` / `timeText`, `bigValue`). Secondary text at 65 %.
 11. **Medium layouts** `layout=day` / `layout=list` are Parameter-only (`S.layout`, not in `DEFAULTS`). Rows too low for rings: dimming, a tint and bold for the hero's row, red for important. The user chose start times in `day`, period numbers in `list`. Tightest spot: "Математика" as current class in `day` stays semibold to keep 13 pt.
@@ -57,7 +57,7 @@ Every size lives in `T` (~line 266): text `T.fs`, gaps `T.sp`, rings `T.ring`, p
 - **Never add an empty text** (an empty room shrank the ФВС row's time). Rows without a room get the invisible `NO_ROOM` (`C.clear`). On large a flexible spacer keeps the hero band left; in `layout=list` the big value moves to the right edge.
 - **Ring lines are two layers** (`C.faint` + colour) and stop at the ring's edge (a translucent overlap showed as a patch). `C.grey` is opaque; done colours stay see-through.
 - **Large dashes the same-room line** when rings are ≥ `T.link.dashMin` apart (6 classes) and splits it in the middle at 7. DrawContext has no dashes: they're separate `strokeLine`s.
-- **Menu (web page):** Week's `weekBoxes` are absolutely positioned grid items and need an explicit end line (`grid-column: c / c+1`) or they stretch. After the last bell, Today lists only the next school day.
+- **Menu (web page):** the heading is the date (sized with `fitSize` to fit beside the share button, which shares the site). Week's `weekBoxes` are absolutely positioned grid items and need an explicit end line (`grid-column: c / c+1`) or they stretch. After the last bell, Today lists only the next school day.
 
 ## Scriptable / WidgetKit layout rules
 

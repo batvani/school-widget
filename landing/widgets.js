@@ -65,7 +65,7 @@
     });
   }
   var TODAY = lessons(4), TOMORROW = lessons(5);
-  var BREAK_NAME = "Christmas break", DAYS_LEFT = { school: 15, done: 14 }; // the demo's Thursday: 13 Dec ... see PLAN.md
+  var BREAK_NAME = "Christmas break", DAYS_LEFT = 21; // days from the demo's Thursday, 3 Dec, to the break (24 Dec), as the script counts them
 
   // computeState: the script's own (class / break / done), over the demo day
   function compute(min) {
@@ -297,7 +297,7 @@
     y += near;
     out.push(box("l2", PAD, y, 297, HAIR, c.divider)); y += HAIR + gap;
     // the bottom line: icon | break name | count
-    var cn = f.live ? DAYS_LEFT.school : DAYS_LEFT.done, fy = y + footH / 2;
+    var cn = DAYS_LEFT, fy = y + footH / 2;
     out.push({ t: "icon", k: "gift", name: "gift", x: PAD, y: fy - FS.base / 2, size: FS.base, c: c.dim });
     out.push(text("fn", BREAK_NAME, FS.base, 600, c.text, { x: PAD + FS.base + SP.md, cy: fy }));
     out.push({ t: "row", k: "fc", xr: 329 - PAD, top: fy - FS.base * LH / 2, h: FS.base * LH, kids: [
@@ -637,7 +637,9 @@
     var tab = o.tab || "today", min = o.min == null ? 550 : o.min, mode = o.mode === "light" ? "light" : "dark";
     host.innerHTML = "";
     var rootEl = h("div", "mw"); rootEl.setAttribute("data-mode", mode);
-    var head = h("div", "mhead"); head.appendChild(h("div", "mdate", "Thursday, 3 December")); head.appendChild(h("h2", "mtitle", "Timetable"));
+    var head = h("div", "mhead"); head.appendChild(h("h2", "mtitle", "Thursday, 3 December"));
+    var shr = h("span", "mshr"); shr.setAttribute("aria-hidden", "true"); // as in the app: shares School Widget's page
+    shr.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3.5v11M7.8 7.4 12 3.2l4.2 4.2M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; head.appendChild(shr);
     var tabs = h("div", "mtabs"); tabs.setAttribute("role", "tablist");
     var api = { el: rootEl };
     [["today", "Today"], ["timetable", "Timetable"], ["daysoff", "Days off"], ["settings", "Settings"]].forEach(function (t) {
@@ -691,7 +693,7 @@
         if (o.up) o.up.style.setProperty("--c", lineCss(TODAY[i - 1], x));
         if (o.down) o.down.style.setProperty("--c", lineCss(x, TODAY[i + 1]));
       });
-      live.foot.textContent = "🎁 " + BREAK_NAME + " in " + (f.live ? DAYS_LEFT.school : DAYS_LEFT.done) + " days";
+      live.foot.textContent = "🎁 " + BREAK_NAME + " in " + DAYS_LEFT + " days";
       // the app's line colour: green next to the class on now, red if both are important, else grey;
       // between two finished classes mixed with the page (opaque, so it can pass under a ring)
       function lineCss(a, b) {
@@ -728,7 +730,7 @@
     function daysoff() {
       var v = h("div", "mview"); live = {};
       var cd = h("div", "mhero"); cd.appendChild(h("div", "emoji", "🎁"));
-      var m = h("div", "hmid"), b = h("div", "hbig", String(DAYS_LEFT.school)); b.appendChild(h("span", "", "days")); m.appendChild(b); m.appendChild(h("div", "hsub", "until " + BREAK_NAME)); cd.appendChild(m); v.appendChild(cd);
+      var m = h("div", "hmid"), b = h("div", "hbig", String(DAYS_LEFT)); b.appendChild(h("span", "", "days")); m.appendChild(b); m.appendChild(h("div", "hsub", "until " + BREAK_NAME)); cd.appendChild(m); v.appendChild(cd);
       OFF.forEach(function (x) { var r = h("div", "mrow"); r.appendChild(h("div", "em", x[0])); var mid = h("div", "mid"); mid.appendChild(h("div", "nm", x[1])); mid.appendChild(h("div", "sub", x[2])); r.appendChild(mid); v.appendChild(r); });
       var bt = h("button", "mbtn", "Add the holidays to your calendar"); bt.type = "button"; bt.style.marginTop = "12px"; v.appendChild(bt); return v;
     }

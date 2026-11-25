@@ -7,7 +7,7 @@
 ![Уиджетите с примерната програма](img/widgets.png)
 
 - **Малък и среден:** часът сега (или следващият), колко минути остават, стаята.
-- **Голям:** целият ден, а отдолу следващата ваканция и колко учебни дни остават до нея.
+- **Голям:** целият ден, а отдолу следващата ваканция и колко дни остават до нея.
 - **Заключен екран:** кръгъл, правоъгълен и на един ред.
 - **Докосни уиджета:** днес, седмицата, почивните дни, настройките.
 
@@ -63,7 +63,7 @@
 **A school timetable widget for iPhone:** the class now, the time left, the next room, the next break. It runs in the free app [Scriptable](https://apps.apple.com/app/scriptable/id1405459188). Its text is Bulgarian by default; English is one setting away.
 
 - **Small and medium:** the class now (or next), the minutes left, the room.
-- **Large:** the whole day, and below it the next holiday with the school days left until it.
+- **Large:** the whole day, and below it the next holiday with the days left until it.
 - **Lock Screen:** round, rectangular and one-line.
 - **Tap the widget:** today, the week, the days off, settings.
 
