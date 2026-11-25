@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.6 — 25 Nov 2026
+Накратко: Нова начална страница на сайта: уиджетите на живо, плъзгач през учебния ден, менюто, ваканциите и инсталиране в 3 стъпки. Самият уиджет не се променя.
+In short: A new home page for the site: the widgets live, a slider through the school day, the menu, the holidays and a 3-step install. The widget itself doesn't change.
+
+- **The landing page** (the site's root, `batvani.github.io/school-widget/`, in English): an iPhone with the widgets and apps, every widget size, **Try it** (a slider and shortcuts through a made-up school day, Dark / Light), the full-screen menu to tap through, the holidays in your calendar, the ways to get a timetable, the install steps and the questions. The widgets on it are hand-made copies that the tests compare with the real script at every moment.
+- **AI on a computer:** on a computer the page turns the AI's whole answer into a QR code to scan with the iPhone (hidden on a phone).
+- **Install:** the steps live on the landing page (`#install`); `install/` is only the automatic page for timetable links (`#z=`), which opens School Widget at once and falls back to the landing page. The AI's last lines and the docs point to `#install` / `#computer`.
+- **The widgets and the menu don't change**; only the version.
+
 ## 1.8.5 — 24 Nov 2026
 Накратко: Инсталирането и програмата са отделни: първо School Widget, после той пита за програмата (Постави, линк, QR код, AI или на ръка). Ваканциите идват от интернет за твоя клас и могат да влязат в календара ти. Град по желание.
 In short: Installing and the timetable are separate: first School Widget, then it asks for your timetable (Paste, a link, a QR code, an AI or by hand). The holidays come from the internet for your grade and can go into your calendar. An optional city.

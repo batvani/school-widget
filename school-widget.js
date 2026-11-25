@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: graduation-cap;
-// Version 1.8.5 — 24 Nov 2026. See CHANGELOG.md.
+// Version 1.8.6 — 25 Nov 2026. See CHANGELOG.md.
 // id: uchilishte-widget; schema: 1
 
 // ════════════════════════ TIMETABLE ════════════════════════
@@ -155,7 +155,7 @@ const DEFAULTS = {
 const TEST_NOW = null;
 
 // ════════════════════════ CODE (no need to edit below) ════════════════════════
-const VERSION = "1.8.5";
+const VERSION = "1.8.6";
 const SCHEMA = 1; // the timetable format this version reads (meta.schema)
 const NOW = TEST_NOW ? new Date(TEST_NOW) : new Date();
 

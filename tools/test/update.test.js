@@ -229,7 +229,7 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
       files = r.files; code = next; hist.push([v, next]);
     }
     const b = Object.keys(files).filter(f => f.startsWith("/docs/school-widget/backups/")).sort();
-    assert.deepStrictEqual(b, [`${V(2)}`, `${V(3)}`, `${V(4)}`].map(v => `/docs/school-widget/backups/${v}.js.txt`));
+    assert.deepStrictEqual(b, [`${V(2)}`, `${V(3)}`, `${V(4)}`].map(v => `/docs/school-widget/backups/${v}.js.txt`).sort()); // sorted as text: 1.8.10 before 1.8.8
   });
 
   console.log("widget runs that can't write, channels, offline");
