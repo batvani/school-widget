@@ -98,4 +98,266 @@
     return `<svg class="qr" viewBox="0 0 ${n + 8} ${n + 8}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${path}" fill="#000"/></svg>`;
   }
   /*QR end*/
+
+  // ───── helpers ─────
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var go = function (u) { (window.__go || function (x) { location.href = x; })(u); };
+  var SITE = location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, ""); // …/school-widget/
+  var SCRIPT_NAME = "School Widget", SHORTCUT_NAME = "School Widget Installer";
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  var dark = matchMedia("(prefers-color-scheme: dark)");
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); };
+
+  // ───── the demo day: one clock for every widget on the page ─────
+  var RANGE = SW_DEMO.RANGE, M = SW_DEMO.MOMENTS;
+  var T = M.inClass, mode = dark.matches ? "dark" : "light", modeSet = false;
+  var holdUntil = 0, glide = null, mounts = [], menu = null;
+  var hm = function (m, pad) { var h = Math.floor(m / 60); return (pad && h < 10 ? "0" : "") + h + ":" + String(m % 60).padStart(2, "0"); };
+
+  function stateText(m) {
+    var s = SW.state(m), n = s.next || {};
+    if (s.kind === "class") return s.name + ": " + s.left + " min left";
+    if (s.kind === "break") return "Break: " + (n.name || s.name) + " in " + s.left + " min";
+    if (s.kind === "before") return "Before school: " + (n.name || s.name) + " at " + (n.start || "");
+    return "School is over for today";
+  }
+  function draw() {
+    mounts.forEach(function (w) { w.update(T); });
+    if (menu) menu.update(T);
+    $$("[data-clock]").forEach(function (e) { e.textContent = hm(T, e.getAttribute("data-clock") === "pad"); });
+    var st = $("#stateTxt"); if (st) st.textContent = stateText(T);
+    var sl = $("#slider");
+    if (sl) { sl.value = T; sl.style.setProperty("--p", (T - RANGE[0]) / (RANGE[1] - RANGE[0]) * 100 + "%"); }
+  }
+  function setT(m) { m = Math.max(RANGE[0], Math.min(RANGE[1], Math.round(m))); if (m !== T) { T = m; draw(); } }
+  function hold(ms) { holdUntil = Date.now() + ms; }
+  function glideTo(m) {
+    if (reduce.matches) { setT(m); hold(1500); return; }
+    var from = T, t0 = performance.now(), len = Math.min(1000, 250 + Math.abs(m - from) * 2);
+    glide = { m: m };
+    (function step(now) {
+      if (!glide || glide.m !== m) return;
+      var k = Math.min(1, (now - t0) / len); k = 1 - Math.pow(1 - k, 3);
+      setT(from + (m - from) * k);
+      if (k < 1) requestAnimationFrame(step); else { glide = null; hold(1500); }
+    })(t0);
+    hold(len + 1500);
+  }
+  function setMode(m, user) {
+    if (user) modeSet = true;
+    mode = m;
+    mounts.forEach(function (w) { if (w.kind.indexOf("lock") !== 0) w.setMode(m); });
+    if (menu) menu.setMode(m);
+    var d = $("#dk"), l = $("#lt");
+    if (d) { d.setAttribute("aria-pressed", m === "dark"); l.setAttribute("aria-pressed", m === "light"); }
+  }
+
+  function boot() {
+    $$("[data-w]").forEach(function (el) {
+      var kind = el.getAttribute("data-w"), w = SW.mount(el, kind, { min: T, mode: mode });
+      w.kind = kind; mounts.push(w);
+      el.addEventListener("click", function () { $("#menu").scrollIntoView({ behavior: reduce.matches ? "auto" : "smooth", block: "start" }); });
+    });
+    var mm = $("[data-menu]");
+    if (mm) {
+      menu = SW.mountMenu(mm, { tab: "today", min: T, mode: mode });
+      mm.addEventListener("click", function (e) { var b = e.target.closest("[data-tab]"); if (b) menu.setTab(b.getAttribute("data-tab")); });
+    }
+    setMode(mode);
+    draw();
+    // the day keeps running; touching the slider or a shortcut only moves it, and it carries on 1.5 s later
+    if (!reduce.matches) setInterval(function () {
+      if (document.hidden || Date.now() < holdUntil || glide) return;
+      setT(T >= RANGE[1] ? RANGE[0] : T + 1);
+    }, 700);
+    var sl = $("#slider");
+    sl.min = RANGE[0]; sl.max = RANGE[1];
+    sl.addEventListener("input", function () { glide = null; T = +sl.value; hold(1500); draw(); });
+    sl.addEventListener("pointerdown", function () { glide = null; hold(60000); });
+    ["pointerup", "pointercancel", "blur"].forEach(function (ev) { sl.addEventListener(ev, function () { hold(1500); }); });
+    $$("[data-at]").forEach(function (b) { b.addEventListener("click", function () { glideTo(+b.getAttribute("data-at")); }); });
+    $("#dk").addEventListener("click", function () { setMode("dark", true); });
+    $("#lt").addEventListener("click", function () { setMode("light", true); });
+    dark.addEventListener("change", function () { if (!modeSet) setMode(dark.matches ? "dark" : "light"); });
+  }
+
+  // ───── scaling (phones and stages keep Apple's sizes, then shrink to fit) ─────
+  function fit() {
+    $$(".phone").forEach(function (p) { var k = p.clientWidth / 414; if (k) p.style.setProperty("--k", k); });
+    $$(".fit").forEach(function (f) {
+      var c = f.firstElementChild; if (!c) return;
+      c.style.transform = ""; c.style.transformOrigin = "0 0";
+      var w = c.offsetWidth, h = c.offsetHeight, p = f.parentElement, cs = getComputedStyle(p);
+      var avail = p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - (innerWidth < 821 ? 24 : 0);
+      var k = Math.min(1, avail / w);
+      if (!w || avail <= 0) return;
+      c.style.transform = k < 1 ? "scale(" + k + ")" : "";
+      f.style.width = w * k + "px"; f.style.height = h * k + "px";
+    });
+    pill();
+  }
+
+  // ───── widget sizes: tabs with a sliding highlight ─────
+  var CAPS = {
+    small: "<b>Small.</b> The class you are in, the minutes left and the room.",
+    medium: "<b>Medium.</b> The same, plus the next three classes.",
+    large: "<b>Large.</b> The whole day, with done classes dimmed and the days to the next break.",
+    lock: "<b>Lock Screen.</b> A round, a rectangular and a one-line widget, always white."
+  };
+  function pill() {
+    var on = $("#sizes [aria-selected=true]"), p = $("#sizes .pill");
+    if (on && p && on.offsetWidth) { p.style.width = on.offsetWidth + "px"; p.style.transform = "translateX(" + on.offsetLeft + "px)"; }
+  }
+  function pickSize(s) {
+    $$("#sizes [data-s]").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-s") === s ? "true" : "false"); b.tabIndex = b.getAttribute("data-s") === s ? 0 : -1; });
+    $("#sizeStage .layers").setAttribute("data-on", s);
+    $("#sizeCap").innerHTML = CAPS[s];
+    pill();
+  }
+  function sizes() {
+    $$("#sizes [data-s]").forEach(function (b) {
+      b.addEventListener("click", function () { pickSize(b.getAttribute("data-s")); });
+      b.addEventListener("keydown", function (e) {
+        var l = $$("#sizes [data-s]"), i = l.indexOf(b), d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (d) { var n = l[(i + d + l.length) % l.length]; pickSize(n.getAttribute("data-s")); n.focus(); e.preventDefault(); }
+      });
+    });
+    pickSize("small");
+  }
+
+  // ───── the phone's ☰ list and the Install bar ─────
+  function phoneBits() {
+    var mb = $("#mb"), sheet = $("#sheet");
+    var close = function () { sheet.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); mb.textContent = "☰"; };
+    mb.addEventListener("click", function () {
+      var o = sheet.classList.toggle("open"); mb.setAttribute("aria-expanded", o); mb.textContent = o ? "✕" : "☰";
+    });
+    $$("#sheet a").forEach(function (a) { a.addEventListener("click", close); });
+    addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    // one rule: shown when the hero buttons are above the screen and neither Try it nor Install is in the middle of it
+    var bar = $("#bar"), ctas = $(".hero .ctas"), ticking = false;
+    var over = function (id) { var r = document.getElementById(id).getBoundingClientRect(), y = innerHeight * 0.4; return r.top < y && r.bottom > y; };
+    var update = function () {
+      ticking = false;
+      bar.classList.toggle("show", ctas.getBoundingClientRect().bottom < 0 && !over("try") && !over("install"));
+    };
+    var queue = function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    addEventListener("scroll", queue, { passive: true }); addEventListener("resize", queue);
+    update();
+  }
+
+  // ───── install steps ─────
+  function steps() {
+    var KEY = "sw-install-done", steps = $$("#install .step"), prog = $("#progress"), label = $("#plabel");
+    var done = Math.max(0, Math.min(3, parseInt(store.get(KEY), 10) || 0));
+    function render() {
+      steps.forEach(function (s, i) { s.classList.toggle("done", i < done); s.classList.toggle("cur", i === done); s.classList.toggle("later", i > done); });
+      prog.setAttribute("data-done", done);
+      label.textContent = done >= 3 ? "All three steps done" : "Step " + (done + 1) + " of 3";
+    }
+    function tick(i) { if (done <= i) { done = i + 1; store.set(KEY, done); render(); } }
+    $("#store").addEventListener("click", function () { tick(0); });
+    $("#add").addEventListener("click", function () { tick(1); });
+    $("#run").addEventListener("click", function () {
+      tick(2);
+      go("shortcuts://run-shortcut?name=" + encodeURIComponent(SHORTCUT_NAME));
+    });
+    $("#add").href = SHORTCUT_LINK;
+    render();
+  }
+
+  // ───── copy buttons: the files are fetched when the page opens (Safari copies only straight after a tap) ─────
+  var texts = {};
+  function load(key, path) {
+    texts[key] = null;
+    return fetch(SITE + path).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (t) { texts[key] = t; }, function () { texts[key] = false; });
+  }
+  function copy(t) { return navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject(new Error("no clipboard")); }
+  function copyBtn(id, key, done) {
+    var b = $("#" + id), label = b.textContent;
+    var flash = function (s) { b.textContent = s; setTimeout(function () { b.textContent = label; }, 2500); };
+    b.addEventListener("click", function () {
+      var t = texts[key];
+      if (!t) { flash(t === null ? "Loading, tap again" : "Could not load. Check the internet"); return; }
+      copy(t).then(function () { flash(done); }, function () { flash("Could not copy"); });
+    });
+  }
+  function copying() {
+    load("script", "ai/install-script.js"); load("prompt", "ai/prompt-en.txt");
+    copyBtn("cs", "script", "Copied. Paste it into Scriptable");
+    copyBtn("ai", "prompt", "Copied. Paste it into your AI");
+  }
+
+  // ───── a timetable handed over by install/ (…/#install&z=… or &d=…) ─────
+  function handover() {
+    var m = location.hash.match(/[#&]([zd])=([A-Za-z0-9_\-]+)/);
+    if (!m) return;
+    var payload = "school-widget:" + m[1] + ":" + m[2], tt = $("#tt");
+    tt.hidden = false;
+    var flash = function (b, s) { var l = b.textContent; b.textContent = s; setTimeout(function () { b.textContent = l; }, 2500); };
+    $("#ttCopy").addEventListener("click", function () { var b = this; copy(payload).then(function () { flash(b, "Copied. Tap Paste in School Widget"); }, function () { flash(b, "Could not copy"); }); });
+    $("#ttOpen").addEventListener("click", function () { go("https://open.scriptable.app/run/" + encodeURIComponent(SCRIPT_NAME) + "?data=" + encodeURIComponent(payload)); });
+  }
+
+  // ───── the AI's answer → a QR code of install/#z=… ─────
+  function b64u(a) { var s = ""; for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function answerLink(text) {
+    var base = SITE + "install/";
+    var l = String(text).match(/https:\/\/\S+?\/install\/?#[zd]=[A-Za-z0-9_\-]+/);
+    if (l) return Promise.resolve(l[0]);
+    var j = String(text).match(/```(?:json)?\s*([\s\S]*?)```/), raw = j ? j[1] : String(text).slice(String(text).indexOf("{"), String(text).lastIndexOf("}") + 1), d;
+    try { d = JSON.parse(raw); } catch (e) { return Promise.resolve(null); }
+    if (!d || typeof d !== "object" || !d.week || !d.bells) return Promise.resolve(null);
+    var bytes = new TextEncoder().encode(JSON.stringify(d));
+    if (typeof CompressionStream !== "function") return Promise.resolve(base + "#d=" + b64u(bytes));
+    return new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer()
+      .then(function (z) { return base + "#z=" + b64u(new Uint8Array(z)); });
+  }
+  function qrBox() {
+    $("#mk").addEventListener("click", function () {
+      var out = $("#qr");
+      answerLink($("#ans").value).then(function (u) {
+        if (!u) { out.innerHTML = "<p>There is no timetable in that. Paste the AI's whole answer, or the link it gave you.</p>"; return; }
+        if (window.__qr) window.__qr(u); // the tests read the link
+        var svg = u.length <= 2000 && qrSvg(u);
+        out.innerHTML = svg ? '<div class="qrbox">' + svg + "</div><p>Scan it with your iPhone's camera.</p>" : "<p>That timetable is too big for a QR code. Paste it into School Widget instead.</p>";
+      });
+    });
+  }
+
+  // ───── the month calendar (December 2026, made up) ─────
+  function calendar() {
+    var g = $("#cal"), h = "";
+    ["M", "T", "W", "T", "F", "S", "S"].forEach(function (d) { h += '<div class="h" aria-hidden="true">' + d + "</div>"; });
+    var first = 1; // 1 December 2026 is a Tuesday: one empty cell after Monday
+    for (var i = 0; i < first; i++) h += "<div></div>";
+    for (var d = 1; d <= 31; d++) {
+      var wd = (first + d - 1) % 7, c = "";
+      if (d >= 24) c = "off"; else if (d === 9 || d === 10) c = "ex"; else if (wd >= 5) c = "we";
+      if (d === 3) c += " today";
+      h += '<div class="' + c + '">' + d + "</div>";
+    }
+    g.innerHTML = h;
+  }
+
+  // ───── start ─────
+  function init() {
+    boot(); sizes(); phoneBits(); steps(); copying(); handover(); qrBox(); calendar();
+    var det = $("#computer");
+    var open = function () { if (location.hash === "#computer") det.open = true; };
+    addEventListener("hashchange", open); open();
+    fit(); addEventListener("resize", fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    // sizes are set by this script, so the browser's own jump to #id lands too early: go again once laid out
+    // (a timetable address, #install&z=…, is not an element id at all)
+    var id = (location.hash.match(/^#([A-Za-z]+)/) || [])[1], target = id && document.getElementById(id);
+    if (target) {
+      var there = function () { target.scrollIntoView({ behavior: "instant", block: "start" }); };
+      there(); addEventListener("load", there); setTimeout(there, 250);
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
