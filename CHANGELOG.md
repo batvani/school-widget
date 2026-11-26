@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.9.0 — 26 Nov 2026
+Накратко: Подреждане преди официалното издание: по-кратък и по-чист код, по-добри тестове и документация. Уиджетите и менюто не се променят. Старите версии (преди 1.9) вече не се поддържат: ако не си избрал календари в Настройки, School Widget не чете никой.
+In short: A clean-up before the official release: shorter, tidier code, better tests and docs. The widgets and the menu don't change. Versions before 1.9 are no longer supported: if you haven't picked calendars in Settings, School Widget reads none.
+
+- **Calendars:** the days-off and tests calendars are read only when picked in **Настройки** (or named in the Parameter). The old defaults "Off-School" and "Контролни" for settings from before 1.8.5 are gone; `tests=on` / `tests=yes` no longer means "Контролни".
+- **Gone with the old versions:** copying the old `uchilishte/` folder, the `uchilishte:` link prefix and the `uchilishte-import.txt` file name. Only `school-widget:` links and `school-widget-import.txt` are read.
+- **Code:** shared helpers for the files, one listing of saved timetables, one request queue in the menu; unused strings and variables removed.
+- **Tests and tools:** one test harness for all suites; new tests for the Parameter, refresh dates and an install with no calendars; the preview galleries share one renderer; the dev server moved to `tools/dev/`; leftover plans and sketches removed.
+- **The site:** the menu demo's date no longer runs under the share button.
+- **Docs:** a new README (English, then Bulgarian) with pictures from the landing page; CONTRIBUTING, SETTINGS and the Shortcut steps brought up to date.
+- The widgets and the menu are unchanged (tree.js: 18,855 cases).
+
 ## 1.8.7 — 26 Nov 2026
 Накратко: Менюто се отваря направо, без списък за избор. Днес се побира на един екран, а Програма показва седмицата първо, с бутони под нея. Зеленото зад текущия час е по-ясно.
 In short: The menu opens straight away, with no list to choose from. Today fits on one screen, and Програма shows the week first, with buttons under it. The green behind the current class is clearer.

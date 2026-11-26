@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: graduation-cap;
-// Version 1.8.7 — 26 Nov 2026. See CHANGELOG.md.
+// Version 1.9.0 — 26 Nov 2026. See CHANGELOG.md.
 // id: uchilishte-widget; schema: 1
 
 // ════════════════════════ TIMETABLE ════════════════════════
@@ -127,7 +127,7 @@ let HOLIDAYS = null;
 //
 // A single widget can also override them with its Parameter field
 // (long-press the widget → Edit Widget → Parameter), separated by ";":
-//   Off-School; countdown=off; reason=on; tests=Контролни; tap=off; lang=en; theme=dark
+//   Days off; countdown=off; reason=on; tests=Tests; tap=off; lang=en; theme=dark
 // A word without "=" is the days-off calendar name.
 // The medium widget has two more layouts, chosen only here:
 //   layout=day   the class in focus | the whole day with start times
@@ -155,7 +155,7 @@ const DEFAULTS = {
 const TEST_NOW = null;
 
 // ════════════════════════ CODE (no need to edit below) ════════════════════════
-const VERSION = "1.8.7";
+const VERSION = "1.9.0";
 const SCHEMA = 1; // the timetable format this version reads (meta.schema)
 const NOW = TEST_NOW ? new Date(TEST_NOW) : new Date();
 
