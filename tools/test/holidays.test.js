@@ -6,11 +6,7 @@ const ROOT = path.join(__dirname, "..", "..");
 const LIST = JSON.parse(fs.readFileSync(path.join(ROOT, "holidays/list.json"), "utf8"));
 const clone = o => JSON.parse(JSON.stringify(o));
 
-let passed = 0, failed = 0;
-function test(name, fn) {
-  try { fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 3).join("\n       ")); }
-}
+const { testSync: test, finish } = require("./harness");
 // the events of a feed: [{ a, b (exclusive), name }]
 function events(ics) {
   const text = ics.replace(/\r\n /g, "");
@@ -82,5 +78,4 @@ test("names are transliterated for the file names", () => {
   assert.strictEqual(H.slug("Стара Загора"), "stara-zagora");
 });
 
-console.log(`\n${passed} passed, ${failed} failed`);
-process.exit(failed ? 1 : 0);
+finish();

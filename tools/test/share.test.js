@@ -22,11 +22,7 @@ const SHARED = clone(OLD);
 delete SHARED.meta.groups; delete SHARED.meta.created; SHARED.meta.source = "shared";
 Object.values(SHARED.week).forEach(d => d.forEach(e => { delete e.important; (e.groups || []).forEach(g => { delete g.important; }); }));
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 5).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 const program = { view: "1", tab: "t2" };
 
 (async () => {
@@ -192,6 +188,5 @@ const program = { view: "1", tab: "t2" };
     assert.deepStrictEqual(d.meta.groups, OLD.meta.groups);
   });
   await live.close();
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

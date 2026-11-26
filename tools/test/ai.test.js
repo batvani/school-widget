@@ -15,11 +15,7 @@ const INSTALLER = fs.readFileSync(P("ai/install-script.js"), "utf8");
 const RAWJS = "https://batvani.github.io/school-widget/school-widget.js";
 const T = "2026-11-05T10:20", ME = "/icloud/Инсталатор.js", SW = "/icloud/School Widget.js", IMPF = "/icloud/school-widget-import.txt";
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 5).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 
 (async () => {
   let A;
@@ -120,6 +116,5 @@ async function test(name, fn) {
     }
   });
 
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

@@ -8,11 +8,7 @@ const H = require("../holidays");
 const ROOT = path.join(__dirname, "../.."), P = (...a) => path.join(ROOT, ...a);
 const SITE = "https://batvani.github.io/school-widget/";
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 5).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 
 (async () => {
   const out = fs.mkdtempSync(path.join(os.tmpdir(), "cal-"));
@@ -79,6 +75,5 @@ async function test(name, fn) {
 
   await browser.close();
   fs.rmSync(out, { recursive: true });
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

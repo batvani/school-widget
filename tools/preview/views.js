@@ -1,4 +1,5 @@
-// Renders the full-screen menu (tap on the widget) at 4 moments into out/view-*.html.
+// Renders the full-screen menu (the page a tap on the widget opens) at 4 moments into out/view-*.html.
+// Usage: node views.js
 const fs = require("fs"), path = require("path");
 const run = require("./run");
 (async () => {

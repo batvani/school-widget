@@ -16,11 +16,7 @@ IMP.week["1"][4] = { name: "ПП Информатика", room: "111?" };
 IMP.week["2"][4] = { name: "Английски / Немски", room: "101 / 102", groups: [{ label: "Английски", name: "Английски език", room: "101" }, { label: "Немски", name: "Немски език", room: "102" }] };
 const answer = "Ето програмата ти:\n```json\n" + JSON.stringify(IMP, null, 1) + "\n```\nКопирай я.";
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 5).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 const text = (p, sel) => p.$eval(sel, e => e.textContent);
 const cell = (k, p) => `#ed [data-k="${k}"][data-p="${p}"]`;
 async function editCell(page, settle, k, p, f) { await page.click(cell(k, p)); await f(); await page.click('[data-y="ok"]'); await settle(); }
@@ -273,6 +269,5 @@ async function editCell(page, settle, k, p, f) { await page.click(cell(k, p)); a
   });
 
   await live.close();
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(async e => { console.error(e); await live.close(); process.exit(1); });

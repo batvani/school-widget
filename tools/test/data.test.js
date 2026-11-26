@@ -11,11 +11,7 @@ const withData = (d, src = SRC) => { const a = src.indexOf("const DATA = {"), b 
   return src.slice(0, a) + "const DATA = " + JSON.stringify(d, null, 2) + ";" + src.slice(b + 3); };
 const OWN = withData(FIX); // as if the user's timetable were typed into the code
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 3).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 // The script's internals, through the __TEST__ hook (a widget run, offline, with the fixture)
 async function api(opts = {}) {
   let x;
@@ -388,6 +384,44 @@ function fnvRef(text) {
     assert.strictEqual(x.hol().schoolYear, "2027-28");
   });
 
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  console.log("the Parameter, refresh dates, calendars");
+  await test("parseParam: keys in both languages, yes/no words, bad values ignored, a bare word is the calendar's name", () => {
+    const P = A.parseParam;
+    assert.deepStrictEqual(P(""), {});
+    assert.deepStrictEqual(P(undefined), {});
+    assert.deepStrictEqual(P("countdown=off;reason=не\ntap=0"), { countdown: false, showReason: false, tapView: false });
+    assert.deepStrictEqual(P("ваканция=да; причина=on"), { countdown: true, showReason: true });
+    assert.deepStrictEqual(P("tests=off"), { testsCalendar: "", testsCalendarId: "" });
+    assert.deepStrictEqual(P("tests=Exams"), { testsCalendar: "Exams", testsCalendarId: "" });
+    assert.deepStrictEqual(P("Липсващ;Other"), { offCalendar: "Липсващ", offCalendarId: "" }, "the first bare word wins");
+    assert.deepStrictEqual(P("calendar=Days off"), { offCalendar: "Days off", offCalendarId: "" });
+    assert.strictEqual(P("layout=day").layout, "day");
+    assert.strictEqual(P("изглед=списък").layout, "list");
+    assert.strictEqual(P("layout=foo").layout, "");
+    assert.strictEqual(P("theme=тъмна").theme, "dark");
+    assert.strictEqual(P("theme=light").theme, "light");
+    assert.strictEqual(P("theme=x").theme, "auto");
+    assert.strictEqual(P("box=цял").linkBox, "row");
+    assert.strictEqual(P("box=room").linkBox, "room");
+    assert.strictEqual(P("box=other").linkBox, undefined);
+    assert.strictEqual(P("channel=бета").channel, "beta");
+    assert.strictEqual(P("channel=x").channel, "stable");
+    assert.strictEqual(P("lang=en").language, "en");
+    assert.strictEqual(P("lang=xx").language, undefined, "an unknown language is ignored");
+    assert.deepStrictEqual(P("unknown=1"), {}, "unknown keys are ignored");
+  });
+  await test("the widget's refresh date: the next bell or 5 minutes in class, else the next bell or midnight", async () => {
+    const at = async t => { const d = (await run(t, "medium")).widget.refreshAfterDate; return `${d.getDate()} ${d.toTimeString().slice(0, 5)}`; };
+    assert.strictEqual(await at("2026-11-05T10:20"), "5 10:25", "in a class: 5 minutes");
+    assert.strictEqual(await at("2026-11-05T13:10"), "5 13:15", "the last class of the day");
+    assert.strictEqual(await at("2026-11-05T15:00"), "6 00:00", "after school: midnight (the next day's classes come then)");
+    assert.strictEqual(await at("2026-11-07T11:00"), "8 00:00", "a Saturday: midnight, not Monday");
+  });
+  await test("no calendar is read unless one is saved: a settings file without any, or with a Parameter naming one", async () => {
+    assert.deepStrictEqual((await run(T0, "medium", { settings: { language: "bg" } })).calendar, []);
+    assert.deepStrictEqual((await run(T0, "medium", { settings: { offCalendar: "", testsCalendar: "" } })).calendar, []);
+    assert.deepStrictEqual((await run(T0, "medium", { param: "tests=off" })).calendar, []);
+  });
+
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

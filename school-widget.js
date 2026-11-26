@@ -3607,7 +3607,7 @@ async function main() {
 }
 
 // For the tests in tools/ (undefined in Scriptable, so this does nothing there).
-if (typeof __TEST__ === "function") __TEST__({ validateData, migrate, parseImport, resolveGroups, fingerprint, inflateRaw, b64decode,
+if (typeof __TEST__ === "function") __TEST__({ parseParam, validateData, migrate, parseImport, resolveGroups, fingerprint, inflateRaw, b64decode,
   utf8encode, utf8decode, cmpVersion, checkForUpdate, installUpdate, updateTick, previousVersion, resumeUpdates, switchChannel, readState, codeSize, loadTimetable, saveTimetable, lastDayFor, nameSpots, emWidth, fitSize, VERSION, SCHEMA, hol: () => HOLIDAYS, loadHolidays, holidaysTick, DATA, OFF, TINFO, tt: () => TT, ttFull: () => TT_FULL });
 
 try { await main(); }

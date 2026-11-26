@@ -19,11 +19,7 @@ const FIX = JSON.parse(fs.readFileSync(P("tools/preview/fixtures/sample-2027.jso
 const TMP = process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, "tmp") : require("os").tmpdir();
 const OPEN = "https://open.scriptable.app/run/School%20Widget?data=school-widget%3A";
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 5).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 
 (async () => {
   let A;
@@ -108,6 +104,5 @@ async function test(name, fn) {
     assert(/Content-Security-Policy" content="default-src 'none';/.test(t));
   });
   await browser.close();
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

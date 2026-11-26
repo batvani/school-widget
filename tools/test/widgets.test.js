@@ -17,11 +17,7 @@ const SAME = { "Коледна ваканция": "Christmas break" }; // the ho
 const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
 const MOMENTS = [450, 490, 530, 550, 640, 720, 785, 820, 900].concat(Object.values(D.MOMENTS)).filter((m, i, a) => a.indexOf(m) === i).sort((a, b) => a - b);
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 6).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 const FONT = "<style>*{font-family:Arial,'Liberation Sans',sans-serif!important;letter-spacing:0!important}body{margin:0;background:#3a4a5c}.wid,.wid div{box-sizing:border-box}.box{display:inline-block;margin:20px}</style>";
 // visible texts and pictures inside each .box, relative to the widget's top-left corner
 const READ = () => [...document.querySelectorAll(".box")].map(b => {
@@ -155,6 +151,5 @@ function same(a, b, where) {
     await ctx.close();
   });
   await browser.close();
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

@@ -13,11 +13,7 @@ const DAY1 = "2026-11-05T10:20", DAY2 = "2026-11-06T10:20";
 const GH = "https://github.com/batvani/school-widget/releases/", API = "https://api.github.com/repos/batvani/school-widget/releases?per_page=10";
 const LATEST = GH + "latest/download/version.json", rel = (v, f) => `${GH}download/v${v}/${f}`;
 
-let passed = 0, failed = 0;
-async function test(name, fn) {
-  try { await fn(); passed++; console.log("  ok  " + name); }
-  catch (e) { failed++; console.log("  FAIL " + name + "\n       " + (e.stack || e).toString().split("\n").slice(0, 4).join("\n       ")); }
-}
+const { test, finish } = require("./harness");
 // FNV-1a 64 over UTF-8 with \n line endings, and the size, as tools/release.js computes them
 function fp(text) {
   let h = 0xcbf29ce484222325n;
@@ -347,6 +343,5 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
     assert.strictEqual(saved.autoUpdate, false);
   });
 
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })().catch(e => { console.error(e); process.exit(1); });

@@ -1,5 +1,5 @@
-// Runs ../../school-widget.js under the Scriptable mock: logic checks (reminders,
-// Parameter parsing, settings round-trip) + a quick preview in out/. Usage: node run.js [en]
+// Runs ../../school-widget.js under the Scriptable mock; the library behind every script in this folder
+// and the tests: const run = require("./run"); await run("2026-11-05T10:20", "medium", opts) → { widget, logs, html, … }.
 // The timetable: by default the user's timetable fixture (fixtures/sample.json, schema 0) is put into
 // the mock's data file, so every render uses it whatever the built-in DATA is.
 //   DATA_FILE=<path> node …   another timetable file (any schema)
@@ -66,11 +66,8 @@ const CAL = {
   ]
 };
 
-let LANG = null;
 async function run(nowStr, family, opts = {}) {
-  opts.settings = opts.settings || (LANG ? { language: LANG } : undefined);
-  let src = SRC.replace("const TEST_NOW = null;", `const TEST_NOW = ${JSON.stringify(nowStr)};`);
-  if (opts.src) src = opts.src.replace("const TEST_NOW = null;", `const TEST_NOW = ${JSON.stringify(nowStr)};`);
+  const src = (opts.src || SRC).replace("const TEST_NOW = null;", `const TEST_NOW = ${JSON.stringify(nowStr)};`);
   let calendar = [], widget = null, logs = [], html = null, scheduled = [], alerts = [], evals = [], copied = [], opened = [], shared = [], exported = [];
   const files = Object.assign({}, opts.files || {}), dirs = new Set();
   for (const f of Object.keys(files)) for (let q = f.slice(0, f.lastIndexOf("/")); q.split("/").length > 2; q = q.slice(0, q.lastIndexOf("/"))) dirs.add(q);
@@ -134,60 +131,3 @@ async function run(nowStr, family, opts = {}) {
 }
 
 module.exports = run;
-// required by final.js / variants.js / views.js: only run()
-if (require.main !== module) return;
-LANG = process.argv[2] || null;
-(async () => {
-  fs.mkdirSync(path.join(__dirname, "out"), { recursive: true });
-  const times = [
-    ["2026-11-05T10:20", "Чт 10:20 — ПП Физика (контролно)"],
-    ["2026-11-05T10:47", "Чт 10:47 — междучасие"],
-    ["2026-11-05T07:35", "Чт 07:35 — преди училище"],
-    ["2026-11-05T13:10", "Чт 13:10 — последен час"],
-    ["2026-11-05T15:00", "Чт 15:00 — след часовете"],
-    ["2026-11-11T12:50", "Ср 12:50 — ФВС, без стая"],
-    ["2026-11-07T11:00", "Сб — уикенд"],
-    ["2026-11-02T09:00", "Пн 2 ное — есенна ваканция"],
-    ["2026-11-20T09:00", "Пт 20 ное — от календара"],
-    ["2027-07-10T10:00", "Юли — ваканция"]
-  ];
-  const fams = ["small", "medium", "large", "accessoryRectangular", "accessoryCircular", "accessoryInline"];
-  let out = `<html><head><meta charset="utf-8"><style>body{background:#3a4a5c;font-family:-apple-system,Arial;color:#fff;padding:20px}
-  .sc{margin-bottom:28px}.sc h2{font-size:15px;margin:0 0 8px}.r{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
-  .wid,.wid div{box-sizing:border-box}.wid{overflow:hidden;color:#fff;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif}
-  .lock{outline:1px dashed rgba(255,255,255,.3)}</style></head><body>`;
-  for (const [t, label] of times) {
-    out += `<div class="sc"><h2>${label}</h2><div class="r">`;
-    for (const f of fams) {
-      const r = await run(t, f);
-      if (!r.widget) throw new Error("no widget " + t + f);
-      if (r.logs.some(l => l.startsWith("ERR"))) console.log(t, f, r.logs);
-      out += M.renderWidget(r.widget, f);
-      if (f === "medium") console.log(label.padEnd(30), "refresh→", r.widget.refreshAfterDate.toTimeString().slice(0, 5), r.widget.refreshAfterDate.toDateString().slice(4, 10));
-    }
-    out += `</div></div>`;
-  }
-  fs.writeFileSync(path.join(__dirname, "out", `preview-${LANG || "bg"}${process.env.MODE === "light" ? "-light" : ""}.html`), out + "</body></html>");
-
-  // tap view
-  const v = await run("2026-11-05T10:20", "medium", { app: true, query: { view: "today" } });
-  fs.writeFileSync(path.join(__dirname, "out", `dayweek-${LANG || "bg"}.html`), v.html);
-  // settings round-trip: page "navigates" to the save link, Scriptable stores it
-  const sv = await run("2026-11-05T10:20", "medium", { app: true, query: { view: "today", tab: "t4" }, onPresent: wv => {
-    const ok = wv.shouldAllowRequest({ url: "school-widget://save?d=" + encodeURIComponent(JSON.stringify({ language: "en", remindMinutes: 5, countdown: false, offCalendar: "" })) });
-    console.log("intercepted save link (should be false):", ok, "| normal load allowed:", wv.shouldAllowRequest({ url: "about:blank" }));
-  } });
-  console.log("saved settings:", sv.files["/docs/school-widget/settings.json"]);
-  console.log("reminders after save:", sv.scheduled.length, sv.scheduled[0] && sv.scheduled[0].body);
-  // reminders
-  const rm = await run("2026-11-05T10:20", "medium", { settings: { remindMinutes: 5 } });
-  console.log("reminders scheduled:", rm.scheduled.length, rm.scheduled.slice(0, 3).map(n => `${n.trigger.toTimeString().slice(0, 5)} ${n.title} | ${n.body}`));
-  // param parsing
-  const pp = await run("2026-11-05T10:20", "large", { param: "Off-School; ваканция=не; контролни=не" });
-  console.log("param run logs:", pp.logs);
-  // the medium widget's layout key: "day" / "list" (also in Bulgarian); anything else = the default
-  const shape = async param => { const w = (await run("2026-11-05T10:20", "medium", { param })).widget; return `${w.children.length} parts, padding ${w.padding.join("/")}`; };
-  for (const p of ["", "layout=day", "изглед=ден", "layout=list", "вид=списък", "layout=foo"]) console.log(`layout param "${p}":`, await shape(p));
-  const bad = await run("2026-11-05T10:20", "small", { param: "Липсващ" });
-  console.log("missing calendar logs:", bad.logs);
-})().catch(e => { console.error(e); process.exit(1); });

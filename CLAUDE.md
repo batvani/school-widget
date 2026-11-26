@@ -82,7 +82,6 @@ A fake Scriptable in Node (`tools/preview/mock.js`) renders the widget tree to H
 ```sh
 npm test                          # every tools/test/*.test.js
 cd tools/preview
-node run.js                       # logic + quick preview
 node final.js bg                  # all sizes × 16 moments → out/final-bg.html ("en"; MODE=light)
 node variants.js bg               # medium's three layouts × 22 moments (EXTRA="box=room;outline=on")
 node views.js                     # the full-screen menu → out/view-*.html
