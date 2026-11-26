@@ -1097,11 +1097,12 @@ function scriptFM() {
   try { if (l.isFileStoredIniCloud(module.filename)) return FileManager.iCloud(); } catch (e) { }
   return l;
 }
-async function readOwn() {
-  const fm = scriptFM();
-  try { if (fm.downloadFileFromiCloud) await fm.downloadFileFromiCloud(module.filename); } catch (e) { }
-  return fm.fileExists(module.filename) ? fm.readString(module.filename) : null;
+// The text of a file; iCloud files are downloaded first. Missing or unreadable: null.
+async function readText(fm, p) {
+  try { if (fm.downloadFileFromiCloud) await fm.downloadFileFromiCloud(p); } catch (e) { }
+  try { return fm.fileExists(p) ? fm.readString(p) : null; } catch (e) { return null; }
 }
+const readOwn = () => readText(scriptFM(), module.filename);
 const codeSize = t => utf8encode(String(t).replace(/\r\n?/g, "\n")).length;
 async function fetchText(url, secs) {
   const r = new Request(url); r.timeoutInterval = secs || 20;
@@ -1120,7 +1121,7 @@ async function checkForUpdate(force, secs) {
   st.lastCheck = NOW.toISOString(); st.checkedChannel = channel();
   st.latest = v.version; st.notes = v.notes || null;
   st.release = { version: v.version, file: v.file || "school-widget.js", fingerprint: v.fingerprint, size: v.size, shortcut: v.shortcut || null };
-  const own = await readOwn().catch(() => null), fp = own == null ? null : fingerprint(own);
+  const own = await readOwn(), fp = own == null ? null : fingerprint(own);
   // this file as it was published: its own release's fingerprint (looked up once per version;
   // not found = not a release, e.g. a copy from the PC; offline = unknown, nothing changes)
   let rel = v.version === VERSION ? v.fingerprint : st.ownRelease && st.ownRelease.version === VERSION ? st.ownRelease.fingerprint : null, unknown = false;
@@ -1164,7 +1165,7 @@ async function installUpdate(opts = {}) {
   if (fingerprint(code) !== rel.fingerprint) return fail("wrong fingerprint");
   try { new (Object.getPrototypeOf(async function () { }).constructor)(code); } catch (e) { return fail("does not compile"); }
   // back up this file, then replace it
-  const own = await readOwn().catch(() => null);
+  const own = await readOwn();
   if (own == null) return fail("can't read this script");
   const fm = FileManager.local(), bd = dataPath("backups"), backup = fm.joinPath(bd, `${VERSION}.js.txt`);
   try {
@@ -1272,7 +1273,7 @@ async function previousVersion() {
 }
 // "Обнови все пак": resume auto-update after a hand edit (this file is then trusted).
 async function resumeUpdates() {
-  const st = readState(), own = await readOwn().catch(() => null);
+  const st = readState(), own = await readOwn();
   st.autoPaused = false; if (own != null) st.ignoreFp = fingerprint(own);
   writeState(st);
 }
@@ -2590,11 +2591,7 @@ async function versionAction(a, v) {
 // in the WebView; the script answers its links in dataAction.
 const importPaths = () => [module.filename.slice(0, module.filename.lastIndexOf("/") + 1) + "school-widget-import.txt"];
 async function readImportFile() {
-  const fm = scriptFM();
-  for (const p of importPaths()) {
-    try { if (fm.fileExists(p) && fm.downloadFileFromiCloud) await fm.downloadFileFromiCloud(p); } catch (e) { }
-    try { if (fm.fileExists(p)) return fm.readString(p); } catch (e) { }
-  }
+  for (const p of importPaths()) { const t = await readText(scriptFM(), p); if (t != null) return t; }
   return null;
 }
 function removeImportFile() { const fm = scriptFM(); for (const p of importPaths()) try { if (fm.fileExists(p)) fm.remove(p); } catch (e) { console.error("Import file: " + e); } }
@@ -2695,7 +2692,7 @@ function mergeOld(n, o, sameYear) {
 }
 // What the editor page needs: the timetable, its check, history/, the official days off.
 function editorPayload(ed = {}) {
-  const fm = FileManager.local(), hd = dataPath("history"), imp = ed.mode === "import", own = ownTT(), newYear = imp && yearOld();
+  const imp = ed.mode === "import", own = ownTT(), newYear = imp && yearOld();
   const m = imp && own ? mergeOld(ed.d, TT_FULL, !newYear) : null, d = m ? m.d : imp ? ed.d : TT_FULL;
   const hol = HOLIDAYS.daysOff.map(e => Array.isArray(e) ? e : [e]).filter(e => isYmd(e[0]) && offApplies(e, 0)).map(e => ({ a: e[0], b: isYmd(e[1]) ? e[1] : e[0] }));
   if (imp && Array.isArray(d.daysOff)) { // older timetables (and AIs) copied the official days off: they come by themselves now
@@ -2734,7 +2731,7 @@ async function dataAction(q, wv, changed) {
   if (q.a === "cancel") { removeImportFile(); return page("t1"); }
   if (q.a === "hist") { // Предишни програми: the history/ folder, each one restored or deleted
     const fm = FileManager.local(), hd = dataPath("history"), t = f => { const d = new Date(parseInt(f)); return `${d.getDate()} ${L.months[d.getMonth()]} ${d.getFullYear()}, ${hm(d)}`; };
-    const fs = fm.fileExists(hd) ? fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)) : [];
+    const fs = historyFiles(hd);
     const a = new Alert(); a.title = E.hist; a.message = fs.length ? E.histLead : E.histNone;
     fs.forEach(f => a.addAction(t(f)));
     if (fs.length) a.addDestructiveAction(E.histAll);
@@ -2751,7 +2748,7 @@ async function dataAction(q, wv, changed) {
   }
   if (q.a === "undo") {
     let d;
-    try { d = migrate(JSON.parse(FileManager.local().readString(dataPath("history", q.f)))); } catch (e) { return say(String(e.message || e)); }
+    try { d = migrate(readJSON(dataPath("history", q.f))); } catch (e) { return say(String(e.message || e)); }
     if (validateData(d, { quick: true }).errors.length) return say(E.badHist);
     saveTimetable(d, q.f); changed(); await reload();
     return page("t2", { msg: E.restored });
@@ -2784,7 +2781,7 @@ async function dataAction(q, wv, changed) {
   }
 }
 // "Въведи я на ръка": the demo's bells, Monday–Friday empty (tap a cell to fill it).
-const blankTimetable = () => ({ meta: { schema: SCHEMA }, bells: JSON.parse(JSON.stringify(DATA.bells)), week: { 1: [], 2: [], 3: [], 4: [], 5: [] } });
+const blankTimetable = () => ({ meta: { schema: SCHEMA }, bells: clone(DATA.bells), week: { 1: [], 2: [], 3: [], 4: [], 5: [] } });
 // At start, before there is a timetable: one copied (the link page copies it when School Widget wasn't
 // installed yet) is offered. Anything else on the clipboard is left alone.
 async function offerClipboard() {
@@ -3516,36 +3513,31 @@ async function showView(s, tab, jump, ed) {
   const wv = new WebView();
   let changed = false, busy = Promise.resolve();
   const apply = d => { saveSettings(cleanSettings(d)); changed = true; };
+  // the page's requests run one after another; a failure is logged, never thrown
+  const queue = (label, job) => { busy = busy.then(job).catch(e => console.error(label + ": " + e)); return false; };
   wv.shouldAllowRequest = req => {
     const u = String((req && req.url) || "");
     // a button in Settings → Версия: run it, then redraw only that card (the page keeps its place)
     const m = u.match(/^school-widget:\/\/update\?a=(\w+)(?:&v=(\w+))?/);
-    if (m) {
-      busy = busy.then(async () => {
-        let msg;
-        try { msg = await versionAction(m[1], m[2]); } catch (e) { msg = String(e.message || e); }
-        if (m[1] === "channel") changed = true;
-        await wv.evaluateJavaScript(`setVer(${JSON.stringify(versionCard(msg))})`);
-      }).catch(e => console.error("Version: " + e));
-      return false;
-    }
+    if (m) return queue("Version", async () => {
+      let msg;
+      try { msg = await versionAction(m[1], m[2]); } catch (e) { msg = String(e.message || e); }
+      if (m[1] === "channel") changed = true;
+      await wv.evaluateJavaScript(`setVer(${JSON.stringify(versionCard(msg))})`);
+    });
     // Settings → a calendar (school-widget://cal?k=offCalendar|testsCalendar): iOS's calendar picker
     const c = u.match(/^school-widget:\/\/cal\?k=(offCalendar|testsCalendar)$/);
-    if (c) {
-      busy = busy.then(async () => {
-        const r = await pickCalendar(c[1]);
-        if (!r) return;
-        apply({ [c[1]]: r.title, [c[1] + "Id"]: r.id });
-        await wv.evaluateJavaScript(`setCal(${JSON.stringify(c[1])},${JSON.stringify(r.title)},${JSON.stringify(r.id)})`);
-      }).catch(e => console.error("Calendar: " + e));
-      return false;
-    }
+    if (c) return queue("Calendar", async () => {
+      const r = await pickCalendar(c[1]);
+      if (!r) return;
+      apply({ [c[1]]: r.title, [c[1] + "Id"]: r.id });
+      await wv.evaluateJavaScript(`setCal(${JSON.stringify(c[1])},${JSON.stringify(r.title)},${JSON.stringify(r.id)})`);
+    });
     // the landing page, the menu and the editor (school-widget://data?a=…)
     if (u.startsWith("school-widget://data?")) {
       const q = {};
       for (const kv of u.slice(u.indexOf("?") + 1).split("&")) { const i = kv.indexOf("="); q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); }
-      busy = busy.then(() => dataAction(q, wv, () => { changed = true; })).catch(e => console.error("Timetable: " + e));
-      return false;
+      return queue("Timetable", () => dataAction(q, wv, () => { changed = true; }));
     }
     if (u.startsWith("school-widget://")) {
       try { apply(JSON.parse(decodeURIComponent(u.split("?d=")[1] || ""))); } catch (e) { console.error("Settings page: " + e); }
