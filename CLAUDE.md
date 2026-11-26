@@ -2,6 +2,8 @@
 
 Read this first, then `README.md` (what the user sees), `docs/SETTINGS.md` and `CONTRIBUTING.md`.
 
+**Pending (1.9):** when the user says "build", carry out `tools/preview/plan-1.9/PLAN.md` (approved design changes; remove this line when it's done).
+
 **This repo is public** (`batvani/school-widget`, MIT). Nothing personal goes in: no real names, emails, classes, the user's subjects or timetable, local paths or LAN addresses. Facts about the user and their phone live in Claude's memory. Fixtures and examples are made-up timetables. `tools/test/privacy.test.js` (part of `npm test`) checks every file against a private word list (`~/.config/school-widget/private-words.txt`; on GitHub the secret `PRIVATE_WORDS`).
 
 ## What it is
