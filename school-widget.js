@@ -372,7 +372,6 @@ const STRINGS = {
       nameWarn: "Скриптът се казва „%“. Преименувай го на „School Widget“ (в Scriptable задръж върху него → Rename), иначе линковете с програми няма да го намират.",
       clipTitle: "Програма в клипборда", clipLead: "Копирана е програма (%). Да я внеса ли?", clipYes: "Внеси я", no: "Не",
       addCal: "Добави ваканциите в календара си", importBtn: "Внеси програма", paste: "Постави", file: "От файл",
-      welcomeHint: "„Постави“ чете копираното: целия отговор на AI-а, линк или програма от съученик. Програмата остава на телефона.",
       copied: "Промптът е копиран ✓ Постави го в AI-а заедно със снимката на програмата.", emptyClip: "Клипбордът е празен. Копирай целия отговор на AI-а и опитай пак.",
       newer: "Тази програма е от по-нова версия на School Widget. Първо обнови School Widget.", fileBad: "Файлът за внасяне (school-widget-import.txt) не стана. Да го изтрия ли?", fileGone: "Изтрий файла",
       doneTitle: "Програмата е запазена", doneLead: "Сега добави уиджета. Тези стъпки са и в Настройки → Как да добавя уиджет.", toMenu: "Към менюто",
@@ -485,7 +484,6 @@ const STRINGS = {
       nameWarn: "This script is called “%”. Rename it to “School Widget” (in Scriptable: hold it → Rename), or timetable links won't find it.",
       clipTitle: "A timetable on the clipboard", clipLead: "A timetable is copied (%). Bring it in?", clipYes: "Bring it in", no: "No",
       addCal: "Add the holidays to your calendar", importBtn: "Import a timetable", paste: "Paste", file: "From a file",
-      welcomeHint: "“Paste” reads what you copied: the AI's whole answer, a link or a classmate's timetable. The timetable stays on the phone.",
       copied: "Prompt copied ✓ Paste it into the AI together with the photo of your timetable.", emptyClip: "The clipboard is empty. Copy the AI's whole answer and try again.",
       newer: "This timetable is from a newer version of School Widget. Update School Widget first.", fileBad: "The import file (school-widget-import.txt) didn't work. Delete it?", fileGone: "Delete the file",
       doneTitle: "Timetable saved", doneLead: "Now add the widget. These steps are also in Settings → How to add the widget.", toMenu: "To the menu",
@@ -534,30 +532,16 @@ const tinyName = n => (TT.tiny && TT.tiny[n]) || shortName(n);
 
 // ───── Settings ─────
 // Every file lives in Scriptable's own documents folder, in school-widget/ (settings.json, data.json, state.json,
-// holidays.json, history/, backups/). Before 1.8.5 the names were Bulgarian (uchilishte/, uchilishte-settings.json):
-// they are copied over once, not moved, so a rollback to an older version still finds its files.
+// holidays.json, history/, backups/).
 const DIR = "school-widget";
-(function englishNames() {
-  const fm = FileManager.local(), j = n => fm.joinPath(fm.documentsDirectory(), n), dir = j(DIR);
-  try {
-    if (fm.fileExists(dir)) return;
-    if (fm.fileExists(j("uchilishte"))) fm.copy(j("uchilishte"), dir); else fm.createDirectory(dir, true);
-    if (fm.fileExists(j("uchilishte-settings.json"))) fm.copy(j("uchilishte-settings.json"), fm.joinPath(dir, "settings.json"));
-    const st = fm.joinPath(dir, "state.json"); // the update state keeps whole paths (backups/)
-    if (fm.fileExists(st)) fm.writeString(st, fm.readString(st).split("/uchilishte/").join("/" + DIR + "/"));
-  } catch (e) { console.error("Renaming the files: " + e); }
-})();
+try { const fm = FileManager.local(), dir = fm.joinPath(fm.documentsDirectory(), DIR); if (!fm.fileExists(dir)) fm.createDirectory(dir, true); }
+catch (e) { console.error("Creating the folder: " + e); }
 function settingsPath() { const fm = FileManager.local(); return fm.joinPath(fm.joinPath(fm.documentsDirectory(), DIR), "settings.json"); }
-// Before 1.8.5 these two calendars were read by name without asking (new installs pick them in Settings).
-const OLD_CALS = { offCalendar: "Off-School", testsCalendar: "Контролни" };
 function loadSaved() {
   const s = Object.assign({}, DEFAULTS);
   try {
     const fm = FileManager.local(), p = settingsPath();
-    // settings from before 1.8.5 (no calendar identifiers yet): a calendar they don't name is the old default
-    if (fm.fileExists(p)) { const f = JSON.parse(fm.readString(p)); Object.assign(s, "offCalendarId" in f ? {} : OLD_CALS, f); }
-    // no settings yet but a timetable (data.json): an install from before 1.8.5 → its calendars stay
-    else if (fm.fileExists(fm.joinPath(fm.joinPath(fm.documentsDirectory(), DIR), "data.json"))) { Object.assign(s, OLD_CALS); saveSettings(s); }
+    if (fm.fileExists(p)) Object.assign(s, JSON.parse(fm.readString(p)));
   } catch (e) { console.error("Reading settings: " + e); }
   return s;
 }
@@ -583,7 +567,7 @@ function cleanSettings(d) {
 function parseParam(p) {
   const out = {};
   if (!p) return out;
-  const YES = /^(yes|on|true|1|да|вкл)$/i, NO = /^(no|off|false|0|не|изкл)$/i;
+  const NO = /^(no|off|false|0|не|изкл)$/i;
   String(p).split(/[;\n]/).map(t => t.trim()).filter(Boolean).forEach(tok => {
     const m = tok.match(/^([^=]+)=(.*)$/);
     if (!m) { if (!out.offCalendar) { out.offCalendar = tok; out.offCalendarId = ""; } return; }
@@ -593,7 +577,7 @@ function parseParam(p) {
       case "calendar": case "календар": out.offCalendar = v; out.offCalendarId = ""; break; // by name
       case "countdown": case "ваканция": out.countdown = on; break;
       case "reason": case "причина": out.showReason = on; break;
-      case "tests": case "контролни": out.testsCalendar = (NO.test(v) || !v) ? "" : (YES.test(v) ? OLD_CALS.testsCalendar : v); out.testsCalendarId = ""; break;
+      case "tests": case "контролни": out.testsCalendar = (NO.test(v) || !v) ? "" : v; out.testsCalendarId = ""; break;
       case "tap": case "докосване": out.tapView = on; break;
       case "color": case "colors": case "colour": case "colours": case "цвят": case "цветове": out.linkColors = on; break;
       case "outline": case "outlines": case "рамки": out.linkOutlines = on; break;
@@ -812,18 +796,18 @@ function parseImport(input) {
     } catch (e) { return { error: IMPORT_ERR.broken }; }
   };
   if (!text) return { error: IMPORT_ERR.none };
-  // 1–3: school-widget:z: / :d: / :j: at the start (uchilishte: before 1.8.5)
-  let m = text.match(/^(?:school-widget|uchilishte):([zdj]):([\s\S]*)$/);
+  // 1–3: school-widget:z: / :d: / :j: at the start
+  let m = text.match(/^school-widget:([zdj]):([\s\S]*)$/);
   if (m) return payload(m[1], m[1] === "j" ? m[2].trim() : m[2].trim().split(/\s/)[0]);
   // 4: a link with #z= / #d= / ?data=
   m = text.match(/[#&]([zd])=([A-Za-z0-9_\-+/=%]+)/);
   if (m) return payload(m[1], decodeURIComponent(m[2]));
   m = text.match(/[?&]data=([^&#\s]+)/);
-  if (m) { let v = m[1]; try { v = decodeURIComponent(v); } catch (e) { } if (/^(school-widget|uchilishte):/.test(v)) return parseImport(v); }
+  if (m) { let v = m[1]; try { v = decodeURIComponent(v); } catch (e) { } if (/^school-widget:/.test(v)) return parseImport(v); }
   // 5: raw JSON
   try { return ok(JSON.parse(text)); } catch (e) { }
   // the prefix somewhere inside a longer text (a whole AI answer)
-  m = text.match(/(?:school-widget|uchilishte):([zd]):([A-Za-z0-9_\-]+)/);
+  m = text.match(/school-widget:([zd]):([A-Za-z0-9_\-]+)/);
   if (m) return payload(m[1], m[2]);
   // 6: the first balanced {…} that parses (a ```json block, or JSON inside other text)
   for (let from = 0, found = false; ;) {
@@ -845,7 +829,6 @@ function migrate(d) {
   else if (d.meta.schema === undefined || d.meta.schema === 0) d.meta.schema = 1;
   // the grade comes from shared links and files, and the editor's page shows it: a whole number 1–12 or nothing
   if (d.meta.grade !== undefined) { const g = Number(d.meta.grade); if (Number.isInteger(g) && g >= 1 && g <= 12) d.meta.grade = g; else delete d.meta.grade; }
-  delete d.lastDay; // before 1.8.5 the last day of school could be set; now it's always the official one
   return d;
 }
 // The key of a split class's label set: labels sorted and joined with "|".
@@ -2609,8 +2592,7 @@ async function versionAction(a, v) {
 // parseImport → migrate → the editor page (validateData on every change), which saves through
 // school-widget://data?a=save: history/, then data.json. The page's code is edPage (below), which runs
 // in the WebView; the script answers its links in dataAction.
-const IMPORT_FILES = ["school-widget-import.txt", "uchilishte-import.txt"]; // the second: Shortcuts and install scripts from before 1.8.5
-const importPaths = () => IMPORT_FILES.map(n => module.filename.slice(0, module.filename.lastIndexOf("/") + 1) + n);
+const importPaths = () => [module.filename.slice(0, module.filename.lastIndexOf("/") + 1) + "school-widget-import.txt"];
 async function readImportFile() {
   const fm = scriptFM();
   for (const p of importPaths()) {

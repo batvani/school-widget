@@ -158,12 +158,6 @@ async function editCell(page, settle, k, p, f) { await page.click(cell(k, p)); a
     assert.strictEqual(title, "Провери програмата");
     assert(!(IMPF in r.files), "the import file is gone");
     assert.strictEqual(hist(r).length, 0, "the saved timetable is untouched");
-    const OLD = IMPF.replace("school-widget-import", "uchilishte-import"); // written by Shortcuts from before 1.8.5
-    const o = await live(T, { files: { [OLD]: "uchilishte:j:" + JSON.stringify(IMP) } }, async (page, settle) => {
-      await settle(); title = await text(page, "#ed h1"); await page.click('[data-x="cancel"]'); await settle();
-    });
-    assert.strictEqual(title, "Провери програмата", "the old name still works");
-    assert(!(OLD in o.files));
   });
   await test("a broken import file: an alert offers to delete it", async () => {
     const r = await run(T, "medium", { app: true, files: { [IMPF]: '{"week": {"1": [' }, alerts: [0] });

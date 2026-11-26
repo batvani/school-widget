@@ -156,8 +156,7 @@ function fnvRef(text) {
   const Z = "school-widget:z:" + b64url(zlib.deflateRawSync(Buffer.from(J), { level: 9 }));
   const Dd = "school-widget:d:" + b64url(Buffer.from(J));
   const same = r => { assert(!r.error, JSON.stringify(r.error)); assert.deepStrictEqual(r.data, D); };
-  await test("school-widget:z:, :d:, :j:", () => { same(A.parseImport(Z)); same(A.parseImport(Dd)); same(A.parseImport("school-widget:j:" + J));
-    same(A.parseImport("uchilishte:j:" + J)); same(A.parseImport("uchilishte:z:" + Z.slice(16))); }); // from before 1.8.5
+  await test("school-widget:z:, :d:, :j:", () => { same(A.parseImport(Z)); same(A.parseImport(Dd)); same(A.parseImport("school-widget:j:" + J)); });
   await test("links: #z=, #d=, ?data=", () => {
     same(A.parseImport("https://batvani.github.io/school-widget/install/#z=" + Z.slice(16)));
     same(A.parseImport("https://batvani.github.io/school-widget/install/#d=" + Dd.slice(16)));
@@ -328,16 +327,6 @@ function fnvRef(text) {
     assert(/data-x="cal"/.test(r.html));
     assert.deepStrictEqual(r.opened, ["https://batvani.github.io/school-widget/calendar/?grade=8&city=%D0%92%D0%B0%D1%80%D0%BD%D0%B0&lang=en"]);
   });
-  await test("1.8.5: an install with the old Bulgarian file names is copied to school-widget/ (the old files stay, for a rollback)", async () => {
-    const old = { "/docs/uchilishte/data.json": JSON.stringify(FIX), "/docs/uchilishte-settings.json": JSON.stringify({ language: "en", offCalendarId: "" }),
-      "/docs/uchilishte/state.json": JSON.stringify({ backups: ["/docs/uchilishte/backups/1.8.0.js.txt"] }), "/docs/uchilishte/backups/1.8.0.js.txt": "// 1.8.0", "/docs/uchilishte/history/1.json": "{}" };
-    const r = await run(T0, "medium", { data: null, holidays: null, files: old });
-    for (const f of ["data.json", "backups/1.8.0.js.txt", "history/1.json"]) assert.strictEqual(r.files["/docs/school-widget/" + f], old["/docs/uchilishte/" + f], f);
-    assert.strictEqual(JSON.parse(r.files["/docs/school-widget/settings.json"]).language, "en");
-    assert.deepStrictEqual(JSON.parse(r.files["/docs/school-widget/state.json"]).backups, ["/docs/school-widget/backups/1.8.0.js.txt"]);
-    for (const f of Object.keys(old)) assert.strictEqual(r.files[f], old[f], "kept: " + f);
-    assert(r.widget, "the widget renders from the copied timetable");
-  });
   await test("a new install: no calendar is read, no update check, the setup page (not the menu); the name is checked", async () => {
     const urls = [];
     const w = await run(T0, "medium", { data: null, net: u => { urls.push(u); return null; } });
@@ -350,12 +339,6 @@ function fnvRef(text) {
     assert(/class="note2">Скриптът се казва „Uchilishte“/.test(app.html));
     assert(!/class="note2">Скриптът се казва/.test((await run(T0, "medium", { data: null, app: true, name: "School Widget" })).html));
   });
-  await test("an install from before 1.8.5 (a timetable, no settings): its Off-School and Контролни calendars stay", async () => {
-    const w = await run(T0, "medium", {});
-    const st = JSON.parse(w.files["/docs/school-widget/settings.json"]);
-    assert.deepStrictEqual([st.offCalendar, st.testsCalendar], ["Off-School", "Контролни"]);
-    assert.deepStrictEqual(w.calendar, ["Off-School", "Контролни"]);
-  });
   await test("Settings → a calendar: iOS's picker, saved by identifier (found even if renamed); another / none", async () => {
     const tap = u => async wv => { wv.shouldAllowRequest({ url: u }); await new Promise(r => setTimeout(r, 50)); };
     const r = await run(T0, "medium", { app: true, query: { view: "today", tab: "t4" }, settings: { language: "bg", offCalendarId: "" }, calPick: "Контролни", onPresent: tap("school-widget://cal?k=testsCalendar") });
@@ -365,8 +348,6 @@ function fnvRef(text) {
     // read by identifier: the saved name no longer matches
     const w = await run(T0, "medium", { settings: { offCalendarId: "", testsCalendar: "Old name", testsCalendarId: "id:Контролни" } });
     assert.deepStrictEqual(w.calendar, ["*"]);
-    // a settings file from before 1.8.5 without calendar names: the old defaults
-    assert.deepStrictEqual((await run(T0, "medium", { settings: { language: "bg" } })).calendar, ["Off-School", "Контролни"]);
     assert(!w.logs.some(l => /not found/.test(l)), w.logs.join("\n"));
     // one is set: the sheet first (1 = no calendar)
     const off = await run(T0, "medium", { app: true, query: { view: "today", tab: "t4" }, settings: { offCalendarId: "", testsCalendar: "Контролни", testsCalendarId: "id:Контролни" }, alerts: [1], onPresent: tap("school-widget://cal?k=testsCalendar") });
