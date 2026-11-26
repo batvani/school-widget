@@ -8,7 +8,7 @@ npx playwright install chromium
 npm test                         # every test in tools/test/ (+ the privacy test, see below)
 npm run preview                  # all widget sizes × 16 moments → tools/preview/out/final-bg.html
 npm run tree -- out/a            # the regression check: one hash per case (~18,800) → out/a/tree.txt
-npm run shots -- readme          # img/widgets.png (also: editor, share, version, install)
+npm run shots -- readme          # img/widgets.png (also: hero = the README's other pictures from the landing page; editor, share, version, install)
 npm run serve                    # the script over Wi-Fi, to paste into Scriptable on a phone
 ```
 
@@ -21,8 +21,8 @@ npm run serve                    # the script over Wi-Fi, to paste into Scriptab
 | `holidays/list.json` | The official days off, every grade (and cities). `tools/holidays.js` checks it and builds what Pages serves |
 | `ai/` | What an AI reads: `INSTRUCTIONS.md` and the full prompts `prompt.txt` / `prompt-en.txt` (all made by `node tools/instructions.js` from `tools/ai/INSTRUCTIONS.template.md`; don't edit them by hand), `START.md`, `schema.json`, `example.json`, `encode.py`, the install script. `ai/tests/`: AI tests |
 | `shortcut/STEPS.md` | How the Shortcut "School Widget Installer" is built |
-| `tools/preview/` | A fake Scriptable in Node (`mock.js`, `run.js`) that renders every widget to HTML/PNG; `fixtures/` are made-up timetables |
-| `tools/test/` | The tests; `all.js` runs them |
+| `tools/preview/` | A fake Scriptable in Node (`mock.js`; `run.js` is the library behind the scripts and tests) that renders every widget to HTML/PNG; `shots.js` makes the README's pictures; `fixtures/` are made-up timetables |
+| `tools/test/` | The tests; `all.js` runs them; `harness.js` is the shared test setup; `site.js` serves the site as Pages would |
 | `tools/ai/` | The template the AI prompt files in `ai/` are built from (`node tools/instructions.js`) |
 | `tools/dev/` | `serve.sh` / `serve.py`: the script over Wi-Fi for the phone |
 | `tools/release.js` | Checks a release and writes `out/release/`: the script **squashed** (esbuild; the header lines and `const VERSION` kept as they are), `version.json`, the notes |

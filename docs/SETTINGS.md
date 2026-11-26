@@ -1,6 +1,6 @@
 # School Widget · settings
 
-**In the app:** tap the widget → **Настройки / Settings**. Changes are saved at once; widgets show them on their next refresh (usually within a few minutes).
+**In the app:** tap the widget → **Настройки** (Settings). Changes are saved at once; widgets show them on their next refresh, usually within a few minutes.
 
 | Setting | What it does |
 |---|---|
@@ -18,7 +18,7 @@
 | Box around | The whole row, or only the room, in the medium lists (whole row by default) |
 | Version | Update, Check now, Previous version, automatic updates on/off. Tap the version number 5 times for the beta channel |
 
-A calendar picked in Settings is found even after you rename it. Installs from before 1.8.5 keep reading the calendars "Off-School" and "Контролни" by name.
+A calendar picked in Settings is found even after you rename it. With no calendar picked, none is read.
 
 ## Per widget: the Parameter
 
@@ -26,12 +26,15 @@ Touch and hold the widget → **Edit Widget** → **Parameter**, with entries se
 
 ```
 lang=en; theme=dark; countdown=off; reason=on; tap=off
-calendar=Off-School; tests=Контролни
+calendar=School days off; tests=Tests
 color=off; outline=on; box=room
 update=off; channel=beta
 ```
 
-A Parameter wins over Settings, for that widget only. `calendar=` and `tests=` name a calendar (`tests=off` turns tests off). A word without `=` is the days-off calendar's name. Bulgarian keys also work (`ваканция=не`, `език=en`, `тема=тъмна`, `цвят=не`, `рамки=да`, `рамка=стая`, `календар=…`, `контролни=…`).
+A Parameter wins over Settings, for that widget only.
+
+- `calendar=` and `tests=` name a calendar (`tests=off` turns tests off). A word without `=` is the days-off calendar's name.
+- Bulgarian keys also work: `ваканция=не`, `език=en`, `тема=тъмна`, `цвят=не`, `рамки=да`, `рамка=стая`, `календар=…`, `контролни=…`.
 
 **Medium widget layouts** (only here, per widget):
 
@@ -43,6 +46,9 @@ A Parameter wins over Settings, for that widget only. `calendar=` and `tests=` n
 
 ## The holidays in your calendar app
 
-The [calendar page](https://batvani.github.io/school-widget/calendar/) (also **Days off** → **Add the holidays to your calendar**) subscribes your calendar app to the official days off for your grade: Apple Calendar (`webcal://`), Google Calendar, or any app that takes a calendar link (Outlook and others). It's a subscription, not a copy: Apple Calendar refreshes it within hours, Google within about a day. It follows your class, so next September it shows the next grade's days without any change.
+The [calendar page](https://batvani.github.io/school-widget/calendar/) (also **Days off** → **Add the holidays to your calendar**) subscribes your calendar app to the official days off for your grade. It works with Apple Calendar (`webcal://`), Google Calendar and any app that takes a calendar link, such as Outlook.
 
-To remove it: Apple Calendar → Calendars → ⓘ next to "Ваканции · School Widget" → Unsubscribe; Google Calendar → Settings → the calendar → Unsubscribe.
+- It is a subscription, not a copy. Apple Calendar refreshes it within hours, Google within about a day.
+- It follows your class: next September it shows the next grade's days with no change from you.
+
+To remove it: Apple Calendar → Calendars → ⓘ next to "Ваканции · School Widget" → Unsubscribe. Google Calendar → Settings → the calendar → Unsubscribe.
