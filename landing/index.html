@@ -271,8 +271,34 @@ footer a{color:var(--dim)}
   .try,.hol,.split{gap:40px}
   .ways{grid-template-columns:1fr 1fr 1fr}
 }
+
+/* buttons answer hover (mouse only) and touch */
+:root{--spring:cubic-bezier(.34,1.56,.64,1)}
+.btn,nav a.get,.marks button,.mode button,.tabs button,#mb,.mtabs button,.mib i{transition:transform .3s var(--spring),background-color .2s,box-shadow .25s,color .2s,filter .2s}
+nav a:not(.get):not(.brand){background:linear-gradient(currentColor,currentColor) 0 100%/0 1.5px no-repeat;padding-bottom:2px;transition:background-size .25s cubic-bezier(.3,.7,.2,1),color .2s}
+@media (hover:hover) and (pointer:fine){
+  .btn.p:hover,nav a.get:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 8px 24px rgba(48,209,88,.35)}
+  .btn.o:hover,.step.done .btn:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--gt) 12%,transparent)}
+  nav a:not(.get):not(.brand):hover{background-size:100% 1.5px}
+  .marks button:hover,.mode button:hover{transform:translateY(-1px)}
+}
+.btn.p:active,.btn.o:active,.step.done .btn:active,nav a.get:active,.marks button:active,.mode button:active,.tabs button:active,#mb:active,.mtabs button:active,.mib:active i{transform:scale(.95);transition-duration:.08s;filter:brightness(.92)}.btn.p:active,nav a.get:active{box-shadow:0 2px 6px rgba(48,209,88,.25)}
+.btn.ok{animation:pop .45s var(--spring)}@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+.btn.no{animation:shake .4s}@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+#mb{position:relative}
+#mb span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform .3s var(--spring),opacity .2s}
+#mb .x{opacity:0;transform:rotate(-90deg)}
+#mb[aria-expanded=true] .m{opacity:0;transform:rotate(90deg)}
+#mb[aria-expanded=true] .x{opacity:1;transform:none}
+.mib:active i{box-shadow:none}
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
+  .btn,.btn:hover,.btn:active,.step.done .btn:hover,.step.done .btn:active,nav a.get:hover,nav a.get:active,.marks button:hover,.marks button:active,.mode button:hover,.mode button:active,.tabs button:active,#mb:active,.mtabs button:active,.mib:active i{transform:none!important;animation:none!important}
+  #mb span,#mb[aria-expanded=true] span{transform:none!important}
+  nav a:not(.get):not(.brand){transition:color .2s}
+  .btn.p:hover,nav a.get:hover{box-shadow:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:color .2s,background-color .2s,opacity .2s,filter .2s!important}
   html{scroll-behavior:auto}
 }
 </style>
@@ -282,7 +308,7 @@ footer a{color:var(--dim)}
   <a class="brand" href="#top">School Widget</a>
   <a href="#widgets">Widgets</a><a href="#try">Try it</a><a href="#menu">Menu</a><a href="#holidays">Holidays</a><a href="#timetable">Timetable</a><a href="#help">Help</a>
   <a class="get" href="#install">Install</a>
-  <button id="mb" type="button" aria-label="Sections" aria-expanded="false" aria-controls="sheet">☰</button>
+  <button id="mb" type="button" aria-label="Sections" aria-expanded="false" aria-controls="sheet"><span class="m">☰</span><span class="x">✕</span></button>
   <div id="sheet">
     <a href="#widgets">Widgets</a><a href="#try">Try it</a><a href="#menu">Menu</a><a href="#holidays">Holidays</a><a href="#timetable">Your timetable</a><a href="#install">Install</a><a href="#help">Questions</a>
   </div>

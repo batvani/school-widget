@@ -300,12 +300,10 @@ const h = x => JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOStri
     const r = await tap([["check"]], { files: base() });
     assert(card(r.evals[0]).includes("Няма връзка с GitHub"));
   });
-  await test(`after the update: \"Обновено до ${V(1)}\" once (card and menu), then gone`, async () => {
+  await test(`after the update: \"Обновено до ${V(1)}\" once (Settings → Версия opens by itself), then gone`, async () => {
     const n = net({ "stable/version.json": vjson(`${V(1)}`, NEW, OLDREL), "stable/school-widget.js": NEW });
     const r1 = await run(DAY1, "small", { files: base(), net: n });
-    const m = await run(DAY1, "medium", { src: NEW, files: r1.files, app: true });
-    assert(m.alerts[0].message.includes(`Обновено до ${V(1)}`), m.alerts[0].message);
-    const r2 = await run(DAY1, "medium", { src: NEW, files: m.files, app: true, query: { view: "today", tab: "t4" } });
+    const r2 = await run(DAY1, "medium", { src: NEW, files: r1.files, app: true }); // run in Scriptable: opens on Версия
     assert(r2.html.includes(`Обновено до ${V(1)}`));
     assert.strictEqual(state(r2).justUpdated, null, "cleared after it was shown");
     const r3 = await run(DAY1, "medium", { src: NEW, files: r2.files, app: true, query: { view: "today", tab: "t4" } });

@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: graduation-cap;
-// Version 1.8.6 — 25 Nov 2026. See CHANGELOG.md.
+// Version 1.8.7 — 26 Nov 2026. See CHANGELOG.md.
 // id: uchilishte-widget; schema: 1
 
 // ════════════════════════ TIMETABLE ════════════════════════
@@ -155,7 +155,7 @@ const DEFAULTS = {
 const TEST_NOW = null;
 
 // ════════════════════════ CODE (no need to edit below) ════════════════════════
-const VERSION = "1.8.6";
+const VERSION = "1.8.7";
 const SCHEMA = 1; // the timetable format this version reads (meta.schema)
 const NOW = TEST_NOW ? new Date(TEST_NOW) : new Date();
 
@@ -177,7 +177,7 @@ function makeColors(theme) {
     faded: pick(new Color("#000000", 0.36), new Color("#ffffff", 0.38)),
     fadedRed: pick(new Color("#ff3b30", 0.45), new Color("#ff453a", 0.45)),
     // the row of the class in focus: a green tint during a class, a neutral one in a break
-    tintClass: pick(new Color("#30d158", 0.16), new Color("#30d158", 0.18)),
+    tintClass: pick(new Color("#30d158", 0.24), new Color("#30d158", 0.32)),
     tintBreak: pick(new Color("#000000", 0.05), new Color("#ffffff", 0.08)),
     sun: pick(new Color("#ff9500"), new Color("#ffd60a")),
     // ring colours (pictures)
@@ -193,7 +193,7 @@ function makeColors(theme) {
     green: new Color("#30d158"),
     clear: new Color("#000000", 0),
     // the current class's tint inside a box picture (pictures can't follow Light/Dark Mode)
-    tintClassPic: ring(new Color("#30d158", 0.16), new Color("#30d158", 0.18), new Color("#30d158", 0.17)),
+    tintClassPic: ring(new Color("#30d158", 0.24), new Color("#30d158", 0.32), new Color("#30d158", 0.28)),
     tintBreakPic: ring(new Color("#000000", 0.05), new Color("#ffffff", 0.08), new Color("#8e8e93", 0.14)),
     lockTrack: new Color("#ffffff", 0.28)
   };
@@ -286,7 +286,7 @@ const STRINGS = {
     room: r => `стая ${r}`, roomWord: "стая", min: "мин", inWord: "след",
     inMin: n => `след ${n} мин`, atTime: t => `в ${t}`, until: t => `до ${t}`, startsAt: t => `започва в ${t}`,
     firstClass: "първи час", test: "контролно", testShort: "К",
-    dayOff: "Почивен ден", noMore: "Няма повече часове днес", doneShort: "Край за днес",
+    dayOff: "Почивен ден", doneShort: "Край за днес",
     tomorrow: "Утре", end: "Край", vacation: "Ваканция", enjoy: "Приятна почивка!", weekend: "Уикенд",
     summer: "Лятна ваканция",
     countdown: (r, n) => `${r} след ${n} ${n === 1 ? "ден" : "дни"}`, daysShort: n => n === 1 ? "ден" : "дни",
@@ -343,16 +343,13 @@ const STRINGS = {
       ],
       lockTip: "Ако на заключения екран пише „Select script…“, пропуснал си последната стъпка."
     },
-    menuTitle: "Училище", menuTimetable: "Разписание", menuSettings: "Настройки",
-    menuMedium: "Среден уиджет", menuSmall: "Малък уиджет", menuLarge: "Голям уиджет",
-    menuRect: "Заключен екран – правоъгълник", menuCirc: "Заключен екран – кръг", menuInline: "Заключен екран – ред", close: "Затвори", menuUpdates: "Обновяване",
+    close: "Затвори",
     ok: "Добре", restore: "Възстанови",
     brokenTitle: "Запазената програма е повредена", brokenMsg: "Сега се показва програмата от кода. Да възстановя последната запазена програма?",
     brokenMsgNoHistory: "Сега се показва програмата от кода. Няма по-стара запазена програма за възстановяване.",
-    menuImport: "Внеси програма",
     // the timetable editor and import (1.6.0); "%" is filled in by the page
     ed: {
-      edit: "Промени програмата", title: "Програма", impTitle: "Провери програмата", importTitle: "Внасяне на програма",
+      edit: "Промени програмата", capEdit: "Промени", capImport: "Внеси", capHist: "Предишни", capShare: "Сподели", title: "Програма", impTitle: "Провери програмата", importTitle: "Внасяне на програма",
       impLead: "Докосни клетка, за да я поправиш. Нищо не е запазено, докато не натиснеш „Запази“.", editLead: "Докосни клетка, за да я промениш.",
       daysN: "% дни · % часа", toCheck: "% за проверка", errs: "грешки: %", free: "свободен",
       cancel: "Отказ", save: "Запази", saveAnyway: "Запази все пак", done: "Готово", cont: "Продължи",
@@ -403,7 +400,7 @@ const STRINGS = {
     room: r => `Room ${r}`, roomWord: "room", min: "min", inWord: "in",
     inMin: n => `in ${n} min`, atTime: t => `at ${t}`, until: t => `until ${t}`, startsAt: t => `starts at ${t}`,
     firstClass: "first class", test: "test", testShort: "T",
-    dayOff: "Day off", noMore: "No more classes today", doneShort: "Done for today",
+    dayOff: "Day off", doneShort: "Done for today",
     tomorrow: "Tomorrow", end: "End", vacation: "Vacation", enjoy: "Enjoy the break!", weekend: "Weekend",
     summer: "Summer vacation",
     countdown: (r, n) => `${r} in ${n} ${n === 1 ? "day" : "days"}`, daysShort: n => n === 1 ? "day" : "days",
@@ -460,15 +457,12 @@ const STRINGS = {
       ],
       lockTip: "If the Lock Screen says “Select script…”, the last step was skipped."
     },
-    menuTitle: "School", menuTimetable: "Timetable", menuSettings: "Settings",
-    menuMedium: "Medium widget", menuSmall: "Small widget", menuLarge: "Large widget",
-    menuRect: "Lock Screen – rectangular", menuCirc: "Lock Screen – round", menuInline: "Lock Screen – one line", close: "Close", menuUpdates: "Updates",
+    close: "Close",
     ok: "OK", restore: "Restore",
     brokenTitle: "The saved timetable is damaged", brokenMsg: "The timetable from the code is shown for now. Restore the last saved timetable?",
     brokenMsgNoHistory: "The timetable from the code is shown for now. There is no older saved timetable to restore.",
-    menuImport: "Import a timetable",
     ed: {
-      edit: "Edit the timetable", title: "Timetable", impTitle: "Check the timetable", importTitle: "Import a timetable",
+      edit: "Edit the timetable", capEdit: "Edit", capImport: "Import", capHist: "Earlier", capShare: "Share", title: "Timetable", impTitle: "Check the timetable", importTitle: "Import a timetable",
       impLead: "Tap a cell to fix it. Nothing is saved until you tap Save.", editLead: "Tap a cell to change it.",
       daysN: "% days · % periods", toCheck: "% to check", errs: "errors: %", free: "free",
       cancel: "Cancel", save: "Save", saveAnyway: "Save anyway", done: "Done", cont: "Continue",
@@ -1508,7 +1502,6 @@ function holidayIcon(reason) {
   for (const [k, sym] of Object.entries(TT.holidayIcons || DATA.holidayIcons || {})) if (r.includes(norm(k))) return sym;
   return "calendar";
 }
-function offTitle(s) { return s.mode === "done" ? L.noMore : L.dayOff; }
 function offReason(s) {
   if (s.mode !== "off" || !S.showReason) return null;
   if (s.status.kind === "weekend") return L.weekend;
@@ -2840,15 +2833,6 @@ async function startImport(text, fromFile) {
   if (r.newer) { if (await say(E.newer, [L.set.v.update]) === 0) await say(await versionAction("install")); return; }
   await showView(computeState(NOW), "t1", null, { mode: "import", d: r.d });
 }
-async function menuImport() {
-  const E = L.ed, a = new Alert();
-  a.title = E.importTitle; a.message = E.welcomeHint;
-  a.addAction(E.paste); a.addAction(E.file); a.addCancelAction(L.close);
-  const i = await a.presentSheet();
-  if (i < 0) return;
-  const text = i === 0 ? Pasteboard.pasteString() : await pickFile();
-  if (text != null || i === 0) await startImport(text || "");
-}
 // The editor's own code. It runs in the WebView (buildHTML puts its text into the page), never in
 // Scriptable. P: editorPayload(); E: the page's strings ("%" = a value).
 function edPage(P, E) {
@@ -3278,7 +3262,7 @@ function buildHTML(s, tab, jump, ed = {}) {
         (tomorrow ? `<div class="hbig">${f.time}<span>${esc(f.day)}</span></div>` : `<div class="hbig">${f.time}</div><div class="hday">${esc(f.day)}</div>`);
     }
     const label = l.test ? `<small class="hot">${L.test}</small>` : `<small>${isNumRoom(l.room) ? L.roomWord : "&nbsp;"}</small>`;
-    return `<div class="hero">${svgRing(76, 9, p, ringColor, String(l.num), 32)}<div class="hmid">${mid}</div><div class="hroom">${label}<b>${esc(l.room)}</b></div></div>`;
+    return `<div class="hero">${svgRing(64, 8, p, ringColor, String(l.num), 28)}<div class="hmid">${mid}</div><div class="hroom">${label}<b>${esc(l.room)}</b></div></div>`;
   };
   const dayList = (ls, showProgress) => {
     const links = dayLinks(ls);
@@ -3328,6 +3312,21 @@ function buildHTML(s, tab, jump, ed = {}) {
   if (s.today.getDay() === 6 || s.today.getDay() === 0) mon = addDays(mon, 7);
   const days = [0, 1, 2, 3, 4].map(i => addDays(mon, i));
   const maxP = TT.bells.length;
+  // a cell's name is sized so its longest word fits on one line (WEEK_NAME_MAX down to WEEK_NAME_MIN pt);
+  // if it still doesn't, the tiny name is used when it is better; only then a word is broken (hyphen)
+  const WEEK_NAME_MAX = 11.5, WEEK_NAME_MIN = 10, WEEK_CELL_TEXT_W = 52;
+  const nameFs = n => Math.min(WEEK_NAME_MAX, WEEK_CELL_TEXT_W / (Math.max(...String(n).split(/\s+/).map(w => emWidth(w))) * 1.06));
+  const cellName = l => { const a = nameFs(l.short), b = l.tiny ? nameFs(l.tiny) : 0; return a < WEEK_NAME_MIN && b > a ? { text: l.tiny, fs: b } : { text: l.short, fs: a }; };
+  // the icon bar under the week (line icons, 22 pt)
+  const stroke = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const BAR_ICON = {
+    edit: `<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" ${stroke}/>`,
+    imp: `<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14" ${stroke}/>`,
+    hist: `<path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4M12 8v4l3 2" ${stroke}/>`,
+    share: `<path d="M12 3.5v11M7.8 7.4 12 3.2l4.2 4.2M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.7" ${stroke}/>`,
+  };
+  const barBtn = (x, cap) => `<button class="ib" data-x="${x}"><i><svg viewBox="0 0 24 24" aria-hidden="true">${BAR_ICON[x]}</svg></i><span>${cap}</span></button>`;
+  const iconBar = `<div class="ibar">${barBtn("edit", E.capEdit)}${barBtn("imp", E.capImport)}${ownTT() ? barBtn("hist", E.capHist) + barBtn("share", E.capShare) : ""}</div>`;
   let grid = `<div class="grid"><div></div>` + days.map(d => `<div class="dh ${+d === +s.today ? "today" : ""}">${L.weekdaysShort[d.getDay()]}<span>${d.getDate()}.${pad(d.getMonth() + 1)}</span></div>`).join("");
   const st = days.map(dayStatus);
   for (let p = 1; p <= maxP; p++) {
@@ -3341,7 +3340,8 @@ function buildHTML(s, tab, jump, ed = {}) {
       if (p === 1) grid += weekBoxes(lessonsFor(d), i);
       const cur = l && l.start <= now && now < l.end;
       const td = +d === +s.today ? "today" : "";
-      grid += l ? `<div class="cell ${l.hot ? "hot" : ""} ${cur ? "cur" : ""} ${td}"><b>${esc(l.short)}</b><span>${esc([l.room, l.test ? L.testShort : ""].filter(Boolean).join(" · ")) || "&nbsp;"}</span></div>`
+      const nm = l ? cellName(l) : null;
+      grid += l ? `<div class="cell ${l.hot ? "hot" : ""} ${cur ? "cur" : ""} ${td}"><b class="${nm.fs < WEEK_NAME_MIN ? "hy" : ""}" style="font-size:${Math.max(WEEK_NAME_MIN, nm.fs).toFixed(1)}px">${esc(nm.text)}</b><span>${esc([l.room, l.test ? L.testShort : ""].filter(Boolean).join(" · ")) || "&nbsp;"}</span></div>`
         : `<div class="cell empty ${td}"></div>`;
     });
   }
@@ -3370,15 +3370,24 @@ function buildHTML(s, tab, jump, ed = {}) {
   return `<!doctype html><html lang="${S.language}"><head><meta name="color-scheme" content="${S.theme === "dark" ? "dark" : S.theme === "light" ? "light" : "light dark"}"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <style>
 :root{color-scheme:dark;--bg:#000;--fg:#fff}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}[hidden]{display:none!important}
-body{margin:0;background:#000;color:#fff;font:16px -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px 60px}
+body{margin:0;background:#000;color:#fff;font:16px -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px 60px}html.fit body{padding-bottom:0}
 h1{font-size:30px;margin:6px 0 2px}h3{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:rgba(255,255,255,.55);margin:24px 4px 8px;font-weight:500}
 .hd{display:flex;align-items:center;gap:12px;margin:6px 0 0}.hd h1{flex:1;min-width:0;margin:0;line-height:1.15}.shr{flex:none;width:40px;height:40px;border:0;border-radius:20px;background:#1c1c1e;color:#30d158;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
-.tabs{display:flex;gap:4px;background:#1c1c1e;border-radius:10px;padding:3px;margin:16px 0;position:sticky;top:6px;z-index:2}
+.tabs{display:flex;gap:4px;background:#1c1c1e;border-radius:10px;padding:3px;margin:12px 0 10px;position:sticky;top:6px;z-index:2}
 .tabs button{flex:1;border:0;border-radius:8px;padding:8px 2px;background:none;color:#fff;font:600 13.5px -apple-system}
 .tabs button.on{background:#3a3a3c}
 .pane{display:none}.pane.on{display:block}
 .row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
 .row.past .mid,.row.past .room{opacity:.4}.row.cur .nm{color:#30d158}
+/* Today: --rh (row height) and --ring are set by fit() in the page script so the list fits the screen */
+#t1,#t2{--tint:rgba(48,209,88,.32)}
+#t1{--rh:59px;--ring:42px;--bleed:10px}
+#t1 h3{margin:16px 4px 4px}
+#t1 .row{min-height:var(--rh);padding:0}#t1 .row>svg{width:var(--ring);height:var(--ring)}
+#t1 .lk{left:calc(var(--ring) / 2 - 2.5px)}#t1 .lk.up{height:calc(50% - var(--ring) / 2 + 3.5px)}#t1 .lk.down{top:calc(50% + var(--ring) / 2 - 2.5px)}
+#t1 .row.cur{background:var(--tint);border-radius:14px;margin:0 calc(-1 * var(--bleed));padding:0 var(--bleed);border-bottom-color:transparent}
+#t1 .row.cur .lk{left:calc(var(--bleed) + var(--ring) / 2 - 2.5px)}
+#t1 .row:has(+ .row.cur){border-bottom-color:transparent}
 .row>svg{position:relative;z-index:1;flex:none}
 .lk{position:absolute;z-index:0;left:18.5px;width:5px;background:var(--c)}
 .lk.up{top:-1px;height:calc(50% - 17.5px)}.lk.down{top:calc(50% + 18.5px);bottom:-1px}
@@ -3387,7 +3396,7 @@ h1{font-size:30px;margin:6px 0 2px}h3{font-size:13px;text-transform:uppercase;le
 .mid{flex:1;min-width:0}.nm{font-weight:600;font-size:16px}.nm.hot{color:#ff453a}
 .sub{color:rgba(255,255,255,.65);font-size:13px}.room{color:rgba(255,255,255,.65);font-size:14px}
 .tag{font-size:11px;background:#ff453a;color:#000;border-radius:5px;padding:1px 5px;vertical-align:2px}
-.grid{display:grid;grid-template-columns:34px repeat(5,1fr);gap:4px;position:relative}
+.grid{display:grid;grid-template-columns:28px repeat(5,1fr);gap:3px;position:relative;margin-top:4px}
 .wbox{position:absolute;inset:-1px;border:1.5px solid var(--c);border-radius:10px;pointer-events:none}
 .wbox.dash{border-style:dashed}.wbox.openT{border-top:0;border-top-left-radius:0;border-top-right-radius:0;top:-12px}
 .wbox.openB{border-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;bottom:-12px}
@@ -3395,16 +3404,21 @@ h1{font-size:30px;margin:6px 0 2px}h3{font-size:13px;text-transform:uppercase;le
 .dh.today{background:#30d158;color:#000}.dh.today span{color:rgba(0,0,0,.6)}
 .pn{font-size:13px;color:rgba(255,255,255,.65);text-align:center;padding-top:6px}.pn span{display:block;font-size:9px;opacity:.7}
 .cell{background:#1c1c1e;border-radius:8px;padding:6px 4px;min-height:52px;text-align:center;font-size:11px;overflow:hidden}
-.cell b{display:block;font-size:11.5px;font-weight:600;line-height:1.15;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}.cell span{color:rgba(255,255,255,.6)}
-.cell.today{background:#2c2c2e}.cell.hot b{color:#ff453a}.cell.cur{outline:2px solid #30d158}.cell.empty{background:none}
+.cell b{display:block;font-size:11.5px;font-weight:600;line-height:1.15;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}.cell b.hy{-webkit-hyphens:auto;hyphens:auto}.cell span{color:rgba(255,255,255,.6)}
+.cell.today{background:#2c2c2e}.cell.hot b{color:#ff453a}.cell.cur{background:var(--tint)}.cell.empty{background:none}
 .offcol{background:repeating-linear-gradient(135deg,#141414 0 8px,#1c1c1e 8px 16px);border-radius:8px;writing-mode:vertical-rl;text-align:center;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6);font-size:13px}
-.hero{display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:22px;padding:16px;margin:4px 0 6px}
+/* Програма: the icon bar under the week (24 pt below the grid, 8 under the bar) */
+.ibar{display:flex;justify-content:space-between;gap:6px;margin:24px 0 8px}
+.ib{flex:1;border:0;background:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;font:600 12.5px -apple-system,sans-serif}
+.ib i{width:54px;height:54px;border-radius:27px;background:#1c1c1e;color:#30d158;display:flex;align-items:center;justify-content:center}.ib i svg{width:22px;height:22px}
+.ib:first-child i{background:#30d158;color:#000}
+.hero{display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:22px;padding:12px 16px;margin:4px 0 6px}
 .hero svg{flex:none}.hmid{flex:1;min-width:0}.hname{font-size:20px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbig{font-size:40px;font-weight:600;line-height:1.05;letter-spacing:-.5px;white-space:nowrap}.hbig span{font-size:17px;color:rgba(255,255,255,.65);margin-left:4px;letter-spacing:0}
+.hbig{font-size:36px;font-weight:600;line-height:1.05;letter-spacing:-.5px;white-space:nowrap}.hbig span{font-size:17px;color:rgba(255,255,255,.65);margin-left:4px;letter-spacing:0}
 .hbig .pre{margin:0 5px 0 0}.hday{font-size:15px;font-weight:700;color:rgba(255,255,255,.65)}.hsub{font-size:13px;color:rgba(255,255,255,.65)}
 .hroom{text-align:right;flex:none}.hroom small{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.65)}.hroom b{font-size:26px}
 .hot{color:#ff453a!important}.emoji{font-size:44px;line-height:1;width:76px;text-align:center;flex:none}
-.foot{color:rgba(255,255,255,.65);font-size:14px;margin:16px 2px}
+.foot{color:rgba(255,255,255,.65);font-size:14px;margin:10px 2px}
 .row .em{font-size:26px;width:42px;text-align:center;flex:none}
 .cd{display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:22px;padding:16px;margin:4px 0 14px}
 .cd .emoji{font-size:40px;width:56px}.cdn{font-size:40px;font-weight:600;line-height:1.05}.cdn span{font-size:16px;font-weight:600;color:rgba(255,255,255,.65);margin-left:6px}
@@ -3455,7 +3469,7 @@ ${S.theme === "dark" ? "" : `@media ${S.theme === "light" ? "all" : "(prefers-co
 :root{color-scheme:light;--bg:#f2f2f7;--fg:#000}body{background:#f2f2f7;color:#000}
 .sub,.room,h3,.pn,.hint,.note,.sw small,.field input,.dh span,.cell span,.offcol{color:rgba(60,60,67,.6)}.shr{background:#e5e5ea;color:#248a3d}
 .tabs,.card,.cd,.cell,.hero{background:#fff}.hbig span,.cdn span,.hroom small,.hsub,.foot,.hday{color:rgba(60,60,67,.6)}.tabs button,.seg button{color:#000}.tabs button.on{background:#e5e5ea}
-.row,.sw,.field{border-color:rgba(0,0,0,.08)}.cell.today{background:#e8f8ec}
+#t1,#t2{--tint:rgba(52,199,89,.24)}.row,.sw,.field{border-color:rgba(0,0,0,.08)}.cell.today{background:#e5e5ea}.cell.cur{background:var(--tint)}.ib i{background:#fff;color:#248a3d}.ib:first-child i{background:#34c759;color:#fff}
 .seg{background:#e5e5ea}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .sw input{background:#e9e9eb}ol{color:rgba(0,0,0,.85)}.note.warn{color:#b25000}
 .btn{background:#e5e5ea;color:#000}.btn.main{background:#34c759;color:#fff}.vnotes{color:rgba(0,0,0,.75)}.vwarn,.vnew{color:#b25000}.vok{color:#248a3d}
@@ -3467,11 +3481,18 @@ ${done}${land}<div id="sh"></div><div id="say" hidden></div>
 <div class="hd"><h1 style="font-size:${dateFs}px">${dateHead}</h1><button class="shr" data-x="app" aria-label="${esc(L.shareApp)}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.5v11M7.8 7.4 12 3.2l4.2 4.2M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 <div class="tabs">${tabs.map(t => `<button class="${t[0] === on ? "on" : ""}" data-t="${t[0]}">${t[1]}</button>`).join("")}</div>
 <div class="pane ${on === "t1" ? "on" : ""}" id="t1">${today}</div>
-<div class="pane ${on === "t2" ? "on" : ""}" id="t2">${newYearDue() ? wcard(E.newYear, E.newYearLead, "names", E.copyNames, `<div class="btns"><button class="btn" data-x="later">${E.later}</button></div>`) : ""}<div class="btns"><button class="btn" data-x="edit">${E.edit}</button><button class="btn" data-x="imp">${E.importBtn}</button></div>${impBtns}${ownTT() ? `<div class="btns"><button class="btn" data-x="hist">${E.hist}</button></div>` : ""}${ownTT() ? `<div class="btns"><button class="btn" data-x="share">${E.share}</button></div>` : ""}${grid}<div id="ed"></div></div>
+<div class="pane ${on === "t2" ? "on" : ""}" id="t2">${newYearDue() ? wcard(E.newYear, E.newYearLead, "names", E.copyNames, `<div class="btns"><button class="btn" data-x="later">${E.later}</button></div>`) : ""}${grid}${iconBar}${impBtns}<div id="ed"></div></div>
 <div class="pane ${on === "t3" ? "on" : ""}" id="t3">${cd}${offList}<div class="btns"><button class="btn" data-x="cal">${E.addCal}</button></div></div>
 <div class="pane ${on === "t4" ? "on" : ""}" id="t4">${settingsPane()}</div>
 <script>
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.pane').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.t).classList.add('on');scrollTo(0,0)});
+// Today: the rows share the height left on the screen (RH_MIN..RH_MAX pt each; rings shrink under RING_SMALL_BELOW); with too many classes the page scrolls
+var RH_MIN=44,RH_MAX=64,RH_DEF=59,RING=42,RING_SMALL=36,RING_SMALL_BELOW=54,FOOT_GAP=20,BOTTOM_INSET=34;
+function fit(){var t=document.getElementById('t1'),rs=t.querySelectorAll('.row'),on=t.classList.contains('on');
+t.style.setProperty('--rh',RH_DEF+'px');t.style.setProperty('--ring',RING+'px');document.documentElement.classList.remove('fit');if(!on||!rs.length||document.body.className)return;
+var f=t.querySelector('.foot'),fh=f?f.getBoundingClientRect().height+FOOT_GAP:0,top=rs[0].getBoundingClientRect().top+scrollY;
+var raw=Math.floor((innerHeight-top-fh-BOTTOM_INSET)/rs.length),h=Math.max(RH_MIN,Math.min(RH_MAX,raw));
+t.style.setProperty('--rh',h+'px');t.style.setProperty('--ring',(h<RING_SMALL_BELOW?RING_SMALL:RING)+'px');document.documentElement.classList.toggle('fit',raw>=RH_MIN)}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.pane').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.t).classList.add('on');scrollTo(0,0);fit()});addEventListener('resize',fit);addEventListener('load',fit);fit();
 // Settings: every change is sent to Scriptable straight away (it intercepts this link).
 var ST=${jsonIn(SAVED)};
 var LANG0=ST.language;
@@ -3571,42 +3592,6 @@ async function showView(s, tab, jump, ed) {
   return changed;
 }
 
-// ════════════════════════ MENU WHEN RUN IN SCRIPTABLE ════════════════════════
-async function appMenu() {
-  for (;;) {
-    const s = computeState(NOW);
-    const status = s.mode === "class" ? `${L.now}: ${[s.current.name, roomLabel(s.current.room), L.minLeft(s.minsLeft)].filter(Boolean).join(" · ")}`
-      : s.mode === "break" ? `${L.next}: ${[s.next.name, roomLabel(s.next.room), startsIn(s)].filter(Boolean).join(" · ")}`
-      : s.mode === "vacation" ? L.vacation : `${offTitle(s)}${offReason(s) ? " · " + offReason(s) : ""}`;
-    const a = new Alert();
-    a.title = L.menuTitle;
-    // once after an update or a rollback, and while an update is waiting
-    const st = readState(), V = L.set.v;
-    const vnote = st.justUpdated === VERSION ? `✓ ${V.updated(VERSION)}` : st.rolledBack ? V.rolledBack(st.rolledBack.from, st.rolledBack.to) : updateAvailable(st) ? V.available(st.latest) : "";
-    a.message = status + (vnote ? "\n" + vnote : "");
-    const acts = [
-      [L.menuTimetable, () => showView(s, "t1")],
-      [L.menuSettings, () => showView(s, "t4")],
-      [L.menuUpdates, () => showView(s, "t4", "ver")],
-      [L.menuImport, menuImport],
-      [L.menuMedium, () => buildWidget("medium", s).presentMedium()],
-      [L.menuSmall, () => buildWidget("small", s).presentSmall()],
-      [L.menuLarge, () => buildWidget("large", s).presentLarge()]
-    ];
-    const probe = new ListWidget();
-    if (typeof probe.presentAccessoryRectangular === "function") {
-      acts.push([L.menuRect, () => buildWidget("accessoryRectangular", s).presentAccessoryRectangular()]);
-      acts.push([L.menuCirc, () => buildWidget("accessoryCircular", s).presentAccessoryCircular()]);
-      acts.push([L.menuInline, () => buildWidget("accessoryInline", s).presentAccessoryInline()]);
-    }
-    acts.forEach(x => a.addAction(x[0]));
-    a.addCancelAction(L.close);
-    const i = await a.presentSheet();
-    if (i < 0) return;
-    await acts[i][1]();
-  }
-}
-
 // ════════════════════════ START ════════════════════════
 async function reload() {
   Object.assign(SAVED, loadSaved());
@@ -3643,12 +3628,12 @@ async function main() {
   if (q.data || file) return startImport(q.data || file, !q.data);
   if (setup && !q.view && await offerClipboard()) return;
   if (setup && !q.view) return showView(computeState(NOW), "t1"); // the setup page, not the menu
-  if (q.view) {
-    await showView(computeState(NOW), args.queryParameters.tab || "t1"); // opened by tapping the widget
-  } else {
-    await syncRemindersSafe();
-    await appMenu();
-  }
+  // run in Scriptable or opened by tapping the widget: straight to the full-screen menu; once after
+  // an update or a rollback, a run in Scriptable opens Settings → Версия, so its notice is seen
+  if (q.view) return showView(computeState(NOW), q.tab || "t1");
+  await syncRemindersSafe();
+  const st = readState(), notice = st.justUpdated === VERSION || st.rolledBack;
+  await showView(computeState(NOW), notice ? "t4" : "t1", notice ? "ver" : null);
 }
 
 // For the tests in tools/ (undefined in Scriptable, so this does nothing there).

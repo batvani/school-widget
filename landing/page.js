@@ -222,9 +222,9 @@
   // ───── the phone's ☰ list and the Install bar ─────
   function phoneBits() {
     var mb = $("#mb"), sheet = $("#sheet");
-    var close = function () { sheet.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); mb.textContent = "☰"; };
+    var close = function () { sheet.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); };
     mb.addEventListener("click", function () {
-      var o = sheet.classList.toggle("open"); mb.setAttribute("aria-expanded", o); mb.textContent = o ? "✕" : "☰";
+      var o = sheet.classList.toggle("open"); mb.setAttribute("aria-expanded", o);
     });
     $$("#sheet a").forEach(function (a) { a.addEventListener("click", close); });
     addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
@@ -291,13 +291,15 @@
       .then(function (t) { texts[key] = t; }, function () { texts[key] = false; });
   }
   function copy(t) { return navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject(new Error("no clipboard")); }
+  // a short pop on success, a small shake on a failure (the classes are in index.html)
+  function reply(b, how) { b.classList.remove("ok", "no"); void b.offsetWidth; b.classList.add(how); setTimeout(function () { b.classList.remove(how); }, 500); }
   function copyBtn(id, key, done) {
     var b = $("#" + id), label = b.textContent;
-    var flash = function (s) { b.textContent = s; setTimeout(function () { b.textContent = label; }, 2500); };
+    var flash = function (s, how) { b.textContent = s; reply(b, how); setTimeout(function () { b.textContent = label; }, 2500); };
     b.addEventListener("click", function () {
       var t = texts[key];
-      if (!t) { flash(t === null ? "Loading, tap again" : "Could not load. Check the internet"); return; }
-      copy(t).then(function () { flash(done); }, function () { flash("Could not copy"); });
+      if (!t) { flash(t === null ? "Loading, tap again" : "Could not load. Check the internet", "no"); return; }
+      copy(t).then(function () { flash(done, "ok"); }, function () { flash("Could not copy", "no"); });
     });
   }
   function copying() {
@@ -312,8 +314,8 @@
     if (!m) return;
     var payload = "school-widget:" + m[1] + ":" + m[2], tt = $("#tt");
     tt.hidden = false;
-    var flash = function (b, s) { var l = b.textContent; b.textContent = s; setTimeout(function () { b.textContent = l; }, 2500); };
-    $("#ttCopy").addEventListener("click", function () { var b = this; copy(payload).then(function () { flash(b, "Copied. Tap Paste in School Widget"); }, function () { flash(b, "Could not copy"); }); });
+    var flash = function (b, s, how) { var l = b.textContent; b.textContent = s; reply(b, how); setTimeout(function () { b.textContent = l; }, 2500); };
+    $("#ttCopy").addEventListener("click", function () { var b = this; copy(payload).then(function () { flash(b, "Copied. Tap Paste in School Widget", "ok"); }, function () { flash(b, "Could not copy", "no"); }); });
     $("#ttOpen").addEventListener("click", function () { go("https://open.scriptable.app/run/" + encodeURIComponent(SCRIPT_NAME) + "?data=" + encodeURIComponent(payload)); });
   }
 

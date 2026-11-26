@@ -272,9 +272,10 @@ async function editCell(page, settle, k, p, f) { await page.click(cell(k, p)); a
     assert.strictEqual(cls, "");
     assert.deepStrictEqual(saved(r), FIX);
   });
-  await test("the app menu has Внеси програма", async () => {
+  await test("running the script opens the menu at once (no list to choose from); Програма has Внеси", async () => {
     const r = await run(T, "medium", { app: true });
-    assert(r.alerts[0].actions.includes("Внеси програма"));
+    assert.strictEqual(r.alerts.length, 0, "no start sheet");
+    assert(r.html && r.html.includes('data-x="imp"'));
   });
 
   await live.close();
