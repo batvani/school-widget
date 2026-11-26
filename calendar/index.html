@@ -18,6 +18,10 @@ select{font:inherit;color:var(--acc);background:transparent;border:0;text-align:
 .main{background:var(--acc);color:var(--accfg)}.sec{background:var(--card);color:var(--acc)}
 code{display:block;font-size:13px;word-break:break-all;color:var(--dim);background:var(--card);border-radius:10px;padding:10px 12px;margin:0 0 10px}
 small{display:block;color:var(--dim);font-size:13px;margin-top:20px}
+.btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,filter .2s,background-color .2s}
+@media (hover:hover) and (pointer:fine){.btn.main:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 8px 24px rgba(48,209,88,.35)}.btn.sec:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--acc) 12%,var(--card))}}
+.btn:active{transform:scale(.95);transition-duration:.08s;filter:brightness(.92)}
+@media (prefers-reduced-motion:reduce){.btn:hover,.btn:active{transform:none!important}*{transition:filter .2s,background-color .2s!important}}
 </style>
 </head>
 <body>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.7 — 26 Nov 2026
+Накратко: Менюто се отваря направо, без списък за избор. Днес се побира на един екран, а Програма показва седмицата първо, с бутони под нея. Зеленото зад текущия час е по-ясно.
+In short: The menu opens straight away, with no list to choose from. Today fits on one screen, and Програма shows the week first, with buttons under it. The green behind the current class is clearer.
+
+- **Running School Widget** in Scriptable opens the full-screen menu on **Днес** at once; the start list (Разписание, Настройки, the widget previews, Обновяване, Внеси програма) is gone. Importing is in **Програма → Внеси**, updates in **Настройки → Версия**; once after an update or a rollback the menu opens on Версия, so its notice is seen.
+- **Днес** fits on one screen: the rows share the height left (44–64 pt, rings 42 or 36 pt), the current class's row is tinted green, the hero card and margins are tighter.
+- **Програма** shows the week first. The four big buttons became round icon buttons under it (Редактирай, Внеси, Предишни, Сподели). The current period's cell is tinted green instead of outlined; names are sized so the longest word fits; a 7-period week and the buttons fit on one screen.
+- **The green tint** behind the current class is stronger everywhere (widgets, boxes, the menu, the site): 32 % in Dark Mode (was 18 %), 24 % in Light Mode (was 16 %).
+- **The site:** the menu phone on the landing page follows the new Днес and Програма; buttons answer hover (mouse only) and touch, copy buttons pop or shake, the menu button turns into ✕; Reduce Motion turns the movement off.
+
 ## 1.8.6 — 25 Nov 2026
 Накратко: Обратното броене до ваканцията е в дни, не в учебни дни. Менюто има за заглавие датата и бутон за споделяне на School Widget. Нова начална страница на сайта.
 In short: The countdown to the next break is in days, not school days. The menu's heading is the date, with a button to share School Widget. A new home page for the site.

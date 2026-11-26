@@ -25,10 +25,10 @@
   // ───────────── colours: makeColors (Dark / Light) ─────────────
   var COL = {
     dark: { text: "#fff", dim: "rgba(255,255,255,.65)", divider: "rgba(255,255,255,.12)", red: "#ff453a", faded: "rgba(255,255,255,.38)", fadedRed: "rgba(255,69,58,.45)",
-      tintClass: "rgba(48,209,88,.18)", tintBreak: "rgba(255,255,255,.08)", faint: "rgba(255,255,255,.2)", grey: "#939395", normal: "rgba(255,255,255,.9)",
+      tintClass: "rgba(48,209,88,.32)", tintBreak: "rgba(255,255,255,.08)", faint: "rgba(255,255,255,.2)", grey: "#939395", normal: "rgba(255,255,255,.9)",
       ringRed: "#ff453a", ringFaded: "rgba(255,255,255,.22)", ringRedFaded: "rgba(255,69,58,.4)", green: "#30d158" },
     light: { text: "#000", dim: "rgba(60,60,67,.62)", divider: "rgba(0,0,0,.1)", red: "#ff3b30", faded: "rgba(0,0,0,.36)", fadedRed: "rgba(255,59,48,.45)",
-      tintClass: "rgba(48,209,88,.16)", tintBreak: "rgba(0,0,0,.05)", faint: "rgba(0,0,0,.09)", grey: "#a9a9ad", normal: "rgba(0,0,0,.7)",
+      tintClass: "rgba(48,209,88,.24)", tintBreak: "rgba(0,0,0,.05)", faint: "rgba(0,0,0,.09)", grey: "#a9a9ad", normal: "rgba(0,0,0,.7)",
       ringRed: "#ff453a", ringFaded: "rgba(0,0,0,.14)", ringRedFaded: "rgba(255,69,58,.4)", green: "#30d158" },
     // the Lock Screen is always white (lockColors)
     lock: { text: "#fff", dim: "rgba(255,255,255,.72)", mid: "rgba(255,255,255,.88)", track: "rgba(255,255,255,.28)", black: "#000", capDark: "rgba(0,0,0,.75)" }
@@ -725,7 +725,7 @@
           if (b > a) { var bx = h("div", "wbox" + (lk[a] === "room" ? " dash" : "")); bx.style.gridColumn = (dd + 1) + " / " + (dd + 2); bx.style.gridRow = (ls[a].num + 1) + " / " + (ls[b].num + 2); g.appendChild(bx); a = b; }
         }
       }
-      v.appendChild(g); return v;
+      var ib = h("div", "mibar"); ib.innerHTML = '<button type="button" class="mib"><i><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg></i><span>Edit</span></button><button type="button" class="mib"><i><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg></i><span>Import</span></button><button type="button" class="mib"><i><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4M12 8v4l3 2"/></svg></i><span>Earlier</span></button><button type="button" class="mib"><i><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11M7.8 7.4 12 3.2l4.2 4.2M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.7"/></svg></i><span>Share</span></button>'; v.appendChild(g); v.appendChild(ib); return v;
     }
     function daysoff() {
       var v = h("div", "mview"); live = {};
