@@ -7,4 +7,7 @@ function bad(name, e) { failed++; console.log("  FAIL " + name + "\n       " + (
 async function test(name, fn) { try { await fn(); ok(name); } catch (e) { bad(name, e); } }
 function testSync(name, fn) { try { fn(); ok(name); } catch (e) { bad(name, e); } }
 function finish() { console.log(`\n${passed} passed, ${failed} failed`); process.exit(failed ? 1 : 0); }
-module.exports = { test, testSync, finish };
+const clone = o => JSON.parse(JSON.stringify(o));
+// onPresent for run(): the page's link is followed (the script's shouldAllowRequest), then a moment for its async work
+const tap = url => async wv => { wv.shouldAllowRequest({ url }); await new Promise(r => setTimeout(r, 50)); };
+module.exports = { test, testSync, finish, clone, tap };

@@ -4,10 +4,10 @@
 // the file; a shared import; the new-school-year card; the merge with the old timetable.
 // node tools/test/share.test.js
 const fs = require("fs"), path = require("path"), assert = require("assert");
+const { test, finish, clone } = require("./harness");
 const live = require("../preview/live");
 const FIX = JSON.parse(fs.readFileSync(path.join(__dirname, "../preview/fixtures/sample-2027.json"), "utf8"));
 const T = "2026-11-05T10:20", DATA = "/docs/school-widget/data.json", STATE = "/docs/school-widget/state.json";
-const clone = o => JSON.parse(JSON.stringify(o));
 const saved = r => JSON.parse(r.files[DATA]);
 const text = (p, sel) => p.$eval(sel, e => e.textContent);
 const JSQR = [process.env.JSQR, path.join(__dirname, "../preview/node_modules/jsqr/dist/jsQR.js")].find(f => f && fs.existsSync(f));
@@ -22,7 +22,6 @@ const SHARED = clone(OLD);
 delete SHARED.meta.groups; delete SHARED.meta.created; SHARED.meta.source = "shared";
 Object.values(SHARED.week).forEach(d => d.forEach(e => { delete e.important; (e.groups || []).forEach(g => { delete g.important; }); }));
 
-const { test, finish } = require("./harness");
 const program = { view: "1", tab: "t2" };
 
 (async () => {

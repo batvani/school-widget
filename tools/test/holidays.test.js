@@ -1,12 +1,11 @@
 // Tests for the official days off: holidays/list.json is valid, and tools/holidays.js builds
 // holidays.json and the calendar feeds right. node tools/test/holidays.test.js
 const fs = require("fs"), path = require("path"), os = require("os"), assert = require("assert");
+const { testSync: test, finish, clone } = require("./harness");
 const H = require("../holidays");
 const ROOT = path.join(__dirname, "..", "..");
 const LIST = JSON.parse(fs.readFileSync(path.join(ROOT, "holidays/list.json"), "utf8"));
-const clone = o => JSON.parse(JSON.stringify(o));
 
-const { testSync: test, finish } = require("./harness");
 // the events of a feed: [{ a, b (exclusive), name }]
 function events(ics) {
   const text = ics.replace(/\r\n /g, "");

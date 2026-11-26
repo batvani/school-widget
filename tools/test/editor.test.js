@@ -3,11 +3,11 @@
 // code, the school-widget://data link, dataAction, validateData and the saved files.
 // node tools/test/editor.test.js (needs Playwright, like check.js)
 const fs = require("fs"), path = require("path"), assert = require("assert");
+const { test, finish, clone } = require("./harness");
 const live = require("../preview/live");
 const run = require("../preview/run");
 const FIX = JSON.parse(fs.readFileSync(path.join(__dirname, "../preview/fixtures/sample-2027.json"), "utf8"));
 const T = "2026-11-05T10:20", DATA = "/docs/school-widget/data.json", IMPF = "/icloud/school-widget-import.txt";
-const clone = o => JSON.parse(JSON.stringify(o));
 const saved = r => JSON.parse(r.files[DATA]);
 const hist = r => Object.keys(r.files).filter(f => /\/school-widget\/history\/\d+\.json$/.test(f));
 // an AI's answer: a split class, an unsure room
@@ -16,7 +16,6 @@ IMP.week["1"][4] = { name: "ПП Информатика", room: "111?" };
 IMP.week["2"][4] = { name: "Английски / Немски", room: "101 / 102", groups: [{ label: "Английски", name: "Английски език", room: "101" }, { label: "Немски", name: "Немски език", room: "102" }] };
 const answer = "Ето програмата ти:\n```json\n" + JSON.stringify(IMP, null, 1) + "\n```\nКопирай я.";
 
-const { test, finish } = require("./harness");
 const text = (p, sel) => p.$eval(sel, e => e.textContent);
 const cell = (k, p) => `#ed [data-k="${k}"][data-p="${p}"]`;
 async function editCell(page, settle, k, p, f) { await page.click(cell(k, p)); await f(); await page.click('[data-y="ok"]'); await settle(); }

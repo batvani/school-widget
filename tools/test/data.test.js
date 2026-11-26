@@ -1,6 +1,7 @@
 // Tests for the timetable data: validation, migration, groups, every transport format, inflate,
 // the fingerprint, and adoption of a timetable typed into the code. node tools/test/data.test.js
 const fs = require("fs"), path = require("path"), zlib = require("zlib"), assert = require("assert");
+const { test, finish, clone, tap } = require("./harness");
 const run = require("../preview/run");
 const ROOT = path.join(__dirname, "..", "..");
 const FIX = JSON.parse(fs.readFileSync(path.join(ROOT, "tools/preview/fixtures/sample.json"), "utf8"));
@@ -11,14 +12,12 @@ const withData = (d, src = SRC) => { const a = src.indexOf("const DATA = {"), b 
   return src.slice(0, a) + "const DATA = " + JSON.stringify(d, null, 2) + ";" + src.slice(b + 3); };
 const OWN = withData(FIX); // as if the user's timetable were typed into the code
 
-const { test, finish } = require("./harness");
 // The script's internals, through the __TEST__ hook (a widget run, offline, with the fixture)
 async function api(opts = {}) {
   let x;
   await run(opts.time || T0, "medium", Object.assign({ expose: o => x = o }, opts));
   return x;
 }
-const clone = o => JSON.parse(JSON.stringify(o));
 const v1 = d => Object.assign({ meta: { schema: 1 } }, clone(d));
 const codes = list => list.map(i => i.code);
 const b64url = buf => Buffer.from(buf).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -336,7 +335,6 @@ function fnvRef(text) {
     assert(!/class="note2">Скриптът се казва/.test((await run(T0, "medium", { data: null, app: true, name: "School Widget" })).html));
   });
   await test("Settings → a calendar: iOS's picker, saved by identifier (found even if renamed); another / none", async () => {
-    const tap = u => async wv => { wv.shouldAllowRequest({ url: u }); await new Promise(r => setTimeout(r, 50)); };
     const r = await run(T0, "medium", { app: true, query: { view: "today", tab: "t4" }, settings: { language: "bg", offCalendarId: "" }, calPick: "Контролни", onPresent: tap("school-widget://cal?k=testsCalendar") });
     const st = JSON.parse(r.files["/docs/school-widget/settings.json"]);
     assert.deepStrictEqual([st.testsCalendar, st.testsCalendarId], ["Контролни", "id:Контролни"]);
@@ -369,13 +367,12 @@ function fnvRef(text) {
     assert(/<select id="city"><option value="">Не е избран<\/option>.*<option value="Варна">/.test(r.html));
   });
   await test("Направи я с AI: the full prompt from the website (BG / EN); offline the short one with the link", async () => {
-    const tap = async wv => { wv.shouldAllowRequest({ url: "school-widget://data?a=prompt" }); await new Promise(r => setTimeout(r, 50)); };
     const full = { "https://batvani.github.io/school-widget/ai/prompt.txt": "Здравей!\n\n---\n\nSchool Widget instructions v1 …", "https://batvani.github.io/school-widget/ai/prompt-en.txt": "Hi!\n\n---\n\nSchool Widget instructions v1 …" };
     for (const lang of ["bg", "en"]) {
-      const r = await run(T0, "medium", { data: null, app: true, settings: { language: lang }, net: u => full[u] || null, onPresent: tap });
+      const r = await run(T0, "medium", { data: null, app: true, settings: { language: lang }, net: u => full[u] || null, onPresent: tap("school-widget://data?a=prompt") });
       assert.deepStrictEqual(r.copied, [full["https://batvani.github.io/school-widget/ai/" + (lang === "en" ? "prompt-en.txt" : "prompt.txt")]], lang);
     }
-    const off = await run(T0, "medium", { data: null, app: true, onPresent: tap });
+    const off = await run(T0, "medium", { data: null, app: true, onPresent: tap("school-widget://data?a=prompt") });
     assert(off.copied[0].includes("https://batvani.github.io/school-widget/ai/INSTRUCTIONS.md"));
   });
   await test("holidays.json: a school year that isn't published yet", async () => {
