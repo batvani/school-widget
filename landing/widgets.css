@@ -42,7 +42,8 @@
   font: 15px -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 .mw[data-mode="light"] { --bg: #f2f2f7; --fg: #000; --dim: rgba(60,60,67,.62); --card: #fff; --seg: #e5e5ea; --line: rgba(0,0,0,.08); --red: #ff3b30; --track: rgba(0,0,0,.09); --btn: #e5e5ea; }
 .mw *, .mw { box-sizing: border-box; }
-.mhead { display: flex; align-items: center; gap: 12px; } .mtitle { flex: 1; min-width: 0; font-size: 26px; margin: 4px 0 0; font-weight: 700; white-space: nowrap; }
+.mhead { display: flex; align-items: center; gap: 12px; }
+.mtitle { flex: 1; min-width: 0; max-width: none; font-size: 26px; margin: 4px 0 0; font-weight: 700; white-space: nowrap; }
 .mshr { flex: none; width: 36px; height: 36px; border-radius: 18px; background: var(--card); color: #30d158; display: flex; align-items: center; justify-content: center; }
 .mw[data-mode="light"] .mshr { background: #e5e5ea; color: #248a3d; }
 .mtabs { display: flex; gap: 3px; background: var(--card); border-radius: 10px; padding: 3px; margin: 14px 0; }
