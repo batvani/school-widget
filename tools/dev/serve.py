@@ -1,8 +1,8 @@
-# The web server behind tools/serve.sh: like `python3 -m http.server`, but every text file is
+# The web server behind tools/dev/serve.sh: like `python3 -m http.server`, but every text file is
 # sent as UTF-8 (without it Safari shows the Bulgarian letters as gibberish, seen on the phone)
 # and never cached, so the iPhone always gets the newest file. Only the files the phone needs are
 # served (anyone on the same Wi-Fi can reach the server): never the repo's history, notes or fixtures.
-# Usage: python3 tools/serve.py <port> <address>
+# Usage: python3 tools/dev/serve.py <port> <address>
 import http.server, os, sys, urllib.parse
 
 ALLOWED = ("/school-widget.js",)

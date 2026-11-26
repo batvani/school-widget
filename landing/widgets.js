@@ -3,7 +3,7 @@
 // (T sizes, colour table, rings, link lines) and laid out with absolute positions, so the copy
 // is the script's own layout; tools/test/widgets.test.js compares each text's words, box and colour
 // and every picture's box with the real script rendered by the preview mock.
-// API: window.SW = { html, mount, state, mountMenu }  (see landing/PLAN.md, "Build contract")
+// API: window.SW = { html, mount, state, mountMenu }
 (function (root) {
   "use strict";
   var DEMO = root.SW_DEMO.DEMO;

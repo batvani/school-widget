@@ -1,4 +1,4 @@
-// The landing page: everything that moves or reacts (agent D builds it; see landing/PLAN.md, "Build contract").
+// The landing page: everything that moves or reacts.
 (function () {
   "use strict";
   var SHORTCUT_LINK = "https://www.icloud.com/shortcuts/0f4543dd299d4e4e87b49e4083b0fbcf"; // the Shortcut's iCloud link (shortcut/STEPS.md; tools/instructions.js reads it here)

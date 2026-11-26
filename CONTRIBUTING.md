@@ -23,6 +23,8 @@ npm run serve                    # the script over Wi-Fi, to paste into Scriptab
 | `shortcut/STEPS.md` | How the Shortcut "School Widget Installer" is built |
 | `tools/preview/` | A fake Scriptable in Node (`mock.js`, `run.js`) that renders every widget to HTML/PNG; `fixtures/` are made-up timetables |
 | `tools/test/` | The tests; `all.js` runs them |
+| `tools/ai/` | The template the AI prompt files in `ai/` are built from (`node tools/instructions.js`) |
+| `tools/dev/` | `serve.sh` / `serve.py`: the script over Wi-Fi for the phone |
 | `tools/release.js` | Checks a release and writes `out/release/`: the script **squashed** (esbuild; the header lines and `const VERSION` kept as they are), `version.json`, the notes |
 
 **Regression check:** run `npm run tree -- out/before` before a change and `npm run tree -- out/after` after it; `diff out/before/tree.txt out/after/tree.txt` lists exactly which cases render differently.

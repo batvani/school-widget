@@ -32,7 +32,7 @@ Read this first, then `README.md` (what the user sees), `docs/SETTINGS.md` and `
 - **Keep approved looks.** Don't change sizes the user approved while doing other work (changing large's sizes once caused a revert). Approved: the Lock Screen (v1.0 look, kept after a redesign sketch, 11 Nov 2026), the medium list centred as a group.
 - **Wording:** SI units; months, not weeks, for long durations; "промпт", never "подкана"; "School Widget" / "School Widget Installer" in English, widget text stays Bulgarian.
 - **Check in proportion to the change.** A small fix gets only the test or the one render that covers it (a single before/after of the affected widget or page). The full `npm test`, `tree.js` and the all-sizes renders are for bigger changes, before a release, and once at the end of a series of small fixes, not after each one.
-- **End every change by getting the script onto the phone:** run `tools/serve.sh` (serves only `school-widget.js` as UTF-8; plain `python3 -m http.server` garbled the Cyrillic in Safari) and give the address it prints. After a release, beta is the way instead.
+- **End every change by getting the script onto the phone:** run `tools/dev/serve.sh` (serves only `school-widget.js` as UTF-8; plain `python3 -m http.server` garbled the Cyrillic in Safari) and give the address it prints. After a release, beta is the way instead.
 
 ## Design rules
 

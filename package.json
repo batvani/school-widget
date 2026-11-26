@@ -8,7 +8,7 @@
     "preview": "node tools/preview/final.js bg && node tools/preview/check.js bg",
     "shots": "node tools/preview/shots.js",
     "tree": "node tools/preview/tree.js",
-    "serve": "sh tools/serve.sh",
+    "serve": "sh tools/dev/serve.sh",
     "instructions": "node tools/instructions.js"
   },
   "devDependencies": {
