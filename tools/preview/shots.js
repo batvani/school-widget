@@ -5,7 +5,8 @@
 //   version  Settings → Версия in each update state
 //   install  the landing page (phone, desktop) and install/ with a cut-off link, served as Pages would
 //   readme   the README's picture img/widgets.png: every widget size, the built-in demo, during a class
-// Usage: node tools/preview/shots.js [editor|share|version|install|readme …]   (none: all of them)
+//   hero     the README's pictures from the landing page (made-up demo, Dark Mode): img/hero.png (the iPhone) and img/tile-*.png
+// Usage: node tools/preview/shots.js [editor|share|version|install|readme|hero …]   (none: all of them)
 const fs = require("fs"), path = require("path"), zlib = require("zlib"), { execFileSync } = require("child_process");
 const { chromium } = require("playwright");
 const run = require("./run"), live = require("./live");
@@ -118,6 +119,23 @@ const SETS = {
       await o.page.screenshot({ path: f, fullPage: false }); shots.push([n, scheme, f]); await o.close();
     }
     if (shots.length) await sheet(b, "install", shots);
+  },
+  async hero(b) {
+    // the landing page served as Pages would (tools/test/site.js), its pieces cut out at 2×; the demo timetable is made up
+    const { SITE, open } = require("../test/site");
+    // the wallpaper gradient makes big PNGs: the iPhone at 1.5× (under 300 kB), the small pictures at 1×
+    const parts = [["hero", "#top .phone", 1.5], ["tile-widgets", "#tryStage", 1], ["tile-menu", "#menu .phone", 1], ["tile-calendar", ".cal", 1], ["tile-timetable", ".ways .way", 1]];
+    for (const scale of [1.5, 1]) {
+      const o = await open(b, SITE, { viewport: { width: 1280, height: 900 }, colorScheme: "dark", reducedMotion: "reduce", scale, wait: 1500 });
+      for (const [n, sel] of parts.filter(x => x[2] === scale)) {
+        const el = await o.page.$(sel);
+        await el.scrollIntoViewIfNeeded(); await o.page.waitForTimeout(400);
+        const f = path.join(ROOT, `img/${n}.png`);
+        await el.screenshot({ path: f, omitBackground: n === "hero" });
+        console.log(`hero: img/${n}.png ${(fs.statSync(f).size / 1024).toFixed(0)} kB`);
+      }
+      await o.close();
+    }
   },
   async readme() {
     // the built-in demo, scenario 0 of check.js (during a class), Dark Mode

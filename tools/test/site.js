@@ -18,7 +18,7 @@ function file(p) {
 const TYPES = { html: "text/html; charset=utf-8", js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8" };
 
 async function open(browser, url, o = {}) {
-  const ctx = await browser.newContext({ viewport: o.viewport || { width: 375, height: 812 }, colorScheme: o.colorScheme || "dark",
+  const ctx = await browser.newContext({ deviceScaleFactor: o.scale || 1, viewport: o.viewport || { width: 375, height: 812 }, colorScheme: o.colorScheme || "dark",
     reducedMotion: o.reducedMotion || "no-preference", hasTouch: !!o.touch, isMobile: !!o.touch });
   const page = await ctx.newPage(), requests = [], errors = [], outside = [];
   page.on("request", r => requests.push(r.url()));
