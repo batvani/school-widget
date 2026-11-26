@@ -534,19 +534,18 @@ const tinyName = n => (TT.tiny && TT.tiny[n]) || shortName(n);
 // Every file lives in Scriptable's own documents folder, in school-widget/ (settings.json, data.json, state.json,
 // holidays.json, history/, backups/).
 const DIR = "school-widget";
-try { const fm = FileManager.local(), dir = fm.joinPath(fm.documentsDirectory(), DIR); if (!fm.fileExists(dir)) fm.createDirectory(dir, true); }
-catch (e) { console.error("Creating the folder: " + e); }
-function settingsPath() { const fm = FileManager.local(); return fm.joinPath(fm.joinPath(fm.documentsDirectory(), DIR), "settings.json"); }
+// File helpers: paths inside school-widget/, JSON in and out (the folder is created on first write).
+const dataPath = (...p) => { const fm = FileManager.local(); return [DIR, ...p].reduce((a, b) => fm.joinPath(a, b), fm.documentsDirectory()); };
+function ensureDir(p) { const fm = FileManager.local(); if (!fm.fileExists(p)) fm.createDirectory(p, true); }
+function readJSON(p) { const fm = FileManager.local(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; }
+function writeJSON(p, v) { ensureDir(p.slice(0, p.lastIndexOf("/"))); FileManager.local().writeString(p, JSON.stringify(v, null, 2)); }
+try { ensureDir(dataPath()); } catch (e) { console.error("Creating the folder: " + e); }
 function loadSaved() {
-  const s = Object.assign({}, DEFAULTS);
-  try {
-    const fm = FileManager.local(), p = settingsPath();
-    if (fm.fileExists(p)) Object.assign(s, JSON.parse(fm.readString(p)));
-  } catch (e) { console.error("Reading settings: " + e); }
-  return s;
+  try { return Object.assign({}, DEFAULTS, readJSON(dataPath("settings.json"))); }
+  catch (e) { console.error("Reading settings: " + e); return Object.assign({}, DEFAULTS); }
 }
 function saveSettings(s) {
-  try { FileManager.local().writeString(settingsPath(), JSON.stringify(s, null, 2)); }
+  try { writeJSON(dataPath("settings.json"), s); }
   catch (e) { console.error("Saving settings: " + e); }
 }
 // Keeps only known keys with the right types (used for values coming from the Settings page).
@@ -616,10 +615,6 @@ let C = makeColors(S.theme);
 // folder (next to the settings file), so an update can replace this code without touching it.
 // The built-in DATA above is a made-up demo, used only when there is no data file (never saved).
 const HISTORY_KEEP = 5;
-const dataPath = (...p) => { const fm = FileManager.local(); return [DIR, ...p].reduce((a, b) => fm.joinPath(a, b), fm.documentsDirectory()); };
-function ensureDir(p) { const fm = FileManager.local(); if (!fm.fileExists(p)) fm.createDirectory(p, true); }
-function readJSON(p) { const fm = FileManager.local(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; }
-function writeJSON(p, v) { ensureDir(p.slice(0, p.lastIndexOf("/"))); FileManager.local().writeString(p, JSON.stringify(v, null, 2)); }
 // state.json: update state and the built-in DATA's fingerprint at adoption.
 function readState() { try { return readJSON(dataPath("state.json")) || {}; } catch (e) { return {}; } }
 function writeState(st) { try { writeJSON(dataPath("state.json"), st); } catch (e) { console.error("Saving state: " + e); } }
@@ -1001,6 +996,8 @@ function validateData(d, opts = {}) {
 let TT = null;      // the timetable the widgets use (groups resolved, lastDay set)
 let TT_FULL = null; // the same in full form (with groups), as saved
 const TINFO = {};   // how it was loaded: source "file" | "builtin" | "broken"; error
+// The history/ files, newest first.
+const historyFiles = hd => FileManager.local().fileExists(hd) ? FileManager.local().listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)) : [];
 // Saves a timetable as data.json; the one it replaces goes to history/ (the last HISTORY_KEEP, no two the same).
 // from: the history file being restored, which leaves the history (it is the current one now).
 function saveTimetable(d, from) {
@@ -1010,18 +1007,17 @@ function saveTimetable(d, from) {
     ensureDir(hd);
     const cur = fm.readString(p), seen = new Set([key(cur), JSON.stringify(d)]);
     fm.writeString(fm.joinPath(hd, `${Date.now()}.json`), cur);
-    const old = fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a));
-    old.slice(1).forEach(n => { const k = key(fm.readString(fm.joinPath(hd, n))); if (seen.has(k)) fm.remove(fm.joinPath(hd, n)); else seen.add(k); });
-    fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a)).slice(HISTORY_KEEP).forEach(n => fm.remove(fm.joinPath(hd, n)));
+    // older copies equal to another one go; then only the newest HISTORY_KEEP stay
+    historyFiles(hd).slice(1).forEach(n => { const k = key(fm.readString(fm.joinPath(hd, n))); if (seen.has(k)) fm.remove(fm.joinPath(hd, n)); else seen.add(k); });
+    historyFiles(hd).slice(HISTORY_KEEP).forEach(n => fm.remove(fm.joinPath(hd, n)));
   }
   writeJSON(p, d);
 }
 // The newest timetable in history/ that loads without errors, or null.
 function lastGoodHistory() {
-  const fm = FileManager.local(), hd = dataPath("history");
-  if (!fm.fileExists(hd)) return null;
-  for (const n of fm.listContents(hd).filter(n => /^\d+\.json$/.test(n)).sort((a, b) => parseInt(b) - parseInt(a))) {
-    try { const d = migrate(JSON.parse(fm.readString(fm.joinPath(hd, n)))); if (!validateData(d, { quick: true }).errors.length) return d; } catch (e) { }
+  const hd = dataPath("history");
+  for (const n of historyFiles(hd)) {
+    try { const d = migrate(readJSON(FileManager.local().joinPath(hd, n))); if (!validateData(d, { quick: true }).errors.length) return d; } catch (e) { }
   }
   return null;
 }
