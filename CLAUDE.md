@@ -7,7 +7,7 @@ Read this first, then `README.md` (what the user sees), `docs/SETTINGS.md` and `
 ## What it is
 
 - **`school-widget.js`** is the whole product: one Scriptable script ("School Widget"; text Bulgarian by default, English is a setting). Line 4 = version, must match `const VERSION` (no VERSION file). Line 5 = `// id: uchilishte-widget; schema: N`, must match `const SCHEMA`. The self-update, older versions and old Shortcuts check that line, so the id stays (the one Bulgarian name left).
-- **Size:** ~250 kB readable (no hard limit; keep new UI compact). Releases publish a **squashed** copy (`tools/release.js` → esbuild, ~200 kB). Lines 1–5, `const VERSION = "…";` and `const TEST_NOW = null;` stay as they are (the self-update and preview tools look for them); fingerprint and size are the squashed file's. A readable copy pasted by hand counts as edited (auto-update pauses).
+- **Size:** ~250 kB readable (no hard limit; keep new UI compact). Releases publish a **squashed** copy (`tools/release.js` → esbuild, ~170 kB; the Cyrillic stays UTF-8 text since 1.9, `RELEASE_CHARSET=ascii` = `\u` escapes, ~35 kB more, the way back if the phone garbles it). Lines 1–5, `const VERSION = "…";` and `const TEST_NOW = null;` stay as they are (the self-update and preview tools look for them); fingerprint and size are the squashed file's. A readable copy pasted by hand counts as edited (auto-update pauses).
 - **Timetable** lives in Scriptable's documents folder, `school-widget/` (`data.json`, `settings.json`, `state.json`, `holidays.json`, `history/`, `backups/`), never in the code. Code reads **`TT`** (groups resolved, `lastDay` filled in); `TT_FULL` is the saved form. The built-in `DATA` is a made-up demo (`meta.demo`), never adopted: used only until a timetable is set up (the widget shows it), for the bells of a hand-typed timetable, and as the `holidayIcons` fallback.
 - **Installing and the timetable are separate.** Landing page (`landing/`, `#install`) → Scriptable → the Shortcut "School Widget Installer" (`shortcut/STEPS.md`: code only, ends with Run Script) or `ai/install-script.js` → School Widget opens its landing page only (`#land`, no tabs; no timetable yet = `isDemo()`; offers a copied timetable; no update check before the first one) → the editor (За теб first: grade, group, city; the calendar page after Save; details folded on import) → the finished screen (widget steps).
 - **Getting a timetable in:** the full prompt (`ai/prompt.txt` = a few lines + `ai/INSTRUCTIONS.md`; the app fetches it for **Направи я с AI**) → the AI's answer → copy it all → **Постави**. Or a `#z=` link → `install/` (automatic: opens School Widget at once via `open.scriptable.app/run/School%20Widget?data=…`; after 2 s the landing page's `#install` with an **Open in School Widget** button). The import file and the editor work too.
@@ -30,7 +30,7 @@ Steps are in `CONTRIBUTING.md`. Here: bump line 4 + `const VERSION` (line 5 + `c
 - **Keep approved looks.** Don't change sizes the user approved while doing other work (changing large's sizes once caused a revert). Approved: the Lock Screen (v1.0 look, kept after a redesign sketch), the medium list centred as a group.
 - **Wording:** SI units; months, not weeks, for long durations; "промпт", never "подкана"; "School Widget" / "School Widget Installer" in English, widget text stays Bulgarian.
 - **Check in proportion to the change.** A small fix gets only the test or the one render that covers it (a single before/after of the affected widget or page). The full `npm test`, `tree.js` and all-sizes renders are for bigger changes, before a release, and once at the end of a series of small fixes.
-- **End every change by getting the script onto the phone:** run `tools/dev/serve.sh` (serves only `school-widget.js` as UTF-8; plain `python3 -m http.server` garbled the Cyrillic in Safari) and give the address it prints. After a release, beta is the way instead.
+- **The phone gets changes through a beta release** (the user tags; the self-update on the beta channel installs it). There is no dev server.
 
 ## Design rules
 
@@ -84,6 +84,8 @@ node final.js bg                  # all sizes × 16 moments → out/final-bg.htm
 node variants.js bg               # medium's three layouts × 22 moments (EXTRA="box=room;outline=on")
 node views.js                     # the full-screen menu → out/view-*.html
 node check.js bg                  # overflow, cut-off text, smallest font, gaps < 4 pt; PNGs
+node compare-build.js             # the squashed release copy's menu, pixel for pixel against the readable one
+SCRIPT_BUILD=squash node tree.js out/sq   # the regression check on the squashed copy (diff with the readable one: only `menu` cases differ)
 node tree.js out/before; …edit…; node tree.js out/after; diff out/before/tree.txt out/after/tree.txt
 node shots.js [editor|share|version|install|readme|hero]   # readme → img/widgets.png; hero → img/hero.png, img/tile-*.png
 ```

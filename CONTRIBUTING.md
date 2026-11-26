@@ -9,7 +9,6 @@ npm test                         # every test in tools/test/ (+ the privacy test
 npm run preview                  # all widget sizes × 16 moments → tools/preview/out/final-bg.html
 npm run tree -- out/a            # the regression check: one hash per case (~18,800) → out/a/tree.txt
 npm run shots -- readme          # img/widgets.png (also: hero = the README's other pictures from the landing page; editor, share, version, install)
-npm run serve                    # the script over Wi-Fi, to paste into Scriptable on a phone
 ```
 
 | Path | What it is |
@@ -24,8 +23,7 @@ npm run serve                    # the script over Wi-Fi, to paste into Scriptab
 | `tools/preview/` | A fake Scriptable in Node (`mock.js`; `run.js` is the library behind the scripts and tests) that renders every widget to HTML/PNG; `shots.js` makes the README's pictures; `fixtures/` are made-up timetables |
 | `tools/test/` | The tests; `all.js` runs them; `harness.js` is the shared test setup; `site.js` serves the site as Pages would |
 | `tools/ai/` | The template the AI prompt files in `ai/` are built from (`node tools/instructions.js`) |
-| `tools/dev/` | `serve.sh` / `serve.py`: the script over Wi-Fi for the phone |
-| `tools/release.js` | Checks a release and writes `out/release/`: the script **squashed** (esbuild; the header lines and `const VERSION` kept as they are), `version.json`, the notes |
+| `tools/release.js` | Checks a release and writes `out/release/`: the script **squashed** (esbuild, Cyrillic as UTF-8; the header lines and `const VERSION` kept as they are), `version.json`, the notes |
 
 **Regression check:** run `npm run tree -- out/before` before a change and `npm run tree -- out/after` after it; `diff out/before/tree.txt out/after/tree.txt` lists exactly which cases render differently.
 

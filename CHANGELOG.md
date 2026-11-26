@@ -7,7 +7,8 @@ In short: A clean-up before the official release: shorter, tidier code, better t
 - **Calendars:** the days-off and tests calendars are read only when picked in **Настройки** (or named in the Parameter). The old defaults "Off-School" and "Контролни" for settings from before 1.8.5 are gone; `tests=on` / `tests=yes` no longer means "Контролни".
 - **Gone with the old versions:** copying the old `uchilishte/` folder, the `uchilishte:` link prefix and the `uchilishte-import.txt` file name. Only `school-widget:` links and `school-widget-import.txt` are read.
 - **Code:** shared helpers for the files, one listing of saved timetables, one request queue in the menu; unused strings and variables removed.
-- **Tests and tools:** one test harness for all suites; new tests for the Parameter, refresh dates and an install with no calendars; the preview galleries share one renderer; the dev server moved to `tools/dev/`; leftover plans and sketches removed.
+- **Tests and tools:** one test harness for all suites; new tests for the Parameter, refresh dates and an install with no calendars; the preview galleries share one renderer; the Wi-Fi dev server is gone (betas bring changes to the phone); leftover plans and sketches removed.
+- **Smaller download:** the released copy keeps the Cyrillic as UTF-8 text instead of `\u` escapes: about 170 kB instead of 204 kB. `tools/preview/compare-build.js` and `SCRIPT_BUILD=squash` check that the squashed copy draws and behaves like the readable one.
 - **The site:** the menu demo's date no longer runs under the share button.
 - **Docs:** a new README (English, then Bulgarian) with pictures from the landing page; CONTRIBUTING, SETTINGS and the Shortcut steps brought up to date.
 - The widgets and the menu are unchanged (tree.js: 18,855 cases).

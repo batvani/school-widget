@@ -6,7 +6,9 @@
 // (independent of the script's own code; tools/test/release.test.js compares the two).
 // The published copy is squashed (esbuild, minified): lines 1–5 (Scriptable's header, the version and id lines)
 // and the lines `const VERSION = "…";` and `const TEST_NOW = null;` stay as they are, because the self-update (also 1.8's) and the Shortcut
-// look for them; the rest is minified. The fingerprint and size are the squashed file's.
+// look for them; the rest is minified (esbuild), with the Cyrillic kept as UTF-8 text (1.9: ~35 kB smaller than \u escapes).
+// The fingerprint and size are the squashed file's (UTF-8 bytes, as the self-update counts them). `node tools/preview/compare-build.js` proves the menu looks the same
+// (pixels, Chromium); SCRIPT_BUILD=squash node tools/preview/tree.js … runs the regression check on the squashed file.
 // Usage: node tools/release.js [vX.Y.Z]   (without a tag: this script's own version)
 const fs = require("fs"), path = require("path");
 const ROOT = path.join(__dirname, "..");
@@ -26,15 +28,16 @@ function notesFor(changelog, version) {
   return { bg: line("Накратко:"), en: line("In short:") };
 }
 
-// The squashed copy of the script (see the top). Non-ASCII text becomes \u escapes, so no encoding can garble it.
-function squash(src) {
+// The squashed copy of the script (see the top). opts.charset (env RELEASE_CHARSET): "utf8" (default: the Cyrillic as itself)
+// or "ascii" (every non-ASCII letter as a \uXXXX escape, ~35 kB more, but no encoding can garble it: the way back if UTF-8 fails on the phone).
+function squash(src, opts = {}) {
   const lines = src.replace(/\r\n?/g, "\n").split("\n"), head = lines.slice(0, 5), body = lines.slice(5);
   // kept lines: const VERSION (the update checks) and const TEST_NOW (the preview tools set the time there)
   const keep = [/^const VERSION = "[^"]+";$/, /^const TEST_NOW = null;/].map(re => {
     const i = body.findIndex(l => re.test(l)); if (i < 0) throw new Error("no line " + re);
     return body.splice(i, 1)[0].replace(/\s*\/\/.*$/, "");
   });
-  const code = require("esbuild").transformSync(body.join("\n"), { minify: true, target: "safari16", legalComments: "none" }).code;
+  const code = require("esbuild").transformSync(body.join("\n"), { minify: true, target: "safari16", legalComments: "none", charset: opts.charset || process.env.RELEASE_CHARSET || "utf8" }).code;
   return head.concat(keep).join("\n") + "\n" + code;
 }
 

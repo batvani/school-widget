@@ -22,7 +22,9 @@
 const fs = require("fs");
 const path = require("path");
 const M = require("./mock");
-const SRC = fs.readFileSync(path.join(__dirname, "..", "..", "school-widget.js"), "utf8");
+const READABLE = fs.readFileSync(path.join(__dirname, "..", "..", "school-widget.js"), "utf8");
+// SCRIPT_BUILD=squash runs the squashed release copy (tools/release.js) instead of the readable file: tree.js, the tests and the renders then check the build
+const SRC = process.env.SCRIPT_BUILD === "squash" ? require("../release").squash(READABLE) : READABLE;
 const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, "fixtures", "sample.json");
 const DATA_TEXT = DATA_FILE === "builtin" ? null : fs.readFileSync(DATA_FILE, "utf8");
 // the official days off as the phone keeps them after a download (opts.holidays: another text, or null = none)

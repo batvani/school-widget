@@ -3,7 +3,7 @@
 // Plain node: node tools/test/release.test.js
 const fs = require("fs"), path = require("path"), assert = require("assert");
 const run = require("../preview/run");
-const { build, fnv, size, notesFor } = require("../release");
+const { build, squash, fnv, size, notesFor } = require("../release");
 const ROOT = path.join(__dirname, "..", "..");
 const SRC = fs.readFileSync(path.join(ROOT, "school-widget.js"), "utf8");
 const CL = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
@@ -57,6 +57,48 @@ const refused = (fn, re) => assert.throws(fn, e => re.test(e.message), re);
     assert.strictEqual(r.files[OWN], NEW, JSON.stringify(st));
     assert(!st.autoPaused);
     assert.strictEqual(st.justUpdated, `${NEXT}`);
+  });
+  const SQ = build().src;
+  await test("the squashed copy keeps lines 1–5, `const VERSION` and `const TEST_NOW` as they are, and compiles", async () => {
+    const a = SRC.split("\n"), b = SQ.split("\n");
+    assert.deepStrictEqual(b.slice(0, 5), a.slice(0, 5));
+    assert(/^\/\/ Version \S+ — /.test(b[3]) && /^\/\/ id: uchilishte-widget; schema: \d+/.test(b[4]));
+    assert.strictEqual(b[5], `const VERSION = "${VER}";`);
+    assert.strictEqual(b[6], "const TEST_NOW = null;");
+    assert.strictEqual(SQ.match(/\nconst VERSION = /g).length, 1);
+    const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+    new AsyncFunction("config", "module", SQ); // compiles (not run)
+    assert(SQ.length < SRC.length * 0.85, `squashed: ${SQ.length} of ${SRC.length}`);
+  });
+  await test("the squashed copy draws the same widgets (every family and layout, several moments, both languages and modes)", async () => {
+    const crypto = require("crypto");
+    const hash = x => crypto.createHash("sha256").update(JSON.stringify(x, (k, v) => v instanceof Date ? "D" + v.toISOString() : v)).digest("hex");
+    let n = 0;
+    for (const mode of ["dark", "light"]) for (const lang of ["bg", "en"]) for (const t of ["2026-11-05T08:35", "2026-11-05T10:20", "2026-11-05T10:47", "2026-11-05T15:00", "2026-11-07T11:00", "2026-12-28T10:00", "2027-07-10T10:00"])
+      for (const fam of ["small", "medium", "large", "accessoryRectangular", "accessoryCircular", "accessoryInline"]) for (const lay of fam === "medium" ? ["", "layout=day", "layout=list"] : [""]) {
+        process.env.MODE = mode;
+        const o = { settings: { language: lang }, param: lay };
+        const a = await run(t, fam, o), b = await run(t, fam, Object.assign({}, o, { src: SQ }));
+        assert.strictEqual(hash([b.widget, b.logs, b.scheduled.length]), hash([a.widget, a.logs, a.scheduled.length]), `${mode} ${lang} ${t} ${fam} ${lay}`);
+        n++;
+      }
+    process.env.MODE = "dark";
+    assert(n > 200);
+  });
+  await test("the squashed copy's menu page looks the same in Chromium (pixel for pixel) and its script has no errors", async () => {
+    const live = require("../preview/live");
+    for (const scheme of ["dark", "light"]) for (const [lang, tab, t] of [["bg", "t1", "2026-11-05T10:20"], ["en", "t1", "2026-11-05T15:00"], ["bg", "t2", "2026-11-05T10:20"], ["en", "t3", "2026-12-28T10:00"], ["bg", "t4", "2026-11-05T10:20"], ["en", "t4", "2026-11-05T10:20"]]) {
+      const shot = async src => { let png, err = []; await live(t, { src, settings: { language: lang }, query: { view: "today", tab } }, async (page, settle) => { page.on("pageerror", e => err.push(String(e))); await settle(); png = await page.screenshot({ fullPage: true }); }, { scheme }); return { png, err }; };
+      const a = await shot(undefined), b = await shot(SQ);
+      assert.deepStrictEqual(b.err, []);
+      assert(a.png.equals(b.png), `${scheme} ${lang} ${tab} ${t}: the screenshots differ`);
+    }
+    await live.close();
+  });
+  await test("the squashed copy keeps the Cyrillic as UTF-8 text (no \\u escapes) and is smaller than the ASCII one", async () => {
+    const src = fs.readFileSync(path.join(ROOT, "school-widget.js"), "utf8"), u = squash(src), a = squash(src, { charset: "ascii" });
+    assert(/[а-яА-Я]/.test(u) && !/\\u04[0-9a-f]{2}/i.test(u), "Cyrillic should be plain text");
+    assert(size(u) < size(a) - 20000, `utf8 ${size(u)} B should be well under ascii ${size(a)} B`);
   });
   await test("notes come from the version's own section", async () => {
     assert.deepStrictEqual(notesFor(withNotes(`${NEXT}`), `${NEXT}`), { bg: "тест", en: "test" });
