@@ -1,16 +1,14 @@
 # GitHub Pages (batvani.github.io/school-widget/): the landing page (landing/ → the site root), the small automatic install/ page, ai/ (the AI's instructions),
 # the official days off (holidays.json, which School Widget downloads, and the calendar feeds, both
-# built from holidays/list.json by tools/holidays.js) and the latest STABLE release's school-widget.js,
-# so the Shortcut, the install script and Safari have one plain address for the script. Runs when
-# those change on main, and when a release becomes stable (published as one, or "pre-release"
-# unticked). Repo Settings → Pages → Source: GitHub Actions.
+# built from holidays/list.json by tools/holidays.js). The script itself is not here: the Shortcut, the
+# install script and the landing page download it from GitHub's latest release
+# (releases/latest/download/school-widget.js). Runs when those change on main.
+# Repo Settings → Pages → Source: GitHub Actions.
 name: pages
 on:
   push:
     branches: [main]
     paths: ["landing/**", "install/**", "ai/**", "calendar/**", "holidays/**", "tools/holidays.js", ".github/workflows/pages.yml"]
-  release:
-    types: [released]
   workflow_dispatch:
 permissions:
   contents: read
@@ -38,10 +36,7 @@ jobs:
           cp -r install _site/install
           cp -r ai _site/ai
           rm -rf _site/ai/tests
-          gh release download --pattern school-widget.js --dir _site || echo "no stable release yet"
           touch _site/.nojekyll
-        env:
-          GH_TOKEN: ${{ github.token }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -84,7 +84,7 @@ const { test, finish } = require("./harness");
     await o.page.reload(); await o.page.waitForTimeout(300);
     assert.strictEqual(await o.page.$eval("#progress", e => e.dataset.done), "3", "remembered after coming back from Shortcuts");
     assert(!(await o.page.$("#alt[open]")), "the other ways are folded");
-    assert.strictEqual(await o.page.$eval("#code", a => a.href), SITE + "school-widget.js");
+    assert.strictEqual(await o.page.$eval("#code", a => a.href), "https://github.com/batvani/school-widget/releases/latest/download/school-widget.js");
     await o.close();
   });
   await test("#install scrolls there; every #link on the page scrolls smoothly to an existing section", async () => {
