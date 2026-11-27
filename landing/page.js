@@ -1,7 +1,7 @@
 // The landing page: everything that moves or reacts.
 (function () {
   "use strict";
-  var SHORTCUT_LINK = "https://www.icloud.com/shortcuts/0f4543dd299d4e4e87b49e4083b0fbcf"; // the Shortcut's iCloud link (shortcut/STEPS.md; tools/instructions.js reads it here)
+  var SHORTCUT_LINK = "https://www.icloud.com/shortcuts/554d0ac4d0b9403c8d8fd2f549fd5f68"; // the Shortcut's iCloud link (shortcut/STEPS.md; tools/instructions.js reads it here)
 
   /*QR*/ // a copy of qrSvg in school-widget.js (the landing test checks they match)
   // QR code (byte mode, error correction L, versions 1–40) as an SVG. After Project Nayuki's
