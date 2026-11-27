@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: download;
 // School Widget installer: downloads "School Widget" from GitHub (if it isn't there yet) and opens it.
 // https://github.com/batvani/school-widget · You can delete this script afterwards.
-const NAME = "School Widget", URL = "https://batvani.github.io/school-widget/school-widget.js";
+const NAME = "School Widget", URL = "https://github.com/batvani/school-widget/releases/latest/download/school-widget.js";
 async function say(title, msg, ok, cancel) {
   const a = new Alert(); a.title = title; a.message = msg; a.addAction(ok || "OK");
   if (cancel) a.addCancelAction(cancel);

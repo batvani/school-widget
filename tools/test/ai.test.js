@@ -12,7 +12,7 @@ const SRC = fs.readFileSync(P("school-widget.js"), "utf8");
 const EX = JSON.parse(fs.readFileSync(P("ai/example.json"), "utf8"));
 const FIX = JSON.parse(fs.readFileSync(P("tools/preview/fixtures/sample-2027.json"), "utf8"));
 const INSTALLER = fs.readFileSync(P("ai/install-script.js"), "utf8");
-const RAWJS = "https://batvani.github.io/school-widget/school-widget.js";
+const RAWJS = "https://github.com/batvani/school-widget/releases/latest/download/school-widget.js";
 const T = "2026-11-05T10:20", ME = "/icloud/Инсталатор.js", SW = "/icloud/School Widget.js", IMPF = "/icloud/school-widget-import.txt";
 
 const { test, finish } = require("./harness");

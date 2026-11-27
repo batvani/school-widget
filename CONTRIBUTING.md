@@ -51,4 +51,4 @@ They aren't in the code: School Widget downloads `holidays.json` from GitHub Pag
 
 ## Releases
 
-Bump line 4 and `const VERSION` in `school-widget.js`, add the version to `CHANGELOG.md` with a `Накратко:` and an `In short:` line, run `npm test` and `node tools/release.js`, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The release workflow runs the tests and makes a **pre-release** (beta). To make it stable: edit the release on GitHub → untick **Set as a pre-release** → **Update release** (that also redeploys Pages).
+Bump line 4 and `const VERSION` in `school-widget.js`, add the version to `CHANGELOG.md` with a `Накратко:` and an `In short:` line, run `npm test` and `node tools/release.js`, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The release workflow runs the tests and makes a **pre-release** (beta). To make it stable: edit the release on GitHub → untick **Set as a pre-release** → **Update release** (from then on the Shortcut and the install script download it).

@@ -12,7 +12,6 @@ function file(p) {
   if (LANDING.includes(p)) return P("landing", p);
   if (p === "install/" || p === "install/index.html") return P("install/index.html");
   if (/^ai\/(prompt(-en)?\.txt|install-script\.js|INSTRUCTIONS\.md)$/.test(p)) return P(p);
-  if (p === "school-widget.js") return P("school-widget.js");
   return null;
 }
 const TYPES = { html: "text/html; charset=utf-8", js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8" };

@@ -22,7 +22,7 @@
 
 **3. Изтегляне и проверка** (между **If** и **Otherwise**, по реда им):
 1. **Show Notification** → `Изтеглям School Widget…`
-2. **Get Contents of URL** → натисни **URL** → напиши `https://batvani.github.io/school-widget/school-widget.js`
+2. **Get Contents of URL** → натисни **URL** → напиши `https://github.com/batvani/school-widget/releases/latest/download/school-widget.js`
 3. **Get Text from Input** → входът трябва да е **Contents of URL** (ако не е: натисни го → **Select Variable** → Get Contents of URL).
 4. **If** → входът е **Text**; **Condition** → **contains** → напиши `id: uchilishte-widget`. Между този **If** и неговото **Otherwise** не слагай нищо. Между неговите **Otherwise** и **End If**: **Show Alert** → `School Widget не можа да се изтегли. Провери интернета и опитай пак.` (натисни **›** → изключи **Show Cancel Button**), после **Stop This Shortcut**.
    *Защо:* за да не се запише страница с грешка (напр. „404: Not Found“) като скрипт.
@@ -44,7 +44,7 @@
 Get School Widget.js from Scriptable (Error If Not Found: off)
 If File does not have any value
   Show notification "Изтеглям School Widget…"
-  Get contents of https://batvani.github.io/…/school-widget.js
+  Get contents of https://github.com/batvani/…/releases/latest/download/school-widget.js
   Get text from Contents of URL
   If Text contains id: uchilishte-widget
   Otherwise
